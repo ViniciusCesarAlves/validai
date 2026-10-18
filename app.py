@@ -1,6 +1,11 @@
 import os
 import uuid
 import json
+import gzip
+try:
+    import brotli
+except ImportError:
+    brotli = None
 from flask import Flask, render_template, request, jsonify, send_file, Response
 import comparator
 import single_auditor
@@ -10,6 +15,61 @@ import xml_reconciler
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # Suporta até 100MB de arquivo
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000    # Cache estático de 1 ano (31536000s)
+
+COMPRESSIBLE_MIMETYPES = {
+    'text/html',
+    'text/css',
+    'text/plain',
+    'text/javascript',
+    'application/javascript',
+    'application/x-javascript',
+    'application/json',
+    'application/xml',
+    'text/xml',
+    'image/svg+xml',
+}
+
+
+@app.after_request
+def add_cache_and_compression(response):
+    # Preserva cabeçalhos restritos da rota de monitoramento /health
+    if request.path == '/health':
+        return response
+
+    # Cache estático de longa duração (1 ano) para /static/ e /favicon.ico (Core Web Vitals / PageSpeed Mobile)
+    if request.path.startswith('/static/') or request.path == '/favicon.ico':
+        response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+
+    # Compressão Gzip / Brotli para respostas HTML, CSS, JS, JSON e XML
+    if (
+        response.status_code == 200
+        and request.method != 'HEAD'
+        and 'Content-Encoding' not in response.headers
+        and (response.mimetype in COMPRESSIBLE_MIMETYPES)
+    ):
+        accept_encoding = request.headers.get('Accept-Encoding', '').lower()
+        if 'br' in accept_encoding or 'gzip' in accept_encoding:
+            if response.direct_passthrough:
+                response.direct_passthrough = False
+            raw_data = response.get_data()
+            if len(raw_data) >= 400:
+                if brotli is not None and 'br' in accept_encoding:
+                    compressed_data = brotli.compress(raw_data, quality=4)
+                    response.set_data(compressed_data)
+                    response.headers['Content-Encoding'] = 'br'
+                    response.headers['Content-Length'] = str(len(compressed_data))
+                elif 'gzip' in accept_encoding:
+                    compressed_data = gzip.compress(raw_data, compresslevel=6)
+                    response.set_data(compressed_data)
+                    response.headers['Content-Encoding'] = 'gzip'
+                    response.headers['Content-Length'] = str(len(compressed_data))
+                vary = response.headers.get('Vary', '')
+                if 'Accept-Encoding' not in vary:
+                    response.headers['Vary'] = f"{vary}, Accept-Encoding".strip(', ')
+
+    return response
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads')

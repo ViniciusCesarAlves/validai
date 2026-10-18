@@ -28,8 +28,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=18">
-    <link rel="stylesheet" href="/static/css/guide.css?v=15">
+    <link rel="stylesheet" href="/static/css/style.css?v=20">
+    <link rel="stylesheet" href="/static/css/guide.css?v=16">
 
     <!-- Dados Estruturados (Schema.org em JSON-LD) -->
     <script type="application/ld+json">
@@ -74,7 +74,7 @@
             } catch(e) {}
         })();
     </script>
-    <script src="/static/js/i18n.js?v=2"></script>
+    <script src="/static/js/i18n.js?v=2" defer></script>
 </head>
 <body>
 
@@ -83,8 +83,8 @@
         <div class="container nav-content">
             <div class="header-left-group">
                 <a href="/" class="header-brand-link" title="ValidAí - Início">
-                    <img src="/static/images/logo.png?v=3" alt="ValidAí Logo" class="brand-logo brand-logo-light" width="144" height="42">
-                    <img src="/static/images/logo-white.png?v=3" alt="ValidAí Logo" class="brand-logo brand-logo-dark" width="144" height="42">
+                    <img src="/static/images/logo.png?v=3" alt="ValidAí Logo" class="brand-logo brand-logo-light" width="144" height="42" fetchpriority="high" decoding="async">
+                    <img src="/static/images/logo-white.png?v=3" alt="ValidAí Logo" class="brand-logo brand-logo-dark" width="144" height="42" loading="lazy" decoding="async">
                 </a>
                 <nav class="nav-menu" aria-label="Navegação Principal">
                     <a href="/" class="nav-menu-link">
@@ -108,7 +108,7 @@
 
                     <!-- Menu Dropdown: Mais Validadores -->
                     <div class="nav-dropdown-wrapper" id="nav-solutions-dropdown">
-                        <button type="button" class="nav-menu-link nav-dropdown-btn" id="nav-solutions-btn" aria-haspopup="true" aria-expanded="false" title="Mais Validadores">
+                        <button type="button" class="nav-menu-link nav-dropdown-btn" id="nav-solutions-btn" aria-haspopup="true" aria-expanded="false" aria-label="Abrir menu de mais validadores" title="Mais Validadores">
                             <svg class="nav-menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <rect x="3" y="3" width="7" height="7" rx="1.5"/>
                                 <rect x="14" y="3" width="7" height="7" rx="1.5"/>
@@ -229,7 +229,7 @@
 
                 <!-- Dropdown de Idiomas (PT / ES / EN) -->
                 <div class="lang-dropdown-wrapper" id="lang-dropdown-wrapper">
-                    <button type="button" class="lang-toggle-btn" id="lang-toggle-btn" aria-haspopup="true" aria-expanded="false" title="Idioma / Language">
+                    <button type="button" class="lang-toggle-btn" id="lang-toggle-btn" aria-haspopup="true" aria-expanded="false" aria-label="Selecionar idioma" title="Idioma / Language">
                         <svg class="lang-globe-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"/>
                             <line x1="2" y1="12" x2="22" y2="12"/>
@@ -240,7 +240,7 @@
                             <polyline points="6 9 12 15 18 9"/>
                         </svg>
                     </button>
-                    <div class="lang-dropdown-menu" id="lang-dropdown-menu" role="menu">
+                    <div class="lang-dropdown-menu" id="lang-dropdown-menu" role="menu" aria-label="Opções de Idioma">
                         <button type="button" class="lang-option active" data-lang="pt" role="menuitem">
                             <span class="lang-flag">🇧🇷</span>
                             <span class="lang-name">Português</span>
@@ -259,7 +259,7 @@
                     </div>
                 </div>
 
-                <button type="button" class="theme-toggle-btn" id="theme-toggle-btn" title="Alternar tema claro/escuro" aria-label="Alternar tema" data-i18n-title="nav_toggle_theme">
+                <button type="button" class="theme-toggle-btn" id="theme-toggle-btn" title="Alternar tema claro/escuro" aria-label="Alternar tema claro ou escuro" data-i18n-title="nav_toggle_theme">
                     <svg class="theme-icon-svg" width="19" height="19" viewBox="0 0 24 24">
                         <defs>
                             <linearGradient id="theme-grad-orange" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -293,7 +293,7 @@
             <section class="guide-hero">
                 <!-- Toggle Button no canto superior direito -->
                 <div class="guide-hero-toggle-wrap">
-                    <div class="mode-toggle-pill" role="tablist" aria-label="Escolher Guia do Validador">
+                    <div class="mode-toggle-pill" role="group" aria-label="Escolher Guia do Validador">
                         <button type="button" class="mode-btn active" id="btn-guide-planilhas" data-guide="planilhas" title="Ver guia do Validador de Planilhas">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
@@ -687,7 +687,7 @@
                         <div class="guide-tip-card">
                             <div class="guide-tip-num">1</div>
                             <div class="guide-tip-content">
-                                <h4 data-i18n="guide_sec4_tip1_title">Títulos sempre na primeira linha</h4>
+                                <h3 data-i18n="guide_sec4_tip1_title">Títulos sempre na primeira linha</h3>
                                 <p data-i18n="guide_sec4_tip1_desc">Certifique-se de que a linha 1 da sua planilha contenha os nomes das colunas (ex: <em>Nome, CPF, Data</em>). Evite colocar títulos ou logos acima dos cabeçalhos.</p>
                             </div>
                         </div>
@@ -695,7 +695,7 @@
                         <div class="guide-tip-card">
                             <div class="guide-tip-num">2</div>
                             <div class="guide-tip-content">
-                                <h4 data-i18n="guide_sec4_tip2_title">Evite células mescladas</h4>
+                                <h3 data-i18n="guide_sec4_tip2_title">Evite células mescladas</h3>
                                 <p data-i18n="guide_sec4_tip2_desc">Células mescladas no meio da tabela podem fazer com que dados pareçam vazios para o validador. Mantenha cada informação em sua própria célula individual.</p>
                             </div>
                         </div>
@@ -703,7 +703,7 @@
                         <div class="guide-tip-card">
                             <div class="guide-tip-num">3</div>
                             <div class="guide-tip-content">
-                                <h4 data-i18n="guide_sec4_tip3_title">Formatos universais</h4>
+                                <h3 data-i18n="guide_sec4_tip3_title">Formatos universais</h3>
                                 <p data-i18n="guide_sec4_tip3_desc">Arquivos <strong>.xlsx</strong> e <strong>.csv</strong> funcionam com máxima performance. Se o seu arquivo for <em>.xls</em> muito antigo, salvar como <em>.xlsx</em> torna o processo ainda mais rápido.</p>
                             </div>
                         </div>
@@ -998,7 +998,7 @@
                         <div class="guide-tip-card">
                             <div class="guide-tip-num">1</div>
                             <div class="guide-tip-content">
-                                <h4 data-i18n="guide_text_sec4_tip1_title">Use o filtro "Exibir apenas diferenças"</h4>
+                                <h3 data-i18n="guide_text_sec4_tip1_title">Use o filtro "Exibir apenas diferenças"</h3>
                                 <p data-i18n="guide_text_sec4_tip1_desc">Ao comparar documentos grandes com muitas páginas iguais, marque a caixinha <strong>"Exibir apenas diferenças"</strong> no topo do resultado para ver somente os parágrafos que mudaram!</p>
                             </div>
                         </div>
@@ -1006,7 +1006,7 @@
                         <div class="guide-tip-card">
                             <div class="guide-tip-num">2</div>
                             <div class="guide-tip-content">
-                                <h4 data-i18n="guide_text_sec4_tip2_title">Alterne entre Rich Text e Redline em 1 clique</h4>
+                                <h3 data-i18n="guide_text_sec4_tip2_title">Alterne entre Rich Text e Redline em 1 clique</h3>
                                 <p data-i18n="guide_text_sec4_tip2_desc">Você não precisa enviar os arquivos de novo para mudar a visualização: basta clicar nos botões <em>Rich Text</em>, <em>Redline</em> ou <em>Plain Text</em> na barra de resultados.</p>
                             </div>
                         </div>
@@ -1014,7 +1014,7 @@
                         <div class="guide-tip-card">
                             <div class="guide-tip-num">3</div>
                             <div class="guide-tip-content">
-                                <h4 data-i18n="guide_text_sec4_tip3_title">Exporte o PDF para compartilhar</h4>
+                                <h3 data-i18n="guide_text_sec4_tip3_title">Exporte o PDF para compartilhar</h3>
                                 <p data-i18n="guide_text_sec4_tip3_desc">Precisa mostrar para um cliente ou gestor o que foi alterado na versão nova? Clique em <strong>\"Baixar Relatório em PDF (.pdf)\"</strong> para gerar o documento timbrado já grifado.</p>
                             </div>
                         </div>

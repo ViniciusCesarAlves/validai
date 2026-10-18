@@ -261,6 +261,7 @@
     justify-content: space-between;
 }
 
+.doc-mode-info h4,
 .doc-mode-info h5 {
     font-size: 14px;
     font-weight: 700;
@@ -277,7 +278,7 @@
     padding: 2px 7px;
     border-radius: 9999px;
     background: #BCFFE2;
-    color: #15803d;
+    color: #065f46;
     letter-spacing: 0.03em;
 }
 
@@ -298,7 +299,7 @@
 .doc-mode-card.active .doc-mode-check {
     background: linear-gradient(135deg, #4FD580, #6AE099);
     border-color: #4FD580;
-    color: #ffffff;
+    color: #052e16;
 }
 
 .doc-mode-info p {
@@ -366,7 +367,7 @@
 
 .viewer-mode-btn.active {
     background: linear-gradient(120deg, #4FD580, #6AE099);
-    color: #ffffff;
+    color: #052e16;
     font-weight: 700;
     box-shadow: 0 2px 6px rgba(79, 213, 128, 0.3);
 }
@@ -529,7 +530,7 @@
     border-bottom: 2px solid #6AE099;
     font-size: 13px;
     font-weight: 700;
-    color: #ffffff;
+    color: #052e16;
 }
 
 .rich-doc-badge {
@@ -537,8 +538,8 @@
     font-weight: 700;
     padding: 2px 9px;
     border-radius: 9999px;
-    background: rgba(255, 255, 255, 0.25);
-    color: #ffffff;
+    background: rgba(5, 46, 22, 0.14);
+    color: #052e16;
 }
 
 .rich-doc-body {
@@ -636,7 +637,7 @@
     border-bottom: 2px solid #6AE099;
     font-size: 13px;
     font-weight: 700;
-    color: #ffffff;
+    color: #052e16;
 }
 
 .redline-doc-body {
@@ -711,7 +712,7 @@
     top: 0;
     z-index: 5;
     background: #4FD580;
-    color: #ffffff;
+    color: #052e16;
     font-family: 'Outfit', 'Montserrat', sans-serif;
     font-size: 13px;
     font-weight: 700;
@@ -939,7 +940,7 @@ body.dark-theme .viewer-mode-btn:hover {
 [data-theme="dark"] .viewer-mode-btn.active,
 body.dark-theme .viewer-mode-btn.active {
     background: linear-gradient(120deg, #4FD580, #6AE099);
-    color: #ffffff;
+    color: #052e16;
 }
 
 [data-theme="dark"] .viewer-only-diff-toggle,

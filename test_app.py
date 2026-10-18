@@ -732,6 +732,36 @@ def test_full_pipeline():
     assert res_health_head.headers.get('X-Robots-Tag') == 'noindex, nofollow'
     print("[OK] Rota /health (GET e HEAD) ultra-leve validada com status 200, JSON {'status': 'ok'} e headers Cache-Control + X-Robots-Tag!")
 
+    # 13. Teste de Performance Mobile (Compressão Gzip + Cache Estático Imutável + Google Fonts display=swap)
+    res_gzip = client.get('/', headers={'Accept-Encoding': 'gzip'})
+    assert res_gzip.status_code == 200
+    assert res_gzip.headers.get('Content-Encoding') == 'gzip', "Resposta HTML deve ser comprimida com Gzip!"
+    assert 'Accept-Encoding' in res_gzip.headers.get('Vary', '')
+
+    res_static_css = client.get('/static/css/style.css', headers={'Accept-Encoding': 'gzip'})
+    assert res_static_css.status_code == 200
+    assert res_static_css.headers.get('Content-Encoding') == 'gzip', "CSS estático deve ser comprimido com Gzip!"
+    assert 'max-age=31536000' in res_static_css.headers.get('Cache-Control', ''), "Cache estático deve ter max-age=31536000!"
+    assert 'immutable' in res_static_css.headers.get('Cache-Control', '')
+    res_static_css.close()
+    print("[OK] Compressão Gzip e Cache-Control estático (max-age=31536000, immutable) validados!")
+
+    # 14. Teste de Acessibilidade (WCAG AA): Hierarquia de Cabeçalhos (sem pulo h2 -> h4) e display=swap
+    import re
+    all_routes = ['/', '/validador-texto', '/validador-cadastros', '/validador-xml', '/como-usar', '/conciliador-taxas']
+    for r in all_routes:
+        resp_r = client.get(r)
+        html_r = resp_r.data.decode('utf-8')
+        assert '&display=swap' in html_r or 'display=swap' in html_r, f"Falta display=swap em {r}"
+        assert 'role="tablist"' not in html_r, f"role='tablist' sem role='tab' encontrado em {r}"
+        headings = [int(m.group(1)) for m in re.finditer(r'<h([1-6])\b', html_r, re.I)]
+        assert headings and headings[0] == 1, f"Primeiro cabeçalho deve ser <h1> em {r}: {headings}"
+        for idx_h in range(1, len(headings)):
+            assert headings[idx_h] <= headings[idx_h - 1] + 1, (
+                f"Pulo de cabeçalho inválido em {r}: h{headings[idx_h - 1]} -> h{headings[idx_h]}"
+            )
+    print("[OK] Hierarquia semântica estrita (h1 -> h2 -> h3), ARIA roles e Google Fonts display=swap validados em todas as rotas!")
+
     print("\nTODOS OS TESTES PASSARAM COM 100% DE SUCESSO!")
 
 if __name__ == '__main__':

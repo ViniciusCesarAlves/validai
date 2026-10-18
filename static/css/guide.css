@@ -214,7 +214,7 @@ body.dark-theme .guide-section-header {
     height: 44px;
     border-radius: 12px;
     background: linear-gradient(135deg, #4FD580 0%, #6AE099 100%);
-    color: #ffffff;
+    color: #052e16;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -325,7 +325,7 @@ body.dark-theme .guide-example-pill {
 }
 
 .guide-example-pill .pill-tag {
-    color: #16a34a;
+    color: #15803d;
     font-weight: 800;
 }
 
@@ -531,7 +531,7 @@ body.dark-theme .guide-rule-example {
 }
 
 .guide-rule-example-item.valid {
-    color: #16a34a;
+    color: #15803d;
     font-weight: 600;
 }
 
@@ -579,7 +579,7 @@ body.dark-theme .guide-tip-card {
     height: 32px;
     border-radius: 50%;
     background: linear-gradient(135deg, #4FD580 0%, #6AE099 100%);
-    color: #ffffff;
+    color: #052e16;
     font-weight: 800;
     font-size: 14px;
     display: flex;
@@ -588,6 +588,7 @@ body.dark-theme .guide-tip-card {
     flex-shrink: 0;
 }
 
+.guide-tip-content h3,
 .guide-tip-content h4 {
     font-size: 15px;
     font-weight: 700;
@@ -595,7 +596,9 @@ body.dark-theme .guide-tip-card {
     margin-bottom: 6px;
 }
 
+[data-theme="dark"] .guide-tip-content h3,
 [data-theme="dark"] .guide-tip-content h4,
+body.dark-theme .guide-tip-content h3,
 body.dark-theme .guide-tip-content h4 {
     color: #f3f4f6;
 }
@@ -617,7 +620,7 @@ body.dark-theme .guide-tip-content p {
     border-radius: var(--radius-lg);
     padding: 40px 32px;
     text-align: center;
-    color: #ffffff;
+    color: #052e16;
     box-shadow: 0 10px 25px rgba(79, 213, 128, 0.35);
     display: flex;
     flex-direction: column;
@@ -625,17 +628,18 @@ body.dark-theme .guide-tip-content p {
     gap: 16px;
 }
 
+.guide-cta-card h2,
 .guide-cta-card h3 {
     font-size: 26px;
     font-weight: 800;
     letter-spacing: -0.02em;
-    color: #ffffff;
+    color: #052e16;
 }
 
 .guide-cta-card p {
     font-size: 16px;
     max-width: 620px;
-    color: rgba(255, 255, 255, 0.95);
+    color: #064e3b;
     line-height: 1.55;
 }
 

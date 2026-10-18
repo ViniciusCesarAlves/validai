@@ -28,7 +28,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=19">
+    <link rel="stylesheet" href="/static/css/style.css?v=20">
     <script>
         (function() {
             try {
@@ -42,7 +42,7 @@
             } catch(e) {}
         })();
     </script>
-    <script src="/static/js/i18n.js?v=4"></script>
+    <script src="/static/js/i18n.js?v=4" defer></script>
 </head>
 <body>
 
@@ -50,8 +50,8 @@
         <div class="container nav-content">
             <div class="header-left-group">
                 <a href="/" class="header-brand-link" title="ValidAí - Início">
-                    <img src="/static/images/logo.png?v=3" alt="ValidAí Logo" width="144" height="42" class="brand-logo brand-logo-light">
-                    <img src="/static/images/logo-white.png?v=3" alt="ValidAí Logo" width="144" height="42" class="brand-logo brand-logo-dark">
+                    <img src="/static/images/logo.png?v=3" alt="ValidAí Logo" width="144" height="42" class="brand-logo brand-logo-light" fetchpriority="high" decoding="async">
+                    <img src="/static/images/logo-white.png?v=3" alt="ValidAí Logo" width="144" height="42" class="brand-logo brand-logo-dark" loading="lazy" decoding="async">
                 </a>
                 <nav class="nav-menu" aria-label="Navegação Principal">
                     <a href="/" class="nav-menu-link">
@@ -74,7 +74,7 @@
                     </a>
 
                     <div class="nav-dropdown-wrapper" id="nav-solutions-dropdown">
-                        <button type="button" class="nav-menu-link nav-dropdown-btn active" id="nav-solutions-btn" aria-haspopup="true" aria-expanded="false" title="Mais Validadores">
+                        <button type="button" class="nav-menu-link nav-dropdown-btn active" id="nav-solutions-btn" aria-haspopup="true" aria-expanded="false" aria-label="Abrir menu de mais validadores" title="Mais Validadores">
                             <svg class="nav-menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <rect x="3" y="3" width="7" height="7" rx="1.5"/>
                                 <rect x="14" y="3" width="7" height="7" rx="1.5"/>
