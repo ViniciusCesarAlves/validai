@@ -226,6 +226,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        dropzone.addEventListener('click', (e) => {
+            if (e.target !== input) {
+                input.click();
+            }
+        });
+
         input.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
                 handleFileSelect(e.target.files[0], dropzone, metaBox, nameSpan, sizeSpan, fileKey);

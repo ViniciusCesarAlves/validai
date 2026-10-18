@@ -335,6 +335,14 @@
                         </div>
                         <h3 data-i18n="xml_drop_pack_title">Notas Fiscais (Pasta .ZIP ou .XML)</h3>
                         <p class="dropzone-hint" data-i18n="xml_drop_pack_hint">Arraste o arquivo .zip com as notas ou selecione vários arquivos .xml (tags &lt;nNF&gt;, &lt;CNPJ&gt;, &lt;vNF&gt;)</p>
+                        <div class="doc-browse-pill">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                                <line x1="12" y1="11" x2="12" y2="17"/>
+                                <line x1="9" y1="14" x2="15" y2="14"/>
+                            </svg>
+                            <span data-i18n="doc_browse_files">Procurar arquivos</span>
+                        </div>
                         <div class="file-meta" id="file-meta-xml-pack" style="display: none;">
                             <span class="filename" id="filename-xml-pack">notas_fiscais.zip</span>
                             <span class="filesize" id="filesize-xml-pack">0 KB</span>
@@ -355,6 +363,12 @@
                         </div>
                         <h3 data-i18n="xml_drop_sheet_title">Planilha de Contas a Pagar / Faturamento</h3>
                         <p class="dropzone-hint" data-i18n="xml_drop_sheet_hint">Arraste a planilha do financeiro ou ERP (.xlsx, .xls ou .csv) para batimento</p>
+                        <div class="doc-browse-pill">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            <span data-i18n="doc_browse_file">Procurar arquivo</span>
+                        </div>
                         <div class="file-meta" id="file-meta-xml-sheet" style="display: none;">
                             <span class="filename" id="filename-xml-sheet">financeiro.xlsx</span>
                             <span class="filesize" id="filesize-xml-sheet">0 KB</span>
@@ -880,11 +894,6 @@
                 <details class="seo-faq-item">
                     <summary class="seo-faq-question">
                         <span>Como conciliar vários arquivos XML de Notas Fiscais com uma planilha Excel?</span>
-                        <span class="seo-faq-icon" aria-hidden="true">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="6 9 12 15 18 9"/>
-                            </svg>
-                        </span>
                     </summary>
                     <div class="seo-faq-answer">
                         Envie uma pasta <code>.zip</code> ou múltiplos arquivos <code>.xml</code> de NFe, NFSe ou CTe de um lado e sua planilha financeira (<code>.xlsx</code> ou <code>.csv</code>) do outro. O sistema lê automaticamente as tags oficiais (<code>&lt;nNF&gt;</code>, <code>&lt;CNPJ&gt;</code>, <code>&lt;vNF&gt;</code>) e aponta notas omitidas no financeiro, lançamentos sem XML e diferenças de valor ou impostos.
@@ -894,11 +903,6 @@
                 <details class="seo-faq-item">
                     <summary class="seo-faq-question">
                         <span>Meus dados e planilhas estão seguros durante a validação?</span>
-                        <span class="seo-faq-icon" aria-hidden="true">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="6 9 12 15 18 9"/>
-                            </svg>
-                        </span>
                     </summary>
                     <div class="seo-faq-answer">
                         Sim. Os pacotes <code>.zip</code>, arquivos <code>.xml</code> e planilhas financeiras são lidos exclusivamente em memória temporária durante a sessão de conciliação, sem armazenamento permanente em banco de dados.
@@ -908,11 +912,6 @@
                 <details class="seo-faq-item">
                     <summary class="seo-faq-question">
                         <span>Quais formatos de arquivo o ValidAí aceita (.xlsx, .xls, .csv, .xml)?</span>
-                        <span class="seo-faq-icon" aria-hidden="true">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="6 9 12 15 18 9"/>
-                            </svg>
-                        </span>
                     </summary>
                     <div class="seo-faq-answer">
                         O Conciliador Fiscal aceita pastas compactadas <code>.zip</code> com subpastas ou múltiplos arquivos <code>.xml</code> (NFe 4.00, NFSe ABRASF/Nacional e CTe) combinados com planilhas <code>.xlsx</code>, <code>.xls</code> ou <code>.csv</code>.
@@ -922,11 +921,6 @@
                 <details class="seo-faq-item">
                     <summary class="seo-faq-question">
                         <span>Como funciona a normalização automática para evitar falsos positivos?</span>
-                        <span class="seo-faq-icon" aria-hidden="true">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="6 9 12 15 18 9"/>
-                            </svg>
-                        </span>
                     </summary>
                     <div class="seo-faq-answer">
                         O conciliador remove automaticamente zeros à esquerda e prefixos como "NF-" do número da nota, normaliza máscaras de CNPJ e permite configurar tolerância de centavos para arredondamentos contábeis.

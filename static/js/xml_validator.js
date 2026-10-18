@@ -134,7 +134,11 @@
 
     // Dropzone 1: Pacote XML (.zip ou .xml)
     if (dropXmlPack && fileXmlPackInput) {
-        dropXmlPack.addEventListener('click', () => fileXmlPackInput.click());
+        dropXmlPack.addEventListener('click', (e) => {
+            if (e.target !== fileXmlPackInput) {
+                fileXmlPackInput.click();
+            }
+        });
 
         ['dragenter', 'dragover'].forEach(ev => {
             dropXmlPack.addEventListener(ev, (e) => {
@@ -194,7 +198,11 @@
 
     // Dropzone 2: Planilha Financeira
     if (dropXmlSheet && fileXmlSheetInput) {
-        dropXmlSheet.addEventListener('click', () => fileXmlSheetInput.click());
+        dropXmlSheet.addEventListener('click', (e) => {
+            if (e.target !== fileXmlSheetInput) {
+                fileXmlSheetInput.click();
+            }
+        });
 
         ['dragenter', 'dragover'].forEach(ev => {
             dropXmlSheet.addEventListener(ev, (e) => {

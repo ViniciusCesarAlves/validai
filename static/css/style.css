@@ -1082,6 +1082,53 @@ html[data-theme="dark"] .step-indicator {
     color: var(--text-muted);
 }
 
+/* Botão Pill Padronizado "Procurar arquivo / Procurar arquivos" nas Dropzones */
+.doc-browse-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 6px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--primary, #1f2937);
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease;
+    pointer-events: none;
+}
+
+.dropzone:hover .doc-browse-pill,
+.doc-dropzone:hover .doc-browse-pill {
+    border-color: #4FD580;
+    color: #059669;
+    background: #f0fdf4;
+}
+
+.dropzone.file-loaded .doc-browse-pill,
+.dropzone.has-file .doc-browse-pill,
+.doc-dropzone.has-file .doc-browse-pill {
+    display: none;
+}
+
+html[data-theme="dark"] .doc-browse-pill,
+body.dark-theme .doc-browse-pill {
+    background: #0F172A !important;
+    border-color: #334155 !important;
+    color: #E2E8F0 !important;
+}
+
+html[data-theme="dark"] .dropzone:hover .doc-browse-pill,
+body.dark-theme .dropzone:hover .doc-browse-pill,
+html[data-theme="dark"] .doc-dropzone:hover .doc-browse-pill,
+body.dark-theme .doc-dropzone:hover .doc-browse-pill {
+    border-color: #4FD580 !important;
+    color: #4FD580 !important;
+    background: rgba(79, 213, 128, 0.1) !important;
+}
+
 .file-meta {
     margin-top: 12px;
     display: inline-flex;
@@ -6131,8 +6178,14 @@ body.dark-theme .seo-faq-badge {
     user-select: none;
 }
 
-.seo-faq-question::-webkit-details-marker {
+.seo-faq-question::-webkit-details-marker,
+.seo-faq-question::marker {
     display: none;
+    content: "";
+}
+
+.seo-faq-icon {
+    display: none !important;
 }
 
 .seo-faq-question::after {
@@ -6148,13 +6201,14 @@ body.dark-theme .seo-faq-badge {
     font-size: 16px;
     font-weight: 800;
     flex-shrink: 0;
-    transition: transform 0.2s ease, background-color 0.2s ease;
+    transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
 }
 
 .seo-faq-item[open] .seo-faq-question::after {
     content: "−";
     background: #4FD580;
     color: #052e16;
+    transform: rotate(180deg);
 }
 
 .seo-faq-answer {

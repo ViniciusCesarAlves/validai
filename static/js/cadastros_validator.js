@@ -101,7 +101,11 @@
     }
 
     if (dropZone && fileInput) {
-        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('click', (e) => {
+            if (e.target !== fileInput) {
+                fileInput.click();
+            }
+        });
 
         ['dragenter', 'dragover'].forEach(eventName => {
             dropZone.addEventListener(eventName, (e) => {

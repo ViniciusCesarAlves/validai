@@ -332,6 +332,12 @@
                         </div>
                         <h3 id="cadastros-file-name" data-i18n="cadastros_drop_title">Planilha de Cadastros (Clientes, Fornecedores ou Leads)</h3>
                         <p class="dropzone-hint" data-i18n="cadastros_drop_hint">Clique para selecionar ou arraste o arquivo (.xlsx, .xls ou .csv) aqui</p>
+                        <div class="doc-browse-pill">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            <span data-i18n="doc_browse_file">Procurar arquivo</span>
+                        </div>
                         <div class="file-meta" id="cadastros-file-meta" style="display: none;">
                             <span class="filename" id="cadastros-filename-display">arquivo.xlsx</span>
                             <span class="filesize" id="cadastros-filesize-display">0 KB</span>
@@ -837,11 +843,6 @@
                 <details class="seo-faq-item">
                     <summary class="seo-faq-question">
                         <span>Como validar CPF, CNPJ, e-mails e remover duplicados de uma planilha?</span>
-                        <span class="seo-faq-icon" aria-hidden="true">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="6 9 12 15 18 9"/>
-                            </svg>
-                        </span>
                     </summary>
                     <div class="seo-faq-answer">
                         Carregue sua planilha no Passo 1 do Higienizador de Cadastros, associe as colunas de CPF/CNPJ, Nome, E-mail e Telefone no Passo 2 e execute a auditoria. O sistema valida matematicamente o dígito verificador (Módulo 11), corrige erros de digitação em domínios de e-mail e gera tanto a base 100% higienizada quanto o relatório de inconsistências.
@@ -851,11 +852,6 @@
                 <details class="seo-faq-item">
                     <summary class="seo-faq-question">
                         <span>Meus dados e planilhas estão seguros durante a validação?</span>
-                        <span class="seo-faq-icon" aria-hidden="true">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="6 9 12 15 18 9"/>
-                            </svg>
-                        </span>
                     </summary>
                     <div class="seo-faq-answer">
                         Sim. O ValidAí processa sua planilha temporariamente em memória apenas durante a higienização ativa, sem armazenar dados sensíveis de clientes ou fornecedores em bancos de dados permanentes.
@@ -865,11 +861,6 @@
                 <details class="seo-faq-item">
                     <summary class="seo-faq-question">
                         <span>Quais formatos de arquivo o ValidAí aceita (.xlsx, .xls, .csv, .xml)?</span>
-                        <span class="seo-faq-icon" aria-hidden="true">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="6 9 12 15 18 9"/>
-                            </svg>
-                        </span>
                     </summary>
                     <div class="seo-faq-answer">
                         O Higienizador de Cadastros aceita planilhas Excel (<code>.xlsx</code> e <code>.xls</code>) e arquivos <code>.csv</code>. Os relatórios de saída são gerados em formato <code>.xlsx</code> com formatação executiva.
@@ -879,11 +870,6 @@
                 <details class="seo-faq-item">
                     <summary class="seo-faq-question">
                         <span>Como funciona a normalização automática para evitar falsos positivos?</span>
-                        <span class="seo-faq-icon" aria-hidden="true">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="6 9 12 15 18 9"/>
-                            </svg>
-                        </span>
                     </summary>
                     <div class="seo-faq-answer">
                         O sistema recupera automaticamente zeros à esquerda que o Excel costuma remover de CPFs e CNPJs, padroniza nomes próprios em Title Case e aplica máscaras oficiais ou mantém apenas números conforme sua preferência.
