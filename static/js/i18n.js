@@ -9,7 +9,19 @@
 
     const TRANSLATIONS = {
         pt: {
-            page_title: "ValidAí - O seu validador",
+            page_title: "ValidAí | Comparador e Validador de Planilhas Excel e CSV Online",
+            text_page_title: "Comparador e Validador de Textos Online | ValidAí",
+            cadastros_page_title: "Higienizador de Cadastros: Validar CPF, CNPJ, E-mail e Duplicados | ValidAí",
+            xml_page_title: "Conciliador de Notas Fiscais (XML NFe/NFSe vs Excel) | ValidAí",
+            guide_page_title: "Como Usar o ValidAí | Guia Completo de Validação e Auditoria de Dados",
+            seo_h1_sheets: "Validador e Comparador Inteligente de Planilhas",
+            seo_sub_sheets: "Compare bases Excel (.xlsx, .xls) e CSV gratuitamente, audite inconsistências célula por célula e baixe o relatório pintado.",
+            seo_h1_text: "Comparador e Validador de Documentos e Textos Online",
+            seo_sub_text: "Compare contratos, minutas e blocos de texto (.pdf, .docx ou .txt) lado a lado e identifique adições e remoções com precisão.",
+            seo_h1_cadastros: "Higienizador de Cadastros: CPF, CNPJ, E-mail e Duplicados",
+            seo_sub_cadastros: "Valide CPF e CNPJ pelo cálculo oficial da Receita Federal, recupere zeros à esquerda, padronize nomes e remova duplicados.",
+            seo_h1_xml: "Conciliador de Notas Fiscais (XML NFe e NFSe vs. Excel)",
+            seo_sub_xml: "Cruze lotes .zip de arquivos XML de Notas Fiscais contra sua planilha financeira e audite valores, impostos e CNPJs.",
             nav_sheets: "Validador Planilhas",
             nav_text: "Validador Texto",
             nav_solutions: "Mais Validadores",
@@ -31,7 +43,6 @@
             badge_new: "Novo",
 
             // Higienizador de Cadastros
-            cadastros_page_title: "ValidAí - Higienizador e Auditor de Cadastros",
             cadastros_hero_badge: "Módulo de Integridade Cadastral",
             cadastros_hero_subtag: "Receita Federal Módulo 11",
             cadastros_hero_title: "Higienizador e Auditor de Cadastros",
@@ -489,7 +500,19 @@
         },
 
         es: {
-            page_title: "ValidAí - Tu validador de datos",
+            page_title: "ValidAí | Comparador y Validador de Hojas Excel y CSV Online",
+            text_page_title: "Comparador y Validador de Textos Online | ValidAí",
+            cadastros_page_title: "Higienizador de Registros: Validar CPF, CNPJ, E-mail y Duplicados | ValidAí",
+            xml_page_title: "Conciliador de Facturas (XML NFe/NFSe vs Excel) | ValidAí",
+            guide_page_title: "Cómo Usar ValidAí | Guía Completa de Validación y Auditoría de Datos",
+            seo_h1_sheets: "Validador y Comparador Inteligente de Hojas de Cálculo",
+            seo_sub_sheets: "Compare hojas Excel (.xlsx, .xls) y CSV gratis, audite discrepancias celda por celda y descargue el informe coloreado.",
+            seo_h1_text: "Comparador y Validador de Documentos y Textos Online",
+            seo_sub_text: "Compare contratos, minutas y textos (.pdf, .docx o .txt) lado a lado e identifique adiciones y eliminaciones con precisión.",
+            seo_h1_cadastros: "Higienizador de Registros: CPF, CNPJ, E-mail y Duplicados",
+            seo_sub_cadastros: "Valide documentos fiscales con cálculo oficial, recupere ceros a la izquierda, estandarice nombres y elimine duplicados.",
+            seo_h1_xml: "Conciliador de Facturas Electrónicas (XML NFe y NFSe vs. Excel)",
+            seo_sub_xml: "Cruce lotes .zip de archivos XML contra su hoja financiera para auditar registros, montos, impuestos y documentos.",
             nav_sheets: "Validador Hojas de Cálculo",
             nav_text: "Validador de Texto",
             nav_solutions: "Más Validadores",
@@ -511,7 +534,6 @@
             badge_new: "Nuevo",
 
             // Higienizador de Cadastros
-            cadastros_page_title: "ValidAí - Higienizador y Auditor de Registros",
             cadastros_hero_badge: "Módulo de Integridad de Registros",
             cadastros_hero_subtag: "Cálculo Oficial Módulo 11",
             cadastros_hero_title: "Higienizador y Auditor de Registros",
@@ -969,7 +991,19 @@
         },
 
         en: {
-            page_title: "ValidAí - Your Data Validator",
+            page_title: "ValidAí | Online Excel & CSV Spreadsheet Comparator and Validator",
+            text_page_title: "Online Text & Document Comparator and Validator | ValidAí",
+            cadastros_page_title: "Data Cleanser: Validate CPF, CNPJ, Email & Duplicates | ValidAí",
+            xml_page_title: "Invoice Reconciler (XML NFe/NFSe vs Excel) | ValidAí",
+            guide_page_title: "How to Use ValidAí | Complete Data Validation & Audit Guide",
+            seo_h1_sheets: "Smart Spreadsheet Validator & Comparator",
+            seo_sub_sheets: "Compare Excel (.xlsx, .xls) and CSV files for free, audit cell-by-cell discrepancies, and download the highlighted report.",
+            seo_h1_text: "Online Document & Text Comparator and Validator",
+            seo_sub_text: "Compare contracts, drafts, and text blocks (.pdf, .docx, or .txt) side by side and spot additions and removals instantly.",
+            seo_h1_cadastros: "Data Cleanser: CPF, CNPJ, Email & Duplicates",
+            seo_sub_cadastros: "Validate tax IDs with official checksum verification, restore leading zeros, format names, and remove duplicates.",
+            seo_h1_xml: "Electronic Invoice Reconciler (XML NFe & NFSe vs. Excel)",
+            seo_sub_xml: "Cross-check .zip batches of XML invoices against your financial spreadsheet to audit amounts, taxes, and tax IDs.",
             nav_sheets: "Spreadsheet Validator",
             nav_text: "Text Validator",
             nav_solutions: "More Validators",
@@ -991,7 +1025,6 @@
             badge_new: "New",
 
             // Higienizador de Cadastros
-            cadastros_page_title: "ValidAí - Data Cleanser & Records Auditor",
             cadastros_hero_badge: "Records Integrity & Audit Module",
             cadastros_hero_subtag: "Modulo 11 Verification Engine",
             cadastros_hero_title: "Data Cleanser & Records Auditor",
@@ -1469,9 +1502,13 @@
         if (!lang) lang = getCurrentLanguage();
         document.documentElement.setAttribute('lang', lang === 'pt' ? 'pt-BR' : (lang === 'es' ? 'es-ES' : 'en-US'));
 
-        // Atualiza título da página
-        if (TRANSLATIONS[lang] && TRANSLATIONS[lang].page_title) {
-            document.title = TRANSLATIONS[lang].page_title;
+        // Atualiza título da página respeitando a rota atual
+        const titleEl = document.querySelector('title[data-i18n]');
+        if (titleEl) {
+            const titleKey = titleEl.getAttribute('data-i18n');
+            if (TRANSLATIONS[lang] && TRANSLATIONS[lang][titleKey]) {
+                document.title = TRANSLATIONS[lang][titleKey];
+            }
         }
 
         // Elementos com data-i18n

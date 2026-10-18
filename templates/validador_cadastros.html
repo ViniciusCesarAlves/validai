@@ -3,7 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="cadastros_page_title">ValidAí - Higienizador e Auditor de Cadastros</title>
+    <title data-i18n="cadastros_page_title">{{ seo.title }}</title>
+    <meta name="description" content="{{ seo.description }}">
+    <meta name="robots" content="{{ seo.robots }}">
+    <link rel="canonical" href="https://validai.app.br{{ request.path }}">
+
+    <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
+    <meta property="og:title" content="{{ seo.title }}">
+    <meta property="og:description" content="{{ seo.description }}">
+    <meta property="og:url" content="https://validai.app.br{{ request.path }}">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="{{ seo.og_image }}">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:site_name" content="ValidAí">
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ seo.title }}">
+    <meta name="twitter:description" content="{{ seo.description }}">
+    <meta name="twitter:image" content="{{ seo.og_image }}">
+
     <link rel="icon" type="image/png" href="/static/images/logo.png?v=3">
     
     <!-- Google Fonts: Outfit e Montserrat -->
@@ -11,14 +30,39 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="/static/css/style.css?v=17">
+    <link rel="stylesheet" href="/static/css/style.css?v=18">
+
+    <!-- Dados Estruturados (Schema.org em JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": ["WebApplication", "SoftwareApplication"],
+      "name": "ValidAí - Higienizador de Cadastros",
+      "url": "https://validai.app.br/validador-cadastros",
+      "description": "Limpe e padronize suas bases de dados. Valide CPF/CNPJ, e-mails e remova linhas duplicadas de planilhas automaticamente.",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "All",
+      "inLanguage": "pt-BR",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "BRL"
+      },
+      "featureList": [
+        "Higienizador de Cadastros (Validação de CPF, CNPJ, E-mail e Duplicados)",
+        "Comparador e Validador de Planilhas Excel (.xlsx, .xls) e CSV",
+        "Comparador e Validador de Textos e Documentos Online (.docx, .pdf, .txt)",
+        "Conciliador de Notas Fiscais (XML NFe/NFSe vs Planilha Financeira Excel)"
+      ]
+    }
+    </script>
 
     <!-- Anti-flicker e Leitura Instantânea de Tema e Idioma -->
     <script>
         (function() {
             try {
                 var lang = localStorage.getItem('validai_lang') || 'pt';
-                document.documentElement.setAttribute('lang', lang);
+                document.documentElement.setAttribute('lang', lang === 'pt' ? 'pt-BR' : (lang === 'es' ? 'es-ES' : 'en-US'));
                 var theme = localStorage.getItem('splitc_theme');
                 if (theme === 'dark') {
                     document.documentElement.setAttribute('data-theme', 'dark');
@@ -41,8 +85,8 @@
         <div class="container nav-content">
             <div class="header-left-group">
                 <a href="/" class="header-brand-link" title="ValidAí - Início">
-                    <img src="/static/images/logo.png?v=3" alt="ValidAí Logo" class="brand-logo brand-logo-light">
-                    <img src="/static/images/logo-white.png?v=3" alt="ValidAí Logo" class="brand-logo brand-logo-dark">
+                    <img src="/static/images/logo.png?v=3" alt="ValidAí Logo" class="brand-logo brand-logo-light" width="144" height="42">
+                    <img src="/static/images/logo-white.png?v=3" alt="ValidAí Logo" class="brand-logo brand-logo-dark" width="144" height="42">
                 </a>
 
                 <!-- Navegação Principal -->
@@ -247,6 +291,21 @@
     </header>
 
     <main class="container main-content">
+
+        <!-- Cabeçalho Semântico de Apresentação (H1 SEO On-Page) -->
+        <div class="seo-page-header">
+            <div class="seo-page-header-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <polyline points="16 11 18 13 22 9"/>
+                </svg>
+            </div>
+            <div class="seo-page-header-text">
+                <h1 class="seo-page-title" data-i18n="seo_h1_cadastros">Higienizador de Cadastros: Validar CPF, CNPJ, E-mail e Duplicados</h1>
+                <p class="seo-page-subtitle" data-i18n="seo_sub_cadastros">Limpe, padronize e audite bases de clientes e fornecedores automaticamente em segundos.</p>
+            </div>
+        </div>
 
         <!-- ======================================================== -->
         <!-- PASSO 1: CARREGAR BASE DE CADASTROS                      -->
@@ -754,6 +813,82 @@
                     </svg>
                     <span data-i18n="cadastros_btn_restart">Auditar Nova Base de Cadastros</span>
                 </button>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SEÇÃO SEMÂNTICA DE PERGUNTAS FREQUENTES (FAQ SEO ON-PAGE) -->
+        <!-- ======================================================== -->
+        <section class="seo-faq-section" aria-labelledby="faq-cadastros-heading">
+            <div class="seo-faq-header">
+                <span class="seo-faq-badge">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <span>Dúvidas Frequentes</span>
+                </span>
+                <h2 class="seo-faq-title" id="faq-cadastros-heading">Perguntas Frequentes sobre Higienização de Cadastros</h2>
+                <p class="seo-faq-subtitle">Como validar CPF/CNPJ, limpar duplicados e padronizar contatos em planilhas Excel e CSV.</p>
+            </div>
+
+            <div class="seo-faq-list">
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>Como validar CPF, CNPJ, e-mails e remover duplicados de uma planilha?</span>
+                        <span class="seo-faq-icon" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        Carregue sua planilha no Passo 1 do Higienizador de Cadastros, associe as colunas de CPF/CNPJ, Nome, E-mail e Telefone no Passo 2 e execute a auditoria. O sistema valida matematicamente o dígito verificador (Módulo 11), corrige erros de digitação em domínios de e-mail e gera tanto a base 100% higienizada quanto o relatório de inconsistências.
+                    </div>
+                </details>
+
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>Meus dados e planilhas estão seguros durante a validação?</span>
+                        <span class="seo-faq-icon" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        Sim. O ValidAí processa sua planilha temporariamente em memória apenas durante a higienização ativa, sem armazenar dados sensíveis de clientes ou fornecedores em bancos de dados permanentes.
+                    </div>
+                </details>
+
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>Quais formatos de arquivo o ValidAí aceita (.xlsx, .xls, .csv, .xml)?</span>
+                        <span class="seo-faq-icon" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        O Higienizador de Cadastros aceita planilhas Excel (<code>.xlsx</code> e <code>.xls</code>) e arquivos <code>.csv</code>. Os relatórios de saída são gerados em formato <code>.xlsx</code> com formatação executiva.
+                    </div>
+                </details>
+
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>Como funciona a normalização automática para evitar falsos positivos?</span>
+                        <span class="seo-faq-icon" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        O sistema recupera automaticamente zeros à esquerda que o Excel costuma remover de CPFs e CNPJs, padroniza nomes próprios em Title Case e aplica máscaras oficiais ou mantém apenas números conforme sua preferência.
+                    </div>
+                </details>
             </div>
         </section>
 

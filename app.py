@@ -1,7 +1,7 @@
 import os
 import uuid
 import json
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file, Response
 import comparator
 import single_auditor
 import text_comparator
@@ -22,6 +22,86 @@ os.makedirs(REPORT_DIR, exist_ok=True)
 SESSIONS = {}
 REPORTS = {}
 
+SITE_DOMAIN = "https://validai.app.br"
+
+# Sistema Centralizado de Metadados SEO por Rota
+SEO_METADATA = {
+    '/': {
+        'title': 'ValidAí | Comparador e Validador de Planilhas Excel e CSV Online',
+        'description': 'Compare, audite e valide duas planilhas Excel (.xlsx, .xls) ou CSV gratuitamente. Encontre divergências célula por célula e baixe o relatório pintado.',
+        'robots': 'index, follow',
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+    },
+    '/validador-texto': {
+        'title': 'Comparador e Validador de Textos Online | ValidAí',
+        'description': 'Compare dois blocos de texto lado a lado e identifique diferenças, adições e remoções instantaneamente com precisão.',
+        'robots': 'index, follow',
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+    },
+    '/validador-cadastros': {
+        'title': 'Higienizador de Cadastros: Validar CPF, CNPJ, E-mail e Duplicados | ValidAí',
+        'description': 'Limpe e padronize suas bases de dados. Valide CPF/CNPJ, e-mails e remova linhas duplicadas de planilhas automaticamente.',
+        'robots': 'index, follow',
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+    },
+    '/validador-xml': {
+        'title': 'Conciliador de Notas Fiscais (XML NFe/NFSe vs Excel) | ValidAí',
+        'description': 'Cruze dados de arquivos XML de Notas Fiscais (NFe e NFSe) contra planilhas de controle no Excel de forma automatizada.',
+        'robots': 'index, follow',
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+    },
+    '/como-usar': {
+        'title': 'Como Usar o ValidAí | Guia Completo de Validação e Auditoria de Dados',
+        'description': 'Aprenda passo a passo como comparar planilhas, higienizar cadastros e conciliar notas fiscais no ValidAí.',
+        'robots': 'index, follow',
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+    },
+    # Rotas "Em Breve" protegidas contra desperdício de Crawl Budget e Soft 404
+    '/conciliador-taxas': {
+        'title': 'Conciliação de Taxas e Extratos (.OFX) - Em Breve | ValidAí',
+        'description': 'Auditoria automatizada de taxas de maquininhas, PIX, extratos bancários OFX e repasses de marketplaces.',
+        'robots': 'noindex, follow',
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png',
+        'module_name': 'Conciliação de Taxas e Extratos (.OFX)',
+        'module_sub': 'Auditoria de maquininhas, PIX, extratos .OFX e repasses de marketplaces.'
+    },
+    '/auditoria-rh': {
+        'title': 'Auditoria de Folha e RH - Em Breve | ValidAí',
+        'description': 'Batimento automatizado de folha de pagamento, encargos trabalhistas, férias e benefícios.',
+        'robots': 'noindex, follow',
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png',
+        'module_name': 'Auditoria de Folha e RH',
+        'module_sub': 'Batimento de folha de pagamento, proventos, descontos e benefícios corporativos.'
+    },
+    '/validador-json': {
+        'title': 'Comparador de JSON / APIs - Em Breve | ValidAí',
+        'description': 'Identifique diferenças estruturais, chaves ausentes e divergências de tipagem entre payloads JSON e retornos de APIs.',
+        'robots': 'noindex, follow',
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png',
+        'module_name': 'Comparador de JSON / APIs',
+        'module_sub': 'Análise de diferenças estruturais entre payloads JSON, webhooks e objetos aninhados.'
+    }
+}
+
+
+@app.context_processor
+def inject_seo_metadata():
+    path = request.path if request else '/'
+    meta = SEO_METADATA.get(path, SEO_METADATA['/'])
+    canonical = f"{SITE_DOMAIN}{path}"
+    return {
+        'seo': {
+            'title': meta['title'],
+            'description': meta['description'],
+            'robots': meta.get('robots', 'index, follow'),
+            'canonical_url': canonical,
+            'og_image': meta.get('og_image', f'{SITE_DOMAIN}/static/images/logo.png'),
+            'module_name': meta.get('module_name', ''),
+            'module_sub': meta.get('module_sub', '')
+        }
+    }
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -41,6 +121,59 @@ def validador_xml():
 @app.route('/como-usar')
 def como_usar():
     return render_template('como_usar.html')
+
+@app.route('/conciliador-taxas')
+@app.route('/auditoria-rh')
+@app.route('/validador-json')
+def upcoming_module():
+    return render_template('em_breve.html')
+
+
+@app.route('/health', methods=['GET', 'HEAD'])
+def health_check():
+    response = Response('{"status": "ok"}', status=200, mimetype='application/json')
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['X-Robots-Tag'] = 'noindex, nofollow'
+    return response
+
+
+@app.route('/robots.txt')
+def robots_txt():
+    content = (
+        "User-agent: *\n"
+        "Allow: /\n"
+        "Disallow: /api/\n"
+        "Disallow: /health\n"
+        "\n"
+        f"Sitemap: {SITE_DOMAIN}/sitemap.xml\n"
+    )
+    return Response(content, mimetype='text/plain; charset=utf-8')
+
+
+@app.route('/sitemap.xml')
+def sitemap_xml():
+    lastmod_date = "2026-10-18"
+    urls = [
+        ('/', '1.0', 'weekly'),
+        ('/validador-texto', '0.9', 'weekly'),
+        ('/validador-cadastros', '0.9', 'weekly'),
+        ('/validador-xml', '0.9', 'weekly'),
+        ('/como-usar', '0.8', 'monthly'),
+    ]
+    xml_lines = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+    ]
+    for route_path, priority, changefreq in urls:
+        xml_lines.append('  <url>')
+        xml_lines.append(f'    <loc>{SITE_DOMAIN}{route_path}</loc>')
+        xml_lines.append(f'    <lastmod>{lastmod_date}</lastmod>')
+        xml_lines.append(f'    <changefreq>{changefreq}</changefreq>')
+        xml_lines.append(f'    <priority>{priority}</priority>')
+        xml_lines.append('  </url>')
+    xml_lines.append('</urlset>')
+    return Response("\n".join(xml_lines), mimetype='application/xml; charset=utf-8')
+
 
 @app.route('/api/upload-headers', methods=['POST'])
 def upload_headers():

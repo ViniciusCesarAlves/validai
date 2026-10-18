@@ -3,19 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="page_title">ValidAí - O seu validador</title>
+    <title data-i18n="text_page_title">{{ seo.title }}</title>
+    <meta name="description" content="{{ seo.description }}">
+    <meta name="robots" content="{{ seo.robots }}">
+    <link rel="canonical" href="https://validai.app.br{{ request.path }}">
+
+    <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
+    <meta property="og:title" content="{{ seo.title }}">
+    <meta property="og:description" content="{{ seo.description }}">
+    <meta property="og:url" content="https://validai.app.br{{ request.path }}">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="{{ seo.og_image }}">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:site_name" content="ValidAí">
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ seo.title }}">
+    <meta name="twitter:description" content="{{ seo.description }}">
+    <meta name="twitter:image" content="{{ seo.og_image }}">
+
     <link rel="icon" type="image/png" href="/static/images/favicon.png?v=3">
     <link rel="shortcut icon" href="/favicon.ico?v=3">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=17">
+    <link rel="stylesheet" href="/static/css/style.css?v=18">
     <link rel="stylesheet" href="/static/css/text_validator.css?v=15">
+
+    <!-- Dados Estruturados (Schema.org em JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": ["WebApplication", "SoftwareApplication"],
+      "name": "ValidAí - Comparador e Validador de Textos",
+      "url": "https://validai.app.br/validador-texto",
+      "description": "Compare dois blocos de texto ou documentos lado a lado e identifique diferenças, adições e remoções instantaneamente com precisão.",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "All",
+      "inLanguage": "pt-BR",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "BRL"
+      },
+      "featureList": [
+        "Comparador e Validador de Textos e Documentos Online (.docx, .pdf, .txt)",
+        "Comparador e Validador de Planilhas Excel (.xlsx, .xls) e CSV",
+        "Higienizador de Cadastros (Validação de CPF, CNPJ, E-mail e Duplicados)",
+        "Conciliador de Notas Fiscais (XML NFe/NFSe vs Planilha Financeira Excel)"
+      ]
+    }
+    </script>
+
     <script>
         (function() {
             try {
                 var lang = localStorage.getItem('validai_lang') || 'pt';
-                document.documentElement.setAttribute('lang', lang);
+                document.documentElement.setAttribute('lang', lang === 'pt' ? 'pt-BR' : (lang === 'es' ? 'es-ES' : 'en-US'));
                 var theme = localStorage.getItem('splitc_theme');
                 if (theme === 'dark') {
                     document.documentElement.setAttribute('data-theme', 'dark');
@@ -29,7 +74,7 @@
             } catch(e) {}
         })();
     </script>
-    <script src="/static/js/i18n.js?v=1"></script>
+    <script src="/static/js/i18n.js?v=2"></script>
 </head>
 <body>
 
@@ -38,8 +83,8 @@
         <div class="container nav-content">
             <div class="header-left-group">
                 <a href="/" class="header-brand-link" title="ValidAí - Início">
-                    <img src="/static/images/logo.png?v=3" alt="ValidAí Logo" class="brand-logo brand-logo-light">
-                    <img src="/static/images/logo-white.png?v=3" alt="ValidAí Logo" class="brand-logo brand-logo-dark">
+                    <img src="/static/images/logo.png?v=3" alt="ValidAí Logo" class="brand-logo brand-logo-light" width="144" height="42">
+                    <img src="/static/images/logo-white.png?v=3" alt="ValidAí Logo" class="brand-logo brand-logo-dark" width="144" height="42">
                 </a>
                 <nav class="nav-menu" aria-label="Navegação Principal">
                     <a href="/" class="nav-menu-link">
@@ -242,6 +287,22 @@
     </header>
 
     <main class="container main-content">
+
+        <!-- Cabeçalho Semântico de Apresentação (H1 SEO On-Page) -->
+        <div class="seo-page-header">
+            <div class="seo-page-header-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                </svg>
+            </div>
+            <div class="seo-page-header-text">
+                <h1 class="seo-page-title" data-i18n="seo_h1_text">Comparador e Validador de Textos e Documentos Online</h1>
+                <p class="seo-page-subtitle" data-i18n="seo_sub_text">Compare dois blocos de texto ou documentos (.pdf, .docx, .txt) lado a lado com precisão instantânea.</p>
+            </div>
+        </div>
 
         <!-- ETAPA 1: Upload dos Documentos e Modo de Comparação -->
         <section class="card step-card" id="text-step-upload">
@@ -731,6 +792,82 @@
             <span id="text-toast-message">Ocorreu um erro.</span>
             <button type="button" id="btn-close-text-toast" class="toast-close">&times;</button>
         </div>
+
+        <!-- ======================================================== -->
+        <!-- SEÇÃO SEMÂNTICA DE PERGUNTAS FREQUENTES (FAQ SEO ON-PAGE) -->
+        <!-- ======================================================== -->
+        <section class="seo-faq-section" aria-labelledby="faq-text-heading">
+            <div class="seo-faq-header">
+                <span class="seo-faq-badge">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <span>Dúvidas Frequentes</span>
+                </span>
+                <h2 class="seo-faq-title" id="faq-text-heading">Perguntas Frequentes sobre Comparação de Textos e Documentos</h2>
+                <p class="seo-faq-subtitle">Saiba como auditar contratos, minutas e textos lado a lado no ValidAí.</p>
+            </div>
+
+            <div class="seo-faq-list">
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>Como comparar dois documentos ou blocos de texto e destacar alterações?</span>
+                        <span class="seo-faq-icon" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        Você pode enviar dois arquivos (<code>.pdf</code>, <code>.docx</code> ou <code>.txt</code>) ou colar os textos diretamente nos campos Original e Novo. Ao clicar em Encontrar Diferenças, o ValidAí exibe o índice de similaridade, destaca adições em verde e remoções em vermelho, e permite baixar um relatório em PDF formatado.
+                    </div>
+                </details>
+
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>Meus dados e planilhas estão seguros durante a validação?</span>
+                        <span class="seo-faq-icon" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        Sim. Todo o processamento de documentos e planilhas ocorre temporariamente em memória apenas durante a sua sessão de análise, sem armazenamento permanente em banco de dados e com total confidencialidade.
+                    </div>
+                </details>
+
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>Quais formatos de arquivo o ValidAí aceita (.xlsx, .xls, .csv, .xml)?</span>
+                        <span class="seo-faq-icon" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        No Validador de Texto são aceitos arquivos <code>.pdf</code>, <code>.docx</code> e <code>.txt</code> (além de texto colado). Nos demais módulos da plataforma, você também pode auditar planilhas <code>.xlsx</code>, <code>.xls</code>, <code>.csv</code> e notas fiscais eletrônicas em <code>.xml</code> ou <code>.zip</code>.
+                    </div>
+                </details>
+
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>Como funciona a normalização automática para evitar falsos positivos?</span>
+                        <span class="seo-faq-icon" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        Você pode ativar opções para ignorar espaços extras no final das linhas, desconsiderar diferenças entre maiúsculas e minúsculas, pular linhas em branco e escolher entre destaque por palavra inteira ou caractere a caractere.
+                    </div>
+                </details>
+            </div>
+        </section>
 
     </main>
 

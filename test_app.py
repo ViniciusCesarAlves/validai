@@ -592,8 +592,149 @@ def test_full_pipeline():
     assert 'Espelho Notas Fiscais XML' in wb_xml_mirror.sheetnames
     print("[OK] Planilha Espelho dos XMLs Extraídos gerada e validada com sucesso!")
 
+    # =========================================================================
+    # 16. TESTE COMPLETO DE SEO TÉCNICO E SEMÂNTICO (META TAGS, OG, H1, FAQ, JSON-LD, ROBOTS E SITEMAP)
+    # =========================================================================
+    print("\n--- Testando Otimização de SEO Técnico e Semântico (ValidAí) ---")
+    import json as json_mod
+    import re
+
+    expected_active_routes = {
+        '/': {
+            'title': 'ValidAí | Comparador e Validador de Planilhas Excel e CSV Online',
+            'description': 'Compare, audite e valide duas planilhas Excel (.xlsx, .xls) ou CSV gratuitamente. Encontre divergências célula por célula e baixe o relatório pintado.',
+            'h1': 'Validador e Comparador Inteligente de Planilhas',
+        },
+        '/validador-texto': {
+            'title': 'Comparador e Validador de Textos Online | ValidAí',
+            'description': 'Compare dois blocos de texto lado a lado e identifique diferenças, adições e remoções instantaneamente com precisão.',
+            'h1': 'Comparador e Validador de Textos e Documentos Online',
+        },
+        '/validador-cadastros': {
+            'title': 'Higienizador de Cadastros: Validar CPF, CNPJ, E-mail e Duplicados | ValidAí',
+            'description': 'Limpe e padronize suas bases de dados. Valide CPF/CNPJ, e-mails e remova linhas duplicadas de planilhas automaticamente.',
+            'h1': 'Higienizador de Cadastros: Validar CPF, CNPJ, E-mail e Duplicados',
+        },
+        '/validador-xml': {
+            'title': 'Conciliador de Notas Fiscais (XML NFe/NFSe vs Excel) | ValidAí',
+            'description': 'Cruze dados de arquivos XML de Notas Fiscais (NFe e NFSe) contra planilhas de controle no Excel de forma automatizada.',
+            'h1': 'Conciliador de Notas Fiscais (XML NFe/NFSe vs Excel)',
+        },
+        '/como-usar': {
+            'title': 'Como Usar o ValidAí | Guia Completo de Validação e Auditoria de Dados',
+            'description': 'Aprenda passo a passo como comparar planilhas, higienizar cadastros e conciliar notas fiscais no ValidAí.',
+            'h1': 'Como usar o <span class="highlight">ValidAí</span>?',
+        },
+    }
+
+    for route_path, expected in expected_active_routes.items():
+        resp = client.get(route_path)
+        assert resp.status_code == 200, f"Rota {route_path} retornou status {resp.status_code}"
+        html = resp.data.decode('utf-8')
+
+        # 1. lang="pt-BR"
+        assert '<html lang="pt-BR">' in html, f"Falta <html lang=\"pt-BR\"> em {route_path}"
+
+        # 2. Title & Meta Description
+        assert f">{expected['title']}</title>" in html, f"Title incorreto em {route_path}"
+        assert f'<meta name="description" content="{expected["description"]}">' in html, f"Description incorreta em {route_path}"
+        assert '<meta name="robots" content="index, follow">' in html, f"Robots meta ausente em {route_path}"
+
+        # 3. Canonical URL
+        expected_canonical = f'<link rel="canonical" href="https://validai.app.br{route_path}">'
+        assert expected_canonical in html, f"Canonical ausente ou incorreto em {route_path}"
+
+        # 4. Open Graph & Twitter Cards
+        assert f'<meta property="og:title" content="{expected["title"]}">' in html
+        assert f'<meta property="og:description" content="{expected["description"]}">' in html
+        assert f'<meta property="og:url" content="https://validai.app.br{route_path}">' in html
+        assert '<meta property="og:type" content="website">' in html
+        assert '<meta property="og:locale" content="pt_BR">' in html
+        assert '<meta property="og:image" content="https://validai.app.br/static/images/logo.png">' in html
+        assert '<meta name="twitter:card" content="summary_large_image">' in html
+
+        # 5. Unique H1
+        h1_matches = re.findall(r'<h1[^>]*>(.*?)</h1>', html, flags=re.DOTALL)
+        assert len(h1_matches) == 1, f"A rota {route_path} deve ter exatamente 1 tag <h1>, mas encontrou {len(h1_matches)}"
+        assert expected['h1'] in h1_matches[0].strip(), f"H1 inesperado em {route_path}: {h1_matches[0]}"
+
+        # 6. Explicit width and height on all <img> tags (CLS protection)
+        img_tags = re.findall(r'<img\b[^>]*>', html)
+        assert len(img_tags) >= 2, f"Logo <img> não encontrada em {route_path}"
+        for img_tag in img_tags:
+            assert 'width="' in img_tag and 'height="' in img_tag, f"Tag <img> sem width/height explícitos em {route_path}: {img_tag}"
+
+        # 7. JSON-LD Schema validation
+        ld_scripts = re.findall(r'<script type="application/ld\+json">\s*(.*?)\s*</script>', html, flags=re.DOTALL)
+        assert len(ld_scripts) >= 1, f"JSON-LD ausente em {route_path}"
+        for raw_ld in ld_scripts:
+            parsed_ld = json_mod.loads(raw_ld)
+            assert parsed_ld['@context'] == 'https://schema.org'
+
+    print("[OK] Todas as 5 rotas ativas possuem Meta Tags dinâmicas, Canonical, Open Graph, Twitter Cards, <h1> único, JSON-LD válido e <img> com width/height!")
+
+    # Verificar FAQ semântico e Schema FAQPage na Home (/)
+    home_html = client.get('/').data.decode('utf-8')
+    faq_questions = [
+        'Como comparar duas planilhas Excel e achar diferenças automaticamente?',
+        'Meus dados e planilhas estão seguros durante a validação?',
+        'Quais formatos de arquivo o ValidAí aceita (.xlsx, .xls, .csv, .xml)?',
+        'Como funciona a normalização automática para evitar falsos positivos?',
+    ]
+    assert '<details class="seo-faq-item">' in home_html
+    assert '<summary class="seo-faq-question">' in home_html
+    for q in faq_questions:
+        assert q in home_html, f"Pergunta de FAQ ausente na Home: {q}"
+    assert '"@type": "FAQPage"' in home_html
+    assert '"applicationCategory": "BusinessApplication"' in home_html
+    print("[OK] Seção de Perguntas Frequentes (<details>/<summary>) e Schema FAQPage + WebApplication validados na Home!")
+
+    # Verificar rotas "Em Breve" com proteção de Crawl Budget (noindex, follow)
+    upcoming_routes = ['/conciliador-taxas', '/auditoria-rh', '/validador-json']
+    for up_route in upcoming_routes:
+        res_up = client.get(up_route)
+        assert res_up.status_code == 200, f"Rota Em Breve {up_route} retornou {res_up.status_code}"
+        up_html = res_up.data.decode('utf-8')
+        assert '<meta name="robots" content="noindex, follow">' in up_html, f"Falta noindex, follow em {up_route}"
+        assert f'<link rel="canonical" href="https://validai.app.br{up_route}">' in up_html
+    print("[OK] Proteção de Crawl Budget (<meta name=\"robots\" content=\"noindex, follow\">) validada em /conciliador-taxas, /auditoria-rh e /validador-json!")
+
+    # Verificar /robots.txt, /sitemap.xml e /health
+    res_robots = client.get('/robots.txt')
+    assert res_robots.status_code == 200
+    assert 'text/plain' in res_robots.mimetype
+    robots_txt = res_robots.data.decode('utf-8')
+    assert 'User-agent: *' in robots_txt
+    assert 'Disallow: /api/' in robots_txt
+    assert 'Disallow: /health' in robots_txt
+    assert 'Sitemap: https://validai.app.br/sitemap.xml' in robots_txt
+    print("[OK] /robots.txt servido corretamente na raiz do domínio (com Disallow: /health)!")
+
+    res_sitemap = client.get('/sitemap.xml')
+    assert res_sitemap.status_code == 200
+    assert 'xml' in res_sitemap.mimetype
+    sitemap_xml = res_sitemap.data.decode('utf-8')
+    for active_url in ['https://validai.app.br/', 'https://validai.app.br/validador-texto', 'https://validai.app.br/validador-cadastros', 'https://validai.app.br/validador-xml', 'https://validai.app.br/como-usar']:
+        assert f'<loc>{active_url}</loc>' in sitemap_xml, f"URL {active_url} ausente no sitemap.xml"
+    for excluded_url in ['/conciliador-taxas', '/auditoria-rh', '/validador-json', '/health']:
+        assert excluded_url not in sitemap_xml, f"Rota {excluded_url} não deveria estar no sitemap.xml"
+    print("[OK] /sitemap.xml servido corretamente com todas as 5 URLs canônicas ativas e sem /health!")
+
+    res_health_get = client.get('/health')
+    assert res_health_get.status_code == 200
+    assert res_health_get.get_json() == {'status': 'ok'}
+    assert res_health_get.headers.get('Cache-Control') == 'no-store, no-cache, must-revalidate, max-age=0'
+    assert res_health_get.headers.get('X-Robots-Tag') == 'noindex, nofollow'
+
+    res_health_head = client.head('/health')
+    assert res_health_head.status_code == 200
+    assert res_health_head.headers.get('Cache-Control') == 'no-store, no-cache, must-revalidate, max-age=0'
+    assert res_health_head.headers.get('X-Robots-Tag') == 'noindex, nofollow'
+    print("[OK] Rota /health (GET e HEAD) ultra-leve validada com status 200, JSON {'status': 'ok'} e headers Cache-Control + X-Robots-Tag!")
+
     print("\nTODOS OS TESTES PASSARAM COM 100% DE SUCESSO!")
 
 if __name__ == '__main__':
     test_full_pipeline()
+
 

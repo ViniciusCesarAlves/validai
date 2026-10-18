@@ -3,7 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="xml_page_title">ValidAí - Conciliador de XML de Notas Fiscais (NFe / NFSe)</title>
+    <title data-i18n="xml_page_title">{{ seo.title }}</title>
+    <meta name="description" content="{{ seo.description }}">
+    <meta name="robots" content="{{ seo.robots }}">
+    <link rel="canonical" href="https://validai.app.br{{ request.path }}">
+
+    <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
+    <meta property="og:title" content="{{ seo.title }}">
+    <meta property="og:description" content="{{ seo.description }}">
+    <meta property="og:url" content="https://validai.app.br{{ request.path }}">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="{{ seo.og_image }}">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:site_name" content="ValidAí">
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ seo.title }}">
+    <meta name="twitter:description" content="{{ seo.description }}">
+    <meta name="twitter:image" content="{{ seo.og_image }}">
+
     <link rel="icon" type="image/png" href="/static/images/logo.png?v=3">
     
     <!-- Google Fonts: Outfit e Montserrat -->
@@ -13,12 +32,37 @@
     
     <link rel="stylesheet" href="/static/css/style.css?v=18">
 
+    <!-- Dados Estruturados (Schema.org em JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": ["WebApplication", "SoftwareApplication"],
+      "name": "ValidAí - Conciliador de Notas Fiscais (XML NFe/NFSe vs Excel)",
+      "url": "https://validai.app.br/validador-xml",
+      "description": "Cruze dados de arquivos XML de Notas Fiscais (NFe e NFSe) contra planilhas de controle no Excel de forma automatizada.",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "All",
+      "inLanguage": "pt-BR",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "BRL"
+      },
+      "featureList": [
+        "Conciliador de Notas Fiscais (XML NFe/NFSe vs Planilha Financeira Excel)",
+        "Comparador e Validador de Planilhas Excel (.xlsx, .xls) e CSV",
+        "Comparador e Validador de Textos e Documentos Online (.docx, .pdf, .txt)",
+        "Higienizador de Cadastros (Validação de CPF, CNPJ, E-mail e Duplicados)"
+      ]
+    }
+    </script>
+
     <!-- Anti-flicker e Leitura Instantânea de Tema e Idioma -->
     <script>
         (function() {
             try {
                 var lang = localStorage.getItem('validai_lang') || 'pt';
-                document.documentElement.setAttribute('lang', lang);
+                document.documentElement.setAttribute('lang', lang === 'pt' ? 'pt-BR' : (lang === 'es' ? 'es-ES' : 'en-US'));
                 var theme = localStorage.getItem('splitc_theme');
                 if (theme === 'dark') {
                     document.documentElement.setAttribute('data-theme', 'dark');
@@ -41,8 +85,8 @@
         <div class="container nav-content">
             <div class="header-left-group">
                 <a href="/" class="header-brand-link" title="ValidAí - Início">
-                    <img src="/static/images/logo.png?v=3" alt="ValidAí Logo" class="brand-logo brand-logo-light">
-                    <img src="/static/images/logo-white.png?v=3" alt="ValidAí Logo" class="brand-logo brand-logo-dark">
+                    <img src="/static/images/logo.png?v=3" alt="ValidAí Logo" class="brand-logo brand-logo-light" width="144" height="42">
+                    <img src="/static/images/logo-white.png?v=3" alt="ValidAí Logo" class="brand-logo brand-logo-dark" width="144" height="42">
                 </a>
 
                 <!-- Navegação Principal -->
@@ -247,6 +291,22 @@
     </header>
 
     <main class="container main-content">
+
+        <!-- Cabeçalho Semântico de Apresentação (H1 SEO On-Page) -->
+        <div class="seo-page-header">
+            <div class="seo-page-header-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <polyline points="9 15 7 13 9 11"/>
+                    <polyline points="15 15 17 13 15 11"/>
+                </svg>
+            </div>
+            <div class="seo-page-header-text">
+                <h1 class="seo-page-title" data-i18n="seo_h1_xml">Conciliador de Notas Fiscais (XML NFe/NFSe vs Excel)</h1>
+                <p class="seo-page-subtitle" data-i18n="seo_sub_xml">Cruze lotes de XMLs de Notas Fiscais contra sua planilha financeira e detecte notas omitidas ou valores divergentes.</p>
+            </div>
+        </div>
 
         <!-- ======================================================== -->
         <!-- PASSO 1: CARREGAR PACOTE DE XMLs + PLANILHA FINANCEIRA    -->
@@ -796,6 +856,82 @@
                     </svg>
                     <span data-i18n="xml_btn_restart">Conciliar Novo Lote de XMLs</span>
                 </button>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SEÇÃO SEMÂNTICA DE PERGUNTAS FREQUENTES (FAQ SEO ON-PAGE) -->
+        <!-- ======================================================== -->
+        <section class="seo-faq-section" aria-labelledby="faq-xml-heading">
+            <div class="seo-faq-header">
+                <span class="seo-faq-badge">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <span>Dúvidas Frequentes</span>
+                </span>
+                <h2 class="seo-faq-title" id="faq-xml-heading">Perguntas Frequentes sobre Conciliação de XML de Notas Fiscais</h2>
+                <p class="seo-faq-subtitle">Como cruzar arquivos XML (NFe, NFSe e CTe) com planilhas de Contas a Pagar e Faturamento.</p>
+            </div>
+
+            <div class="seo-faq-list">
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>Como conciliar vários arquivos XML de Notas Fiscais com uma planilha Excel?</span>
+                        <span class="seo-faq-icon" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        Envie uma pasta <code>.zip</code> ou múltiplos arquivos <code>.xml</code> de NFe, NFSe ou CTe de um lado e sua planilha financeira (<code>.xlsx</code> ou <code>.csv</code>) do outro. O sistema lê automaticamente as tags oficiais (<code>&lt;nNF&gt;</code>, <code>&lt;CNPJ&gt;</code>, <code>&lt;vNF&gt;</code>) e aponta notas omitidas no financeiro, lançamentos sem XML e diferenças de valor ou impostos.
+                    </div>
+                </details>
+
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>Meus dados e planilhas estão seguros durante a validação?</span>
+                        <span class="seo-faq-icon" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        Sim. Os pacotes <code>.zip</code>, arquivos <code>.xml</code> e planilhas financeiras são lidos exclusivamente em memória temporária durante a sessão de conciliação, sem armazenamento permanente em banco de dados.
+                    </div>
+                </details>
+
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>Quais formatos de arquivo o ValidAí aceita (.xlsx, .xls, .csv, .xml)?</span>
+                        <span class="seo-faq-icon" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        O Conciliador Fiscal aceita pastas compactadas <code>.zip</code> com subpastas ou múltiplos arquivos <code>.xml</code> (NFe 4.00, NFSe ABRASF/Nacional e CTe) combinados com planilhas <code>.xlsx</code>, <code>.xls</code> ou <code>.csv</code>.
+                    </div>
+                </details>
+
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>Como funciona a normalização automática para evitar falsos positivos?</span>
+                        <span class="seo-faq-icon" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        O conciliador remove automaticamente zeros à esquerda e prefixos como "NF-" do número da nota, normaliza máscaras de CNPJ e permite configurar tolerância de centavos para arredondamentos contábeis.
+                    </div>
+                </details>
             </div>
         </section>
 
