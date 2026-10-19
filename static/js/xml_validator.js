@@ -544,15 +544,15 @@
         items.forEach(item => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td style="text-align: center; font-weight: 700;">${escapeHtml(item.excel_line)}</td>
-                <td><code class="code-pill" style="font-weight: 700;">NF ${escapeHtml(item.nNF)}</code></td>
+                <td style="text-align: center;"><span class="badge-line">${escapeHtml(item.excel_line)}</span></td>
+                <td><span class="key-code">NF ${escapeHtml(item.nNF)}</span></td>
                 <td>
                     <strong>${escapeHtml(item.emit_nome)}</strong>
-                    <div style="font-size: 11px; color: var(--text-muted);">CNPJ XML: ${escapeHtml(item.emit_cnpj_xml)}</div>
+                    <div style="font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px;">CNPJ XML: ${escapeHtml(item.emit_cnpj_xml)}</div>
                 </td>
-                <td><strong style="color: #16a34a;">${escapeHtml(item.vNF_xml_fmt)}</strong></td>
-                <td><strong style="color: #dc2626;">${escapeHtml(item.val_planilha_fmt)}</strong></td>
-                <td><span class="tag-pill tag-error" style="font-weight: 700;">${escapeHtml(item.diff_val_fmt)}</span></td>
+                <td style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: #16a34a; white-space: nowrap;">${escapeHtml(item.vNF_xml_fmt)}</td>
+                <td style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: #dc2626; white-space: nowrap;">${escapeHtml(item.val_planilha_fmt)}</td>
+                <td style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; white-space: nowrap;"><span class="tag-pill tag-error" style="font-weight: 700;">${escapeHtml(item.diff_val_fmt)}</span></td>
                 <td><span style="color: #dc2626; font-weight: 600; font-size: 12.5px;">${escapeHtml(item.motivo)}</span></td>
             `;
             tbodyDivs.appendChild(tr);
@@ -571,13 +571,13 @@
         items.forEach(item => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><span class="badge-recommended">${escapeHtml(item.tipo_doc)}</span></td>
-                <td><code class="code-pill" style="font-weight: 700; color: #b45309; background: rgba(245, 158, 11, 0.14);">NF ${escapeHtml(item.nNF)}</code></td>
-                <td>${escapeHtml(item.data_emissao)}</td>
-                <td><code class="code-pill">${escapeHtml(item.emit_cnpj)}</code></td>
+                <td><span class="status-badge status-badge-info">${escapeHtml(item.tipo_doc)}</span></td>
+                <td><span class="key-code" style="color: #d97706; border-color: rgba(245, 158, 11, 0.4);">NF ${escapeHtml(item.nNF)}</span></td>
+                <td style="white-space: nowrap;">${escapeHtml(item.data_emissao)}</td>
+                <td><span class="key-code">${escapeHtml(item.emit_cnpj)}</span></td>
                 <td><strong>${escapeHtml(item.emit_nome)}</strong></td>
-                <td><strong style="color: #d97706;">${escapeHtml(item.vNF_fmt)}</strong></td>
-                <td>${escapeHtml(item.total_impostos_fmt)}</td>
+                <td style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: #d97706; white-space: nowrap;">${escapeHtml(item.vNF_fmt)}</td>
+                <td style="font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap;">${escapeHtml(item.total_impostos_fmt)}</td>
                 <td style="font-size: 12px; color: var(--text-muted);">${escapeHtml(item.filename)}</td>
             `;
             tbodyMissingExcel.appendChild(tr);
@@ -596,11 +596,11 @@
         items.forEach(item => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td style="text-align: center; font-weight: 700;">${item.excel_line}</td>
-                <td><code class="code-pill" style="color: #ea580c; background: rgba(234, 88, 12, 0.12); font-weight: 700;">${escapeHtml(item.nNF_planilha)}</code></td>
+                <td style="text-align: center;"><span class="badge-line">${escapeHtml(item.excel_line)}</span></td>
+                <td><span class="key-code" style="color: #ea580c; border-color: rgba(234, 88, 12, 0.4);">NF ${escapeHtml(item.nNF_planilha)}</span></td>
                 <td><strong>${escapeHtml(item.fornecedor)}</strong></td>
-                <td><code class="code-pill">${escapeHtml(item.cnpj_planilha)}</code></td>
-                <td><strong>${escapeHtml(item.val_planilha_fmt)}</strong></td>
+                <td><span class="key-code">${escapeHtml(item.cnpj_planilha)}</span></td>
+                <td style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; white-space: nowrap;">${escapeHtml(item.val_planilha_fmt)}</td>
                 <td><span style="color: #ea580c; font-weight: 600; font-size: 12.5px;">${escapeHtml(item.motivo)}</span></td>
             `;
             tbodyMissingFile.appendChild(tr);
@@ -618,24 +618,24 @@
 
         items.forEach(item => {
             const st = item.status_conciliacao || '';
-            let badgeStyle = 'background: #dcfce7; color: #15803d; border: 1px solid #86eab1;';
+            let statusBadge = `<span class="status-badge status-badge-ok">${escapeHtml(st)}</span>`;
             if (st.includes('DIVERGÊNCIA')) {
-                badgeStyle = 'background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5;';
-            } else if (st.includes('SEM LANÇAMENTO')) {
-                badgeStyle = 'background: #fef3c7; color: #b45309; border: 1px solid #fcd34d;';
+                statusBadge = `<span class="status-badge status-badge-diff">${escapeHtml(st)}</span>`;
+            } else if (st.includes('SEM LANÇAMENTO') || st.includes('NÃO ENCONTRADO')) {
+                statusBadge = `<span class="status-badge status-badge-warning">${escapeHtml(st)}</span>`;
             }
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; display: inline-block; ${badgeStyle}">${escapeHtml(st)}</span></td>
+                <td>${statusBadge}</td>
                 <td><strong>${escapeHtml(item.tipo_doc)}</strong></td>
-                <td><code class="code-pill" style="font-weight: 700;">${escapeHtml(item.nNF)}</code></td>
-                <td>${escapeHtml(item.data_emissao)}</td>
-                <td><code class="code-pill">${escapeHtml(item.emit_cnpj_fmt || item.emit_cnpj)}</code></td>
+                <td><span class="key-code">NF ${escapeHtml(item.nNF)}</span></td>
+                <td style="white-space: nowrap;">${escapeHtml(item.data_emissao)}</td>
+                <td><span class="key-code">${escapeHtml(item.emit_cnpj_fmt || item.emit_cnpj)}</span></td>
                 <td><strong>${escapeHtml(item.emit_nome)}</strong></td>
-                <td><strong>${escapeHtml(item.vNF_fmt)}</strong></td>
-                <td>${escapeHtml(item.total_impostos_fmt)}</td>
-                <td style="font-family: monospace; font-size: 11px; color: var(--text-muted);">${escapeHtml(item.chave_acesso)}</td>
+                <td style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; white-space: nowrap;">${escapeHtml(item.vNF_fmt)}</td>
+                <td style="font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap;">${escapeHtml(item.total_impostos_fmt)}</td>
+                <td style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted);">${escapeHtml(item.chave_acesso)}</td>
             `;
             tbodyMirror.appendChild(tr);
         });

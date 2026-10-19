@@ -12,6 +12,7 @@ import single_auditor
 import text_comparator
 import cadastros_cleaner
 import xml_reconciler
+import ofx_reconciler
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # Suporta até 100MB de arquivo
@@ -116,15 +117,13 @@ SEO_METADATA = {
         'robots': 'index, follow',
         'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
     },
-    # Rotas "Em Breve" protegidas contra desperdício de Crawl Budget e Soft 404
     '/conciliador-taxas': {
-        'title': 'Conciliação de Taxas e Extratos (.OFX) - Em Breve | ValidAí',
-        'description': 'Auditoria automatizada de taxas de maquininhas, PIX, extratos bancários OFX e repasses de marketplaces.',
-        'robots': 'noindex, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/logo.png',
-        'module_name': 'Conciliação de Taxas e Extratos (.OFX)',
-        'module_sub': 'Auditoria de maquininhas, PIX, extratos .OFX e repasses de marketplaces.'
+        'title': 'Conciliador de Taxas e Extratos (.OFX vs Vendas) | ValidAí',
+        'description': 'Audite taxas de maquininhas (Stone, Cielo, Rede) e repasses de marketplaces contra extratos bancários .OFX.',
+        'robots': 'index, follow',
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
     },
+    # Rotas "Em Breve" protegidas contra desperdício de Crawl Budget e Soft 404
     '/auditoria-rh': {
         'title': 'Auditoria de Folha e RH - Em Breve | ValidAí',
         'description': 'Batimento automatizado de folha de pagamento, encargos trabalhistas, férias e benefícios.',
@@ -183,6 +182,9 @@ def como_usar():
     return render_template('como_usar.html')
 
 @app.route('/conciliador-taxas')
+def conciliador_taxas():
+    return render_template('validador_ofx.html')
+
 @app.route('/auditoria-rh')
 @app.route('/validador-json')
 def upcoming_module():
@@ -218,6 +220,7 @@ def sitemap_xml():
         ('/validador-texto', '0.9', 'weekly'),
         ('/validador-cadastros', '0.9', 'weekly'),
         ('/validador-xml', '0.9', 'weekly'),
+        ('/conciliador-taxas', '0.9', 'weekly'),
         ('/como-usar', '0.8', 'monthly'),
     ]
     xml_lines = [
@@ -317,6 +320,58 @@ def upload_headers():
 
     except Exception as e:
         return jsonify({'error': f'Falha ao processar arquivos: {str(e)}'}), 500
+
+
+@app.route('/api/sheets/load-example', methods=['POST'])
+def sheets_load_example():
+    try:
+        session_id = str(uuid.uuid4())
+        session_folder = os.path.join(UPLOAD_DIR, session_id)
+        os.makedirs(session_folder, exist_ok=True)
+
+        path_a, filename_a, path_b, filename_b = comparator.create_demo_files(session_folder)
+
+        df_a = comparator.read_tabular_file(path_a, filename_a)
+        df_b = comparator.read_tabular_file(path_b, filename_b)
+
+        cols_a = list(df_a.columns)
+        cols_b = list(df_b.columns)
+
+        mapping = comparator.suggest_column_mappings(cols_a, cols_b)
+
+        key_keywords = ['ID', 'SEQ', 'TICKET', 'MATRICULA', 'CODIGO', 'CHAVE', 'CPF', 'NUMERO', 'REGISTRO']
+        suggested_keys = []
+        for col_a, col_b in mapping.items():
+            col_norm = comparator.normalize_column_name(col_a)
+            if any(k in col_norm for k in key_keywords):
+                suggested_keys.append({'col_a': col_a, 'score': 10})
+
+        if not suggested_keys and 'ID_Pedido' in cols_a:
+            suggested_keys.append({'col_a': 'ID_Pedido', 'score': 10})
+
+        SESSIONS[session_id] = {
+            'path_a': path_a,
+            'path_b': path_b,
+            'filename_a': filename_a,
+            'filename_b': filename_b,
+            'cols_a': cols_a,
+            'cols_b': cols_b
+        }
+
+        return jsonify({
+            'session_id': session_id,
+            'filename_a': filename_a,
+            'filename_b': filename_b,
+            'rows_a_count': len(df_a),
+            'rows_b_count': len(df_b),
+            'cols_a': cols_a,
+            'cols_b': cols_b,
+            'suggested_keys': [s['col_a'] for s in suggested_keys],
+            'column_mapping': mapping
+        })
+    except Exception as e:
+        return jsonify({'error': f'Erro ao carregar exemplo de planilhas: {str(e)}'}), 500
+
 
 @app.route('/favicon.ico')
 def favicon():
@@ -672,9 +727,17 @@ def cadastros_upload_headers():
         cols = list(df.columns)
 
         # Sugestão automática e inteligente de colunas
-        def find_col(keywords, exclude=None):
+        def find_col(keywords, exclude=None, avoid_keywords=None):
             if exclude is None:
                 exclude = set()
+            if avoid_keywords is None:
+                avoid_keywords = set()
+            for c in cols:
+                if c in exclude:
+                    continue
+                c_norm = comparator.normalize_column_name(c)
+                if any(k in c_norm for k in keywords) and not any(ak in c_norm for ak in avoid_keywords):
+                    return c
             for c in cols:
                 if c in exclude:
                     continue
@@ -686,7 +749,7 @@ def cadastros_upload_headers():
         col_doc = find_col(['CPF', 'CNPJ', 'DOC', 'DOCUMENTO', 'RUT', 'IDENTIFICACAO'])
         col_email = find_col(['EMAIL', 'E-MAIL', 'CORREIO', 'MAIL'], exclude={col_doc})
         col_phone = find_col(['TELEFONE', 'CELULAR', 'TEL', 'CEL', 'FONE', 'WHATSAPP'], exclude={col_doc, col_email})
-        col_name = find_col(['NOME', 'RAZAO', 'CLIENTE', 'FORNECEDOR', 'FUNCIONARIO', 'LEAD', 'TITULAR', 'CONTATO'], exclude={col_doc, col_email, col_phone})
+        col_name = find_col(['NOME', 'RAZAO', 'CLIENTE', 'FORNECEDOR', 'FUNCIONARIO', 'LEAD', 'TITULAR', 'CONTATO'], exclude={col_doc, col_email, col_phone}, avoid_keywords=['ID', 'COD', 'MATRICULA'])
 
         suggested = {
             'col_doc': col_doc,
@@ -724,6 +787,78 @@ def cadastros_upload_headers():
 
     except Exception as e:
         return jsonify({'error': f'Falha ao carregar base de cadastros: {str(e)}'}), 500
+
+
+@app.route('/api/cadastros/load-example', methods=['POST'])
+def cadastros_load_example():
+    try:
+        session_id = str(uuid.uuid4())
+        session_folder = os.path.join(UPLOAD_DIR, session_id)
+        os.makedirs(session_folder, exist_ok=True)
+
+        filepath, filename = cadastros_cleaner.create_demo_file(session_folder)
+        df = comparator.read_tabular_file(filepath, filename)
+        cols = list(df.columns)
+
+        def find_col(keywords, exclude=None, avoid_keywords=None):
+            if exclude is None:
+                exclude = set()
+            if avoid_keywords is None:
+                avoid_keywords = set()
+            for c in cols:
+                if c in exclude:
+                    continue
+                c_norm = comparator.normalize_column_name(c)
+                if any(k in c_norm for k in keywords) and not any(ak in c_norm for ak in avoid_keywords):
+                    return c
+            for c in cols:
+                if c in exclude:
+                    continue
+                c_norm = comparator.normalize_column_name(c)
+                if any(k in c_norm for k in keywords):
+                    return c
+            return ""
+
+        col_doc = find_col(['CPF', 'CNPJ', 'DOC', 'DOCUMENTO', 'RUT', 'IDENTIFICACAO'])
+        col_email = find_col(['EMAIL', 'E-MAIL', 'CORREIO', 'MAIL'], exclude={col_doc})
+        col_phone = find_col(['TELEFONE', 'CELULAR', 'TEL', 'CEL', 'FONE', 'WHATSAPP'], exclude={col_doc, col_email})
+        col_name = find_col(['NOME', 'RAZAO', 'CLIENTE', 'FORNECEDOR', 'FUNCIONARIO', 'LEAD', 'TITULAR', 'CONTATO'], exclude={col_doc, col_email, col_phone}, avoid_keywords=['ID', 'COD', 'MATRICULA'])
+
+        suggested = {
+            'col_doc': col_doc,
+            'col_name': col_name,
+            'col_email': col_email,
+            'col_phone': col_phone
+        }
+
+        sample_rows = []
+        for _, row in df.head(5).iterrows():
+            row_dict = {}
+            for c in cols:
+                val = row[c]
+                row_dict[c] = "" if (val is None or str(val) == 'nan') else str(val)
+            sample_rows.append(row_dict)
+
+        SESSIONS[session_id] = {
+            'mode': 'cadastros',
+            'path': filepath,
+            'filename': filename,
+            'cols': cols,
+            'total_rows': len(df)
+        }
+
+        return jsonify({
+            'session_id': session_id,
+            'filename': filename,
+            'total_rows': len(df),
+            'total_cols': len(cols),
+            'cols': cols,
+            'suggested': suggested,
+            'sample_data': sample_rows
+        })
+    except Exception as e:
+        return jsonify({'error': f'Erro ao carregar exemplo de cadastros: {str(e)}'}), 500
+
 
 @app.route('/api/cadastros/process', methods=['POST'])
 def cadastros_process():
@@ -1028,6 +1163,212 @@ def xml_download_mirror(report_id):
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
     return jsonify({'error': 'Planilha espelho expirada ou não encontrada.'}), 404
+
+
+# ========================================================
+# ROTAS DO CONCILIADOR DE TAXAS E EXTRATOS (.OFX)
+# ========================================================
+
+@app.route('/api/ofx/upload', methods=['POST'])
+def ofx_upload():
+    try:
+        ofx_files = request.files.getlist('ofx_files')
+        sheet_file = request.files.get('sheet_file')
+
+        if not ofx_files or not ofx_files[0].filename:
+            return jsonify({'error': 'Envie ao menos um extrato bancário no formato .OFX ou .ZIP.'}), 400
+
+        if not sheet_file or not sheet_file.filename:
+            return jsonify({'error': 'Envie o relatório de vendas do PDV/ERP (.xlsx, .xls ou .csv).'}), 400
+
+        session_id = str(uuid.uuid4())
+        session_folder = os.path.join(UPLOAD_DIR, session_id)
+        os.makedirs(session_folder, exist_ok=True)
+
+        saved_ofx_files = []
+        for f in ofx_files:
+            if f.filename:
+                safe_name = os.path.basename(f.filename)
+                f_path = os.path.join(session_folder, safe_name)
+                f.save(f_path)
+                saved_ofx_files.append((f_path, safe_name))
+
+        sheet_filename = os.path.basename(sheet_file.filename)
+        sheet_path = os.path.join(session_folder, sheet_filename)
+        sheet_file.save(sheet_path)
+
+        transactions, parse_errors = ofx_reconciler.extract_ofx_from_uploaded_files(saved_ofx_files)
+        if not transactions and parse_errors:
+            return jsonify({'error': f"Falha ao ler transações do arquivo OFX: {parse_errors[0]['error']}"}), 400
+        elif not transactions:
+            return jsonify({'error': 'Nenhuma transação válida encontrada no(s) arquivo(s) OFX enviado(s).'}), 400
+
+        df_sheet = comparator.read_tabular_file(sheet_path, sheet_filename)
+        cols = list(df_sheet.columns)
+        suggested = ofx_reconciler.suggest_sheet_columns(cols)
+
+        ofx_label = saved_ofx_files[0][1] if len(saved_ofx_files) == 1 else f"{len(saved_ofx_files)} arquivos OFX"
+
+        SESSIONS[session_id] = {
+            'mode': 'ofx',
+            'transactions': transactions,
+            'parse_errors': parse_errors,
+            'sheet_path': sheet_path,
+            'sheet_filename': sheet_filename,
+            'ofx_label': ofx_label,
+            'cols': cols
+        }
+
+        return jsonify({
+            'session_id': session_id,
+            'ofx_label': ofx_label,
+            'ofx_count': len(transactions),
+            'parse_errors': parse_errors,
+            'sheet_filename': sheet_filename,
+            'sheet_rows': len(df_sheet),
+            'sheet_cols': len(cols),
+            'cols': cols,
+            'suggested': suggested
+        })
+
+    except Exception as e:
+        return jsonify({'error': f'Erro ao processar arquivos OFX e planilha: {str(e)}'}), 500
+
+
+@app.route('/api/ofx/load-example', methods=['POST'])
+def ofx_load_example():
+    try:
+        session_id = str(uuid.uuid4())
+        session_folder = os.path.join(UPLOAD_DIR, session_id)
+        os.makedirs(session_folder, exist_ok=True)
+
+        ofx_path, ofx_name, excel_path, excel_name = ofx_reconciler.create_demo_files(session_folder)
+        transactions, parse_errors = ofx_reconciler.extract_ofx_from_uploaded_files([(ofx_path, ofx_name)])
+        df_sheet = comparator.read_tabular_file(excel_path, excel_name)
+        cols = list(df_sheet.columns)
+        suggested = ofx_reconciler.suggest_sheet_columns(cols)
+
+        SESSIONS[session_id] = {
+            'mode': 'ofx',
+            'transactions': transactions,
+            'parse_errors': parse_errors,
+            'sheet_path': excel_path,
+            'sheet_filename': excel_name,
+            'ofx_label': ofx_name,
+            'cols': cols
+        }
+
+        return jsonify({
+            'session_id': session_id,
+            'ofx_label': ofx_name,
+            'ofx_count': len(transactions),
+            'parse_errors': parse_errors,
+            'sheet_filename': excel_name,
+            'sheet_rows': len(df_sheet),
+            'sheet_cols': len(cols),
+            'cols': cols,
+            'suggested': suggested
+        })
+
+    except Exception as e:
+        return jsonify({'error': f'Erro ao gerar dados de exemplo OFX: {str(e)}'}), 500
+
+
+@app.route('/api/ofx/reconcile', methods=['POST'])
+def ofx_reconcile():
+    try:
+        data = request.json or {}
+        session_id = data.get('session_id')
+
+        if not session_id or session_id not in SESSIONS:
+            return jsonify({'error': 'Sessão inválida ou expirada. Faça o upload novamente.'}), 400
+
+        sess = SESSIONS[session_id]
+        df_sales = comparator.read_tabular_file(sess['sheet_path'], sess['sheet_filename'])
+        transactions = sess['transactions']
+
+        col_id = data.get('col_id')
+        col_gross_val = data.get('col_gross_val')
+        col_date = data.get('col_date')
+        col_acquirer = data.get('col_acquirer')
+        expected_rate_pct = float(data.get('expected_rate_pct', 3.5))
+        tolerance_cents = float(data.get('tolerance_cents', 0.05))
+        date_tolerance_days = int(data.get('date_tolerance_days', 3))
+
+        res = ofx_reconciler.reconcile_ofx_vs_sales(
+            df_sales=df_sales,
+            ofx_transactions=transactions,
+            col_id=col_id,
+            col_gross_val=col_gross_val,
+            col_date=col_date,
+            col_acquirer=col_acquirer,
+            expected_rate_pct=expected_rate_pct,
+            tolerance_cents=tolerance_cents,
+            date_tolerance_days=date_tolerance_days
+        )
+
+        report_id = str(uuid.uuid4())
+        logo_path = os.path.join(app.root_path, 'static', 'images', 'logo.png')
+        if not os.path.exists(logo_path):
+            logo_path = None
+
+        audit_filename = f"Relatorio_Auditoria_Taxas_OFX_{report_id[:8]}.xlsx"
+        audit_path = os.path.join(REPORT_DIR, audit_filename)
+        ofx_reconciler.generate_audit_report(res, audit_path, logo_path=logo_path)
+
+        mirror_filename = f"Espelho_Extrato_OFX_{report_id[:8]}.xlsx"
+        mirror_path = os.path.join(REPORT_DIR, mirror_filename)
+        ofx_reconciler.generate_ofx_mirror_report(transactions, mirror_path, logo_path=logo_path)
+
+        REPORTS[f"ofx_audit_{report_id}"] = {
+            'path': audit_path,
+            'filename': audit_filename
+        }
+        REPORTS[f"ofx_mirror_{report_id}"] = {
+            'path': mirror_path,
+            'filename': mirror_filename
+        }
+
+        sess['last_result'] = res
+        sess['last_report_id'] = report_id
+
+        return jsonify({
+            'success': True,
+            'report_id': report_id,
+            'kpis': res['kpis'],
+            'items': res['items']
+        })
+
+    except ValueError as ve:
+        return jsonify({'error': str(ve)}), 400
+    except Exception as e:
+        return jsonify({'error': f'Erro ao executar conciliação de taxas: {str(e)}'}), 500
+
+
+@app.route('/api/ofx/download-audit/<report_id>', methods=['GET'])
+def ofx_download_audit(report_id):
+    key = f"ofx_audit_{report_id}"
+    if key in REPORTS and os.path.exists(REPORTS[key]['path']):
+        return send_file(
+            REPORTS[key]['path'],
+            as_attachment=True,
+            download_name=REPORTS[key]['filename'],
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+    return jsonify({'error': 'Relatório de auditoria de taxas expirado ou não encontrado.'}), 404
+
+
+@app.route('/api/ofx/download-mirror/<report_id>', methods=['GET'])
+def ofx_download_mirror(report_id):
+    key = f"ofx_mirror_{report_id}"
+    if key in REPORTS and os.path.exists(REPORTS[key]['path']):
+        return send_file(
+            REPORTS[key]['path'],
+            as_attachment=True,
+            download_name=REPORTS[key]['filename'],
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+    return jsonify({'error': 'Espelho do extrato OFX expirado ou não encontrado.'}), 404
 
 
 if __name__ == '__main__':

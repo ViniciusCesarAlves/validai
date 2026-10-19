@@ -28,8 +28,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=20">
-    <link rel="stylesheet" href="/static/css/text_validator.css?v=16">
+    <link rel="stylesheet" href="/static/css/style.css?v=34">
+    <link rel="stylesheet" href="/static/css/text_validator.css?v=17">
 
     <!-- Dados Estruturados (Schema.org em JSON-LD) -->
     <script type="application/ld+json">
@@ -159,7 +159,7 @@
                             </a>
 
                             <!-- 3. Conciliação de Taxas e Extratos (.OFX) -->
-                            <a href="/conciliador-taxas" class="nav-dropdown-item" role="menuitem" data-upcoming="true">
+                            <a href="/conciliador-taxas" class="nav-dropdown-item" role="menuitem">
                                 <div class="nav-dropdown-item-icon">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <rect x="2" y="5" width="20" height="14" rx="2"/>
@@ -171,7 +171,7 @@
                                 <div class="nav-dropdown-item-content">
                                     <div class="nav-dropdown-item-header">
                                         <span class="nav-dropdown-item-title" data-i18n="module_ofx_title">Conciliação de Taxas e Extratos (.OFX)</span>
-                                        <span class="nav-dropdown-item-badge" data-i18n="badge_coming_soon">Em breve</span>
+                                        <span class="nav-dropdown-item-badge new-badge" data-i18n="badge_new">Novo</span>
                                     </div>
                                     <span class="nav-dropdown-item-subtitle" data-i18n="module_ofx_sub">Auditoria de maquininhas, PIX e marketplaces</span>
                                 </div>
@@ -281,7 +281,6 @@
                         <path class="moon-icon-path" d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646z"/>
                     </svg>
                 </button>
-                <span class="version-tag">v2.0</span>
             </div>
         </div>
     </header>
@@ -846,6 +845,39 @@
                         Você pode ativar opções para ignorar espaços extras no final das linhas, desconsiderar diferenças entre maiúsculas e minúsculas, pular linhas em branco e escolher entre destaque por palavra inteira ou caractere a caractere.
                     </div>
                 </details>
+
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>Qual a diferença entre os modos de exibição Rich Text, Redline e Plain Text?</span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        O modo <strong>Rich Text</strong> exibe o documento original e o documento novo lado a lado com rolagem sincronizada. O modo <strong>Redline (Unificado)</strong> funde as duas versões em uma única folha contínua marcando inserções em verde e exclusões tachadas em vermelho — ideal para revisão jurídica. Já o modo <strong>Plain Text</strong> compara linha a linha em fonte monoespaçada.
+                    </div>
+                </details>
+
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>Posso baixar um relatório em PDF com todas as diferenças grifadas?</span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        Sim. Após executar a comparação, basta clicar em <strong>Baixar Relatório em PDF (.pdf) com Alterações Destacadas</strong> para gerar um documento executivo pronto para compartilhar com clientes, gestores ou departamento jurídico.
+                    </div>
+                </details>
+            </div>
+
+            <div class="seo-faq-help-cta">
+                <div class="seo-faq-help-text">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <span>Ficou com dúvida de como usar?</span>
+                </div>
+                <a href="/como-usar" class="seo-faq-help-link">
+                    <span>Acessar página Como Usar</span>
+                    <span aria-hidden="true">→</span>
+                </a>
             </div>
         </section>
 
@@ -854,6 +886,7 @@
     <footer class="footer">
         <div class="container footer-content">
             <p data-i18n="footer_copyright">&copy; 2026 ValidAí. Todos os direitos reservados.</p>
+            <span class="version-tag" aria-hidden="true">v3.2</span>
         </div>
     </footer>
 

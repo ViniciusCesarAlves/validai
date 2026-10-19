@@ -28,8 +28,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=20">
-    <link rel="stylesheet" href="/static/css/guide.css?v=16">
+    <link rel="stylesheet" href="/static/css/style.css?v=32">
+    <link rel="stylesheet" href="/static/css/guide.css?v=18">
 
     <!-- Dados Estruturados (Schema.org em JSON-LD) -->
     <script type="application/ld+json">
@@ -159,7 +159,7 @@
                             </a>
 
                             <!-- 3. Conciliação de Taxas e Extratos (.OFX) -->
-                            <a href="/conciliador-taxas" class="nav-dropdown-item" role="menuitem" data-upcoming="true">
+                            <a href="/conciliador-taxas" class="nav-dropdown-item" role="menuitem">
                                 <div class="nav-dropdown-item-icon">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <rect x="2" y="5" width="20" height="14" rx="2"/>
@@ -171,7 +171,7 @@
                                 <div class="nav-dropdown-item-content">
                                     <div class="nav-dropdown-item-header">
                                         <span class="nav-dropdown-item-title" data-i18n="module_ofx_title">Conciliação de Taxas e Extratos (.OFX)</span>
-                                        <span class="nav-dropdown-item-badge" data-i18n="badge_coming_soon">Em breve</span>
+                                        <span class="nav-dropdown-item-badge new-badge" data-i18n="badge_new">Novo</span>
                                     </div>
                                     <span class="nav-dropdown-item-subtitle" data-i18n="module_ofx_sub">Auditoria de maquininhas, PIX e marketplaces</span>
                                 </div>
@@ -281,7 +281,6 @@
                         <path class="moon-icon-path" d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646z"/>
                     </svg>
                 </button>
-                <span class="version-tag">v2.0</span>
             </div>
         </div>
     </header>
@@ -289,9 +288,9 @@
     <main class="container main-content">
         <div class="guide-container">
 
-            <!-- Banner Hero de Apresentação com Toggle Button (Planilhas | Texto) -->
+            <!-- Banner Hero de Apresentação com Toggle Button (4 Ferramentas Ativas) -->
             <section class="guide-hero">
-                <!-- Toggle Button no canto superior direito -->
+                <!-- Seletor de Ferramentas / Navegação de Abas no Topo -->
                 <div class="guide-hero-toggle-wrap">
                     <div class="mode-toggle-pill" role="group" aria-label="Escolher Guia do Validador">
                         <button type="button" class="mode-btn active" id="btn-guide-planilhas" data-guide="planilhas" title="Ver guia do Validador de Planilhas">
@@ -300,7 +299,7 @@
                                 <line x1="3" y1="9" x2="21" y2="9"/>
                                 <line x1="9" y1="21" x2="9" y2="9"/>
                             </svg>
-                            <span data-i18n="guide_btn_planilhas">Validar Planilhas</span>
+                            <span data-i18n="guide_btn_planilhas">Validador Planilhas</span>
                         </button>
                         <button type="button" class="mode-btn" id="btn-guide-texto" data-guide="texto" title="Ver guia do Validador de Texto e Documentos">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -309,7 +308,24 @@
                                 <line x1="16" y1="13" x2="8" y2="13"/>
                                 <line x1="16" y1="17" x2="8" y2="17"/>
                             </svg>
-                            <span data-i18n="guide_btn_texto">Validar Texto</span>
+                            <span data-i18n="guide_btn_texto">Validador Texto</span>
+                        </button>
+                        <button type="button" class="mode-btn" id="btn-guide-cadastros" data-guide="cadastros" title="Ver guia do Higienizador de Cadastros">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <polyline points="16 11 18 13 22 9"/>
+                            </svg>
+                            <span data-i18n="guide_btn_cadastros">Higienizador de Cadastros</span>
+                        </button>
+                        <button type="button" class="mode-btn" id="btn-guide-xml" data-guide="xml" title="Ver guia do Conciliador de XML">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <polyline points="9 15 7 13 9 11"/>
+                                <polyline points="15 15 17 13 15 11"/>
+                            </svg>
+                            <span data-i18n="guide_btn_xml">Conciliador de XML (NFe/NFSe)</span>
                         </button>
                     </div>
                 </div>
@@ -399,6 +415,91 @@
                             <span data-i18n="guide_pill_text_modes">Modos e Opções de Leitura</span>
                         </a>
                         <a href="#sec-texto-dicas" class="guide-nav-pill-btn">
+                            <svg class="guide-pill-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 18h6"/>
+                                <path d="M10 22h4"/>
+                                <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/>
+                            </svg>
+                            <span data-i18n="guide_pill_tips">Dicas de Ouro</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Subtítulo e Atalhos: Modo Higienizador de Cadastros -->
+                <div id="hero-content-cadastros" style="display: none;">
+                    <p class="guide-hero-subtitle" data-i18n="guide_cadastros_sub">
+                        O Higienizador de Cadastros do ValidAí valida CPFs e CNPJs pela regra matemática oficial do Módulo 11 da Receita Federal, recupera zeros à esquerda apagados pelo Excel, padroniza e-mails, telefones e remove duplicados em poucos segundos.
+                    </p>
+
+                    <div class="guide-nav-pills">
+                        <a href="#sec-cadastros-conceito" class="guide-nav-pill-btn">
+                            <svg class="guide-pill-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <polyline points="16 11 18 13 22 9"/>
+                            </svg>
+                            <span data-i18n="guide_pill_cad_concept">O que é Higienização?</span>
+                        </a>
+                        <a href="#sec-cadastros-passos" class="guide-nav-pill-btn">
+                            <svg class="guide-pill-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="3" width="8" height="18" rx="2"/>
+                                <rect x="14" y="3" width="8" height="18" rx="2"/>
+                                <path d="m6 12 2-2-2-2"/>
+                                <path d="m18 12-2 2 2 2"/>
+                            </svg>
+                            <span data-i18n="guide_pill_cad_steps">Passo a Passo</span>
+                        </a>
+                        <a href="#sec-cadastros-regras" class="guide-nav-pill-btn">
+                            <svg class="guide-pill-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="m9 12 2 2 4-4"/>
+                            </svg>
+                            <span data-i18n="guide_pill_cad_rules">O que Detecta e Corrige?</span>
+                        </a>
+                        <a href="#sec-cadastros-dicas" class="guide-nav-pill-btn">
+                            <svg class="guide-pill-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 18h6"/>
+                                <path d="M10 22h4"/>
+                                <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/>
+                            </svg>
+                            <span data-i18n="guide_pill_tips">Dicas de Ouro</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Subtítulo e Atalhos: Modo Conciliador XML -->
+                <div id="hero-content-xml" style="display: none;">
+                    <p class="guide-hero-subtitle" data-i18n="guide_xml_sub">
+                        O Conciliador de Notas Fiscais (XML) cruza centenas de arquivos XML (NF-e, NFC-e, CT-e e NFS-e) contra sua planilha financeira do Excel em segundos, identificando notas omitidas, pagamentos sem nota e divergências de valores ou impostos.
+                    </p>
+
+                    <div class="guide-nav-pills">
+                        <a href="#sec-xml-conceito" class="guide-nav-pill-btn">
+                            <svg class="guide-pill-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                            </svg>
+                            <span data-i18n="guide_pill_xml_concept">Como Funciona o Cruzamento?</span>
+                        </a>
+                        <a href="#sec-xml-passos" class="guide-nav-pill-btn">
+                            <svg class="guide-pill-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="3" width="8" height="18" rx="2"/>
+                                <rect x="14" y="3" width="8" height="18" rx="2"/>
+                                <path d="m6 12 2-2-2-2"/>
+                                <path d="m18 12-2 2 2 2"/>
+                            </svg>
+                            <span data-i18n="guide_pill_xml_steps">Passo a Passo Fiscal</span>
+                        </a>
+                        <a href="#sec-xml-regras" class="guide-nav-pill-btn">
+                            <svg class="guide-pill-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="m9 12 2 2 4-4"/>
+                            </svg>
+                            <span data-i18n="guide_pill_xml_rules">O que é Auditado?</span>
+                        </a>
+                        <a href="#sec-xml-dicas" class="guide-nav-pill-btn">
                             <svg class="guide-pill-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M9 18h6"/>
                                 <path d="M10 22h4"/>
@@ -498,8 +599,18 @@
                             <p class="guide-step-desc" data-i18n="guide_sec2_step1_desc">
                                 Envie a <strong>Base Antiga</strong> (sua base de referência) e a <strong>Base Nova</strong> (o arquivo atualizado que você deseja conferir).
                             </p>
-                            <div class="guide-step-highlight" data-i18n="guide_sec2_step1_hl">
-                                Formatos aceitos: <strong>.xlsx, .xls ou .csv</strong> (até 100 MB).
+                            <div class="guide-step-highlight">
+                                <span class="guide-step-highlight-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                        <polyline points="14 2 14 8 20 8"/>
+                                        <line x1="8" y1="13" x2="16" y2="13"/>
+                                        <line x1="8" y1="17" x2="16" y2="17"/>
+                                    </svg>
+                                </span>
+                                <div class="guide-step-highlight-content" data-i18n="guide_sec2_step1_hl">
+                                    Formatos aceitos: <strong>.xlsx, .xls ou .csv</strong> (até 100 MB).
+                                </div>
                             </div>
                         </div>
 
@@ -509,8 +620,17 @@
                             <p class="guide-step-desc" data-i18n="guide_sec2_step2_desc">
                                 Selecione a coluna que identifica cada linha (ex: ID, CPF, Código). Se precisar, selecione colunas secundárias para refinar.
                             </p>
-                            <div class="guide-step-highlight" data-i18n="guide_sec2_step2_hl">
-                                O ValidAí já sugere automaticamente as colunas mais prováveis!
+                            <div class="guide-step-highlight">
+                                <span class="guide-step-highlight-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="7.5" cy="15.5" r="5.5"/>
+                                        <path d="m21 2-9.6 9.6"/>
+                                        <path d="m15.5 7.5 3 3L22 7l-3-3"/>
+                                    </svg>
+                                </span>
+                                <div class="guide-step-highlight-content" data-i18n="guide_sec2_step2_hl">
+                                    O ValidAí já sugere automaticamente as colunas mais prováveis!
+                                </div>
                             </div>
                         </div>
 
@@ -520,8 +640,23 @@
                             <p class="guide-step-desc" data-i18n="guide_sec2_step3_desc">
                                 O sistema reconhece colunas com nomes parecidos (ex: <em>Valor Total</em> e <em>Vlr_Total</em>). Você pode conferir e ajustar manualmente como quiser.
                             </p>
-                            <div class="guide-step-highlight" data-i18n="guide_sec2_step3_hl">
-                                Opções para ignorar diferenças de maiúsculas, espaços e formatar moedas (R$).
+                            <div class="guide-step-highlight">
+                                <span class="guide-step-highlight-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="4" y1="21" x2="4" y2="14"/>
+                                        <line x1="4" y1="10" x2="4" y2="3"/>
+                                        <line x1="12" y1="21" x2="12" y2="12"/>
+                                        <line x1="12" y1="8" x2="12" y2="3"/>
+                                        <line x1="20" y1="21" x2="20" y2="16"/>
+                                        <line x1="20" y1="12" x2="20" y2="3"/>
+                                        <line x1="1" y1="14" x2="7" y2="14"/>
+                                        <line x1="9" y1="8" x2="15" y2="8"/>
+                                        <line x1="17" y1="16" x2="23" y2="16"/>
+                                    </svg>
+                                </span>
+                                <div class="guide-step-highlight-content" data-i18n="guide_sec2_step3_hl">
+                                    Opções para ignorar diferenças de maiúsculas, espaços e formatar moedas (R$).
+                                </div>
                             </div>
                         </div>
 
@@ -531,8 +666,17 @@
                             <p class="guide-step-desc" data-i18n="guide_sec2_step4_desc">
                                 Veja na tela os KPIs gerais, a lista completa de células divergentes e a <strong>Sumarização Financeira</strong>.
                             </p>
-                            <div class="guide-step-highlight" data-i18n="guide_sec2_step4_hl">
-                                Baixe o <strong>Relatório Excel (.xlsx)</strong> com abas prontas e células pintadas!
+                            <div class="guide-step-highlight">
+                                <span class="guide-step-highlight-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="7 10 12 15 17 10"/>
+                                        <line x1="12" y1="15" x2="12" y2="3"/>
+                                    </svg>
+                                </span>
+                                <div class="guide-step-highlight-content" data-i18n="guide_sec2_step4_hl">
+                                    Baixe o <strong>Relatório Excel (.xlsx)</strong> com abas prontas e células pintadas!
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -815,8 +959,18 @@
                             <p class="guide-step-desc" data-i18n="guide_text_sec2_step1_desc">
                                 Coloque o <strong>Documento Original</strong> na caixa da esquerda e o <strong>Documento Novo</strong> na caixa da direita (ou cole os dois textos).
                             </p>
-                            <div class="guide-step-highlight" data-i18n="guide_text_sec2_step1_hl">
-                                Formatos aceitos: <strong>.pdf, .docx ou .txt</strong> (ou texto colado).
+                            <div class="guide-step-highlight">
+                                <span class="guide-step-highlight-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                        <polyline points="14 2 14 8 20 8"/>
+                                        <line x1="16" y1="13" x2="8" y2="13"/>
+                                        <line x1="16" y1="17" x2="8" y2="17"/>
+                                    </svg>
+                                </span>
+                                <div class="guide-step-highlight-content" data-i18n="guide_text_sec2_step1_hl">
+                                    Formatos aceitos: <strong>.pdf, .docx ou .txt</strong> (ou texto colado).
+                                </div>
                             </div>
                         </div>
 
@@ -826,8 +980,16 @@
                             <p class="guide-step-desc" data-i18n="guide_text_sec2_step2_desc">
                                 Selecione como prefere enxergar as alterações: <strong>Rich text</strong> (lado a lado), <strong>Redline</strong> (texto único unificado) ou <strong>Plain text</strong>.
                             </p>
-                            <div class="guide-step-highlight" data-i18n="guide_text_sec2_step2_hl">
-                                Você também pode trocar o modo depois que o resultado aparecer!
+                            <div class="guide-step-highlight">
+                                <span class="guide-step-highlight-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect width="18" height="18" x="3" y="3" rx="2"/>
+                                        <path d="M12 3v18"/>
+                                    </svg>
+                                </span>
+                                <div class="guide-step-highlight-content" data-i18n="guide_text_sec2_step2_hl">
+                                    Você também pode trocar o modo depois que o resultado aparecer!
+                                </div>
                             </div>
                         </div>
 
@@ -837,8 +999,16 @@
                             <p class="guide-step-desc" data-i18n="guide_text_sec2_step3_desc">
                                 Escolha se quer ignorar espaços extras, diferenças entre letras maiúsculas/minúsculas ou linhas em branco.
                             </p>
-                            <div class="guide-step-highlight" data-i18n="guide_text_sec2_step3_hl">
-                                O destaque por palavra já vem ativado por padrão para facilitar a leitura.
+                            <div class="guide-step-highlight">
+                                <span class="guide-step-highlight-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="m9 12 2 2 4-4"/>
+                                    </svg>
+                                </span>
+                                <div class="guide-step-highlight-content" data-i18n="guide_text_sec2_step3_hl">
+                                    O destaque por palavra já vem ativado por padrão para facilitar a leitura.
+                                </div>
                             </div>
                         </div>
 
@@ -848,8 +1018,17 @@
                             <p class="guide-step-desc" data-i18n="guide_text_sec2_step4_desc">
                                 Confira o <strong>Índice de Similaridade (%)</strong>, total de palavras inseridas/removidas e navegue pelas divergências.
                             </p>
-                            <div class="guide-step-highlight" data-i18n="guide_text_sec2_step4_hl">
-                                Baixe o <strong>Relatório em PDF (.pdf)</strong> pronto com todas as diferenças grifadas!
+                            <div class="guide-step-highlight">
+                                <span class="guide-step-highlight-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="7 10 12 15 17 10"/>
+                                        <line x1="12" y1="15" x2="12" y2="3"/>
+                                    </svg>
+                                </span>
+                                <div class="guide-step-highlight-content" data-i18n="guide_text_sec2_step4_hl">
+                                    Baixe o <strong>Relatório em PDF (.pdf)</strong> pronto com todas as diferenças grifadas!
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1036,16 +1215,929 @@
 
             </div>
 
+            <!-- ================================================================== -->
+            <!-- VISÃO 3: GUIA DO HIGIENIZADOR DE CADASTROS                         -->
+            <!-- ================================================================== -->
+            <div id="guide-view-cadastros" class="guide-view-container" style="display: none;">
+
+                <!-- SEÇÃO 1: O QUE É HIGIENIZAÇÃO DE CADASTROS -->
+                <section id="sec-cadastros-conceito" class="guide-section">
+                    <div class="guide-section-header">
+                        <div class="guide-section-icon-wrap">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <polyline points="16 11 18 13 22 9"/>
+                            </svg>
+                        </div>
+                        <div class="guide-section-title-wrap">
+                            <h2 data-i18n="guide_cad_sec1_title">1. O que é Higienização e Padronização de Cadastros?</h2>
+                            <p data-i18n="guide_cad_sec1_sub">Transforme cadastros desorganizados e com erros em bases de dados limpas, estruturadas e confiáveis para qualquer sistema.</p>
+                        </div>
+                    </div>
+
+                    <div class="guide-analogy-box">
+                        <div class="guide-analogy-title">
+                            <svg class="guide-pill-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 18h6"/>
+                                <path d="M10 22h4"/>
+                                <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/>
+                            </svg>
+                            <span data-i18n="guide_cad_sec1_analogy_title">Pense nos Correios tentando entregar encomendas com endereços incompletos!</span>
+                        </div>
+                        <p class="guide-analogy-text" data-i18n="guide_cad_sec1_analogy_p1">
+                            Imagine uma transportadora tentando entregar milhares de pacotes com <strong>endereços sem CEP</strong>, <strong>telefones sem DDD</strong> ou <strong>CPFs com dígitos trocados</strong>. O resultado é atraso, custos com devoluções e clientes insatisfeitos.
+                        </p>
+                        <p class="guide-analogy-text" style="margin-top: 10px;" data-i18n="guide_cad_sec1_analogy_p2">
+                            Nos sistemas da sua empresa (como <strong>ERP</strong>, <strong>CRM</strong> ou <strong>sistemas fiscais</strong>) acontece a mesma coisa: cadastros sujos causam <strong>notas fiscais rejeitadas na SEFAZ</strong>, <strong>e-mails que caem no spam (bounces)</strong>, <strong>falhas no envio de WhatsApp</strong> e retrabalho manual diário. O Higienizador do ValidAí resolve tudo isso automaticamente em poucos segundos!
+                        </p>
+
+                        <div class="guide-example-pill-row">
+                            <span class="guide-example-pill"><span class="pill-tag" data-i18n="guide_sec1_pill_example">Caso de Uso:</span> <span data-i18n="guide_cad_pill_erp">Importação para ERP / CRM</span></span>
+                            <span class="guide-example-pill"><span class="pill-tag" data-i18n="guide_sec1_pill_example">Caso de Uso:</span> <span data-i18n="guide_cad_pill_mkt">Campanhas de E-mail / WhatsApp</span></span>
+                            <span class="guide-example-pill"><span class="pill-tag" data-i18n="guide_sec1_pill_example">Caso de Uso:</span> <span data-i18n="guide_cad_pill_sup">Cadastro de Clientes e Fornecedores</span></span>
+                            <span class="guide-example-pill"><span class="pill-tag" data-i18n="guide_sec1_pill_example">Caso de Uso:</span> <span data-i18n="guide_cad_pill_rh">Auditoria de Folha e RH</span></span>
+                            <span class="guide-example-pill"><span class="pill-tag" data-i18n="guide_sec1_pill_example">Caso de Uso:</span> <span data-i18n="guide_cad_pill_conf">Conformidade e Higienização</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Cards conceituais explicativos sob a analogia -->
+                    <div class="guide-concept-cards-grid">
+                        <div class="guide-concept-card">
+                            <div class="guide-concept-card-header">
+                                <div class="guide-concept-card-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="m9 12 2 2 4-4"/>
+                                    </svg>
+                                </div>
+                                <h3 class="guide-concept-card-title" data-i18n="guide_cad_concept1_title">Validação Matemática Real (Módulo 11 da Receita)</h3>
+                            </div>
+                            <p class="guide-concept-card-desc" data-i18n="guide_cad_concept1_desc">
+                                O ValidAí <strong>não faz apenas contagem de caracteres</strong>. O motor calcula os dois dígitos verificadores (DV) ponderados oficiais do CPF e CNPJ. Sequências inventadas como <code>111.111.111-11</code> ou números adulterados são identificados imediatamente como inválidos.
+                            </p>
+                        </div>
+
+                        <div class="guide-concept-card">
+                            <div class="guide-concept-card-header">
+                                <div class="guide-concept-card-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"/>
+                                    </svg>
+                                </div>
+                                <h3 class="guide-concept-card-title" data-i18n="guide_cad_concept2_title">Padronização e Recuperação de Zeros à Esquerda</h3>
+                            </div>
+                            <p class="guide-concept-card-desc" data-i18n="guide_cad_concept2_desc">
+                                Quando o Excel abre um CPF iniciado em zero (ex: <code>012.345.678-90</code>), ele costuma apagar o zero inicial. O sistema detecta documentos com 9, 10, 12 ou 13 dígitos, reconstrói os zeros suprimidos, valida pelo Módulo 11 e padroniza para máscara oficial ou formato numérico.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SEÇÃO 2: PASSO A PASSO COMPLETO -->
+                <section id="sec-cadastros-passos" class="guide-section">
+                    <div class="guide-section-header">
+                        <div class="guide-section-icon-wrap">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                                <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                                <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                                <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                            </svg>
+                        </div>
+                        <div class="guide-section-title-wrap">
+                            <h2 data-i18n="guide_cad_sec2_title">2. Passo a Passo da Higienização de Cadastros</h2>
+                            <p data-i18n="guide_cad_sec2_sub">Como carregar, auditar e exportar sua base limpa em 4 etapas diretas.</p>
+                        </div>
+                    </div>
+
+                    <div class="guide-steps-grid">
+                        <!-- Passo 1 -->
+                        <div class="guide-step-card">
+                            <span class="guide-step-badge" data-i18n="guide_sec2_step1_badge">Passo 1</span>
+                            <h3 class="guide-step-title" data-i18n="guide_cad_step1_title">Carregar a Planilha de Cadastros</h3>
+                            <p class="guide-step-desc" data-i18n="guide_cad_step1_desc">
+                                Arraste ou selecione sua planilha de clientes, fornecedores, leads ou colaboradores nos formatos <strong>.xlsx</strong>, <strong>.xls</strong> ou <strong>.csv</strong>. O sistema processa tudo na memória com total privacidade.
+                            </p>
+                            <div class="guide-step-highlight">
+                                <span class="guide-step-highlight-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
+                                        <path d="M9 18h6"/>
+                                        <path d="M10 22h4"/>
+                                    </svg>
+                                </span>
+                                <div class="guide-step-highlight-content">
+                                    <strong>Dica:</strong> <span data-i18n="guide_cad_step1_tip">Não é necessário formatar ou renomear as colunas da planilha antes do envio.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Passo 2 -->
+                        <div class="guide-step-card">
+                            <span class="guide-step-badge" data-i18n="guide_sec2_step2_badge">Passo 2</span>
+                            <h3 class="guide-step-title" data-i18n="guide_cad_step2_title">Mapear Colunas da Base</h3>
+                            <p class="guide-step-desc" data-i18n="guide_cad_step2_desc">
+                                O sistema reconhece automaticamente os nomes das colunas de <strong>CPF/CNPJ</strong>, <strong>Nome</strong>, <strong>E-mail</strong> e <strong>Telefone</strong>. Você pode confirmar ou trocar as colunas conforme a estrutura do seu arquivo.
+                            </p>
+                            <div class="guide-step-highlight">
+                                <span class="guide-step-highlight-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                        <path d="m9 12 2 2 4-4"/>
+                                    </svg>
+                                </span>
+                                <div class="guide-step-highlight-content">
+                                    <strong>Segurança:</strong> <span data-i18n="guide_cad_step2_tip">Se selecionar uma coluna incompatível (ex: ID numérico de 5 dígitos para CPF), o sistema alerta na hora.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Passo 3 -->
+                        <div class="guide-step-card">
+                            <span class="guide-step-badge" data-i18n="guide_sec2_step3_badge">Passo 3</span>
+                            <h3 class="guide-step-title" data-i18n="guide_cad_step3_title">Configurar Regras e Duplicados</h3>
+                            <p class="guide-step-desc" data-i18n="guide_cad_step3_desc">
+                                Escolha o formato dos documentos (com máscara ou apenas números), ative a conversão de nomes para Title Case, padronize e-mails e selecione as chaves de busca para duplicidade (Documento, E-mail ou Telefone).
+                            </p>
+                            <div class="guide-step-highlight">
+                                <span class="guide-step-highlight-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                                    </svg>
+                                </span>
+                                <div class="guide-step-highlight-content">
+                                    <strong>Expurgo:</strong> <span data-i18n="guide_cad_step3_tip">Ative a opção "Remover Linhas Duplicadas" para manter apenas o primeiro registro na base limpa.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Passo 4 -->
+                        <div class="guide-step-card">
+                            <span class="guide-step-badge" data-i18n="guide_sec2_step4_badge">Passo 4</span>
+                            <h3 class="guide-step-title" data-i18n="guide_cad_step4_title">Analisar Painel e Baixar Arquivos</h3>
+                            <p class="guide-step-desc" data-i18n="guide_cad_step4_desc">
+                                Visualize o percentual de integridade, total de cadastros válidos e baixe dois arquivos: a <strong>Base 100% Higienizada</strong> (pronta para importação) e o <strong>Relatório de Auditoria</strong> com células pintadas.
+                            </p>
+                            <div class="guide-step-highlight">
+                                <span class="guide-step-highlight-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                        <polyline points="14 2 14 8 20 8"/>
+                                        <line x1="8" y1="13" x2="16" y2="13"/>
+                                        <line x1="8" y1="17" x2="16" y2="17"/>
+                                    </svg>
+                                </span>
+                                <div class="guide-step-highlight-content">
+                                    <strong>Excel:</strong> <span data-i18n="guide_cad_step4_tip">O relatório traz 3 abas completas com resumo executivo e ações recomendadas.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SEÇÃO 3: O QUE DETECTA E CORRIGE -->
+                <section id="sec-cadastros-regras" class="guide-section">
+                    <div class="guide-section-header">
+                        <div class="guide-section-icon-wrap">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="m9 12 2 2 4-4"/>
+                            </svg>
+                        </div>
+                        <div class="guide-section-title-wrap">
+                            <h2 data-i18n="guide_cad_sec3_title">3. O que o Higienizador Detecta e Corrige?</h2>
+                            <p data-i18n="guide_cad_sec3_sub">Todas as regras de validação e saneamento com exemplos comparativos de antes e depois.</p>
+                        </div>
+                    </div>
+
+                    <div class="guide-rules-grid">
+                        <!-- Regra 1: CPF / CNPJ Módulo 11 -->
+                        <div class="guide-rule-card">
+                            <div class="guide-rule-header">
+                                <div class="guide-rule-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="4" width="18" height="16" rx="2"/>
+                                        <line x1="7" y1="8" x2="17" y2="8"/>
+                                        <line x1="7" y1="12" x2="17" y2="12"/>
+                                        <line x1="7" y1="16" x2="12" y2="16"/>
+                                    </svg>
+                                </div>
+                                <h3 class="guide-rule-name" data-i18n="guide_cad_rule1_name">Validação de CPF e CNPJ (Módulo 11)</h3>
+                            </div>
+                            <p class="guide-rule-desc" data-i18n="guide_cad_rule1_desc">
+                                Valida matematicamente os dois dígitos verificadores (DV) da Receita Federal e rejeita sequências fictícias repetidas.
+                            </p>
+                            <div class="guide-rule-example">
+                                <div class="guide-rule-example-item valid">
+                                    <span>✔</span> <span>042.819.330-91 (Cálculo do DV aprovado)</span>
+                                </div>
+                                <div class="guide-rule-example-item invalid">
+                                    <span>✘</span> <span>123.456.789-00 (Dígito verificador incorreto)</span>
+                                </div>
+                                <div class="guide-rule-example-item invalid">
+                                    <span>✘</span> <span>222.222.222-22 (Sequência repetida inválida)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Regra 2: Recuperação de Zeros à Esquerda -->
+                        <div class="guide-rule-card">
+                            <div class="guide-rule-header">
+                                <div class="guide-rule-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="23 4 23 10 17 10"/>
+                                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                                    </svg>
+                                </div>
+                                <h3 class="guide-rule-name" data-i18n="guide_cad_rule2_name">Recuperação de Zeros à Esquerda</h3>
+                            </div>
+                            <p class="guide-rule-desc" data-i18n="guide_cad_rule2_desc">
+                                Reconstrói documentos onde o Excel apagou o zero inicial ao converter a célula para tipo número.
+                            </p>
+                            <div class="guide-rule-example">
+                                <div class="guide-rule-example-item valid">
+                                    <span>✔</span> <span>014.582.910-33 (Zero inicial restaurado e validado)</span>
+                                </div>
+                                <div class="guide-rule-example-item invalid">
+                                    <span>✘</span> <span>1458291033 (No Excel: 10 dígitos vira inválido sem reparo)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Regra 3: Typos e Validação de E-mails -->
+                        <div class="guide-rule-card">
+                            <div class="guide-rule-header">
+                                <div class="guide-rule-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                        <polyline points="22,6 12,13 2,6"/>
+                                    </svg>
+                                </div>
+                                <h3 class="guide-rule-name" data-i18n="guide_cad_rule3_name">Detecção de Typos em E-mails</h3>
+                            </div>
+                            <p class="guide-rule-desc" data-i18n="guide_cad_rule3_desc">
+                                Remove espaços acidentais, valida a estrutura RFC e detecta erros de digitação comuns em domínios populares.
+                            </p>
+                            <div class="guide-rule-example">
+                                <div class="guide-rule-example-item valid">
+                                    <span>✔</span> <span>contato@empresa.com.br (Estrutura e sintaxe OK)</span>
+                                </div>
+                                <div class="guide-rule-example-item invalid">
+                                    <span>✘</span> <span>joao@gmial.com → Alerta: typo (@gmail.com)</span>
+                                </div>
+                                <div class="guide-rule-example-item invalid">
+                                    <span>✘</span> <span>maria@uol.con.br → Alerta: extensão (.com.br)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Regra 4: Telefones e WhatsApp -->
+                        <div class="guide-rule-card">
+                            <div class="guide-rule-header">
+                                <div class="guide-rule-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="guide-rule-name" data-i18n="guide_cad_rule4_name">Telefones, Celulares e WhatsApp</h3>
+                            </div>
+                            <p class="guide-rule-desc" data-i18n="guide_cad_rule4_desc">
+                                Valida DDDs reais no Brasil, exige 9º dígito obrigatório em celulares e oferece exportação com máscara ou formato WhatsApp.
+                            </p>
+                            <div class="guide-rule-example">
+                                <div class="guide-rule-example-item valid">
+                                    <span>✔</span> <span>(11) 98765-4321 (Máscara padrão brasileira)</span>
+                                </div>
+                                <div class="guide-rule-example-item valid">
+                                    <span>✔</span> <span>5511987654321 (Formato direto para disparos WhatsApp)</span>
+                                </div>
+                                <div class="guide-rule-example-item invalid">
+                                    <span>✘</span> <span>(00) 8765-4321 (DDD 00 não existe no Brasil)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Regra 5: Nomes e Razão Social em Title Case -->
+                        <div class="guide-rule-card">
+                            <div class="guide-rule-header">
+                                <div class="guide-rule-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 7V4h16v3"/>
+                                        <line x1="9" y1="20" x2="15" y2="20"/>
+                                        <line x1="12" y1="4" x2="12" y2="20"/>
+                                    </svg>
+                                </div>
+                                <h3 class="guide-rule-name" data-i18n="guide_cad_rule5_name">Nomes e Razão Social em Title Case</h3>
+                            </div>
+                            <p class="guide-rule-desc" data-i18n="guide_cad_rule5_desc">
+                                Converte nomes em caixa alta para Title Case elegante, mantendo partículas em minúsculo e siglas empresariais preservadas.
+                            </p>
+                            <div class="guide-rule-example">
+                                <div class="guide-rule-example-item valid">
+                                    <span>✔</span> <span>Mariana de Souza e Silva (Partículas preservadas)</span>
+                                </div>
+                                <div class="guide-rule-example-item valid">
+                                    <span>✔</span> <span>Comércio de Ferragens Alfa LTDA (Preserva siglas)</span>
+                                </div>
+                                <div class="guide-rule-example-item invalid">
+                                    <span>✘</span> <span>MARIANA DE SOUZA E SILVA (Texto gritado em caixa alta)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Regra 6: Identificação de Duplicados -->
+                        <div class="guide-rule-card">
+                            <div class="guide-rule-header">
+                                <div class="guide-rule-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="16 18 22 12 16 6"/>
+                                        <polyline points="8 6 2 12 8 18"/>
+                                    </svg>
+                                </div>
+                                <h3 class="guide-rule-name" data-i18n="guide_cad_rule6_name">Identificação Inteligente de Duplicados</h3>
+                            </div>
+                            <p class="guide-rule-desc" data-i18n="guide_cad_rule6_desc">
+                                Cruza os registros da planilha identificando repetições por CPF/CNPJ, E-mail ou Telefone e apontando a linha da primeira ocorrência.
+                            </p>
+                            <div class="guide-rule-example">
+                                <div class="guide-rule-example-item valid">
+                                    <span>✔</span> <span>1º Registro mantido como íntegro na base</span>
+                                </div>
+                                <div class="guide-rule-example-item invalid">
+                                    <span>✘</span> <span>Linha 142 duplicada: mesmo CPF já cadastrado na linha 15</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SEÇÃO 4: DICAS DE OURO -->
+                <section id="sec-cadastros-dicas" class="guide-section">
+                    <div class="guide-section-header">
+                        <div class="guide-section-icon-wrap">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 18h6"/>
+                                <path d="M10 22h4"/>
+                                <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/>
+                            </svg>
+                        </div>
+                        <div class="guide-section-title-wrap">
+                            <h2 data-i18n="guide_cad_sec4_title">4. Dicas de Ouro para Bases de Cadastros</h2>
+                            <p data-i18n="guide_cad_sec4_sub">Práticas recomendadas para manter seus dados cadastrais sempre prontos para auditorias e integrações.</p>
+                        </div>
+                    </div>
+
+                    <div class="guide-tips-grid">
+                        <div class="guide-tip-card">
+                            <div class="guide-tip-num">1</div>
+                            <div class="guide-tip-content">
+                                <h3 data-i18n="guide_cad_tip1_title">Células blindadas como Texto no Excel</h3>
+                                <p data-i18n="guide_cad_tip1_desc">
+                                    O arquivo de <strong>Base Higienizada</strong> exportado pelo ValidAí é configurado com formatação explícita de Texto (<code>@</code>). Isso impede que o Excel converta CPFs iniciados com zero em números ao abrir a planilha novamente!
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="guide-tip-card">
+                            <div class="guide-tip-num">2</div>
+                            <div class="guide-tip-content">
+                                <h3 data-i18n="guide_cad_tip2_title">Estratégia para registros duplicados</h3>
+                                <p data-i18n="guide_cad_tip2_desc">
+                                    Se você for importar a base para um CRM que não aceita e-mails ou CPFs repetidos, marque a opção <strong>"Remover Linhas Duplicadas na Base Higienizada"</strong>. A base limpa fica sem repetições e a aba de auditoria mantém o histórico do que foi retirado.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="guide-tip-card">
+                            <div class="guide-tip-num">3</div>
+                            <div class="guide-tip-content">
+                                <h3 data-i18n="guide_cad_tip3_title">Encaminhe a Aba 3 para o time de suporte</h3>
+                                <p data-i18n="guide_cad_tip3_desc">
+                                    O Relatório de Auditoria contém a aba <strong>"Inconsistências e Duplicados"</strong> com a coluna <em>Ação Recomendada</em> pronta (ex: "Solicitar novo CPF ao cliente", "Corrigir provedor do e-mail"). Basta enviar essa aba para a equipe operacional corrigir.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="guide-tip-card">
+                            <div class="guide-tip-num">4</div>
+                            <div class="guide-tip-content">
+                                <h3 data-i18n="guide_cad_tip4_title">Validação prévia a disparos em massa</h3>
+                                <p data-i18n="guide_cad_tip4_desc">
+                                    Antes de subir listas para disparos de e-mail marketing (RD Station, Mailchimp) ou régua de WhatsApp, faça a validação no ValidAí. Isso evita que seu domínio caia em listas de bloqueio (blacklists) por envios a caixas inexistentes.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CTA FINAL CADASTROS -->
+                <section class="guide-cta-card">
+                    <h3 data-i18n="guide_cta_cad_title">Pronto para limpar e auditar sua base de cadastros?</h3>
+                    <p data-i18n="guide_cta_cad_desc">Valide CPFs, CNPJs, e-mails e remova duplicados da sua planilha agora mesmo com total segurança e precisão matemática.</p>
+                    <a href="/validador-cadastros" class="btn-guide-cta">
+                        <span data-i18n="guide_cta_cad_btn">Ir para o Higienizador de Cadastros</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12 5 19 12 12 19"/>
+                        </svg>
+                    </a>
+                </section>
+
+            </div>
+
+            <!-- ================================================================== -->
+            <!-- VISÃO 4: GUIA DO CONCILIADOR DE XML DE NOTAS FISCAIS               -->
+            <!-- ================================================================== -->
+            <div id="guide-view-xml" class="guide-view-container" style="display: none;">
+
+                <!-- SEÇÃO 1: COMO FUNCIONA O CRUZAMENTO XML VS PLANILHA -->
+                <section id="sec-xml-conceito" class="guide-section">
+                    <div class="guide-section-header">
+                        <div class="guide-section-icon-wrap">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <polyline points="9 15 7 13 9 11"/>
+                                <polyline points="15 15 17 13 15 11"/>
+                            </svg>
+                        </div>
+                        <div class="guide-section-title-wrap">
+                            <h2 data-i18n="guide_xml_sec1_title">1. Como Funciona o Cruzamento de XMLs (NFe/NFSe) vs. Planilha?</h2>
+                            <p data-i18n="guide_xml_sec1_sub">Automatize a conferência fiscal mensal batendo os documentos oficiais da SEFAZ contra o contas a pagar ou faturamento da empresa.</p>
+                        </div>
+                    </div>
+
+                    <div class="guide-analogy-box">
+                        <div class="guide-analogy-title">
+                            <svg class="guide-pill-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 18h6"/>
+                                <path d="M10 22h4"/>
+                                <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/>
+                            </svg>
+                            <span data-i18n="guide_xml_sec1_analogy_title">Pense no fechamento de mês fiscal e contas a pagar!</span>
+                        </div>
+                        <p class="guide-analogy-text" data-i18n="guide_xml_sec1_analogy_p1">
+                            Todo final de mês, a área financeira e contábil recebe uma pasta compactada com centenas de arquivos XML baixados da <strong>SEFAZ</strong>, prefeituras ou portais de fornecedores. Do outro lado, existe o relatório do <strong>ERP ou extrato financeiro</strong> com os valores que foram programados para pagamento.
+                        </p>
+                        <p class="guide-analogy-text" style="margin-top: 10px;" data-i18n="guide_xml_sec1_analogy_p2">
+                            Conferir nota por nota manualmente para checar se o <strong>valor bate</strong>, se o <strong>CNPJ do fornecedor está certo</strong> e se há <strong>notas emitidas que ninguém lançou</strong> leva dias e gera multas fiscais pesadas. O Conciliador do ValidAí faz esse batimento em lote em segundos, apontando centavo por centavo com precisão cirúrgica!
+                        </p>
+
+                        <div class="guide-example-pill-row">
+                            <span class="guide-example-pill"><span class="pill-tag" data-i18n="guide_sec1_pill_example">Caso de Uso:</span> <span data-i18n="guide_xml_pill_erp">XMLs da SEFAZ vs Relatório do ERP</span></span>
+                            <span class="guide-example-pill"><span class="pill-tag" data-i18n="guide_sec1_pill_example">Caso de Uso:</span> <span data-i18n="guide_xml_pill_ap">Auditoria de Contas a Pagar e Receber</span></span>
+                            <span class="guide-example-pill"><span class="pill-tag" data-i18n="guide_sec1_pill_example">Caso de Uso:</span> <span data-i18n="guide_xml_pill_tax">Conferência de Impostos e Retenções</span></span>
+                            <span class="guide-example-pill"><span class="pill-tag" data-i18n="guide_sec1_pill_example">Caso de Uso:</span> <span data-i18n="guide_xml_pill_omiss">Detecção de Notas Não Lançadas (Omissões)</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Cards conceituais explicativos sob a analogia -->
+                    <div class="guide-concept-cards-grid">
+                        <div class="guide-concept-card">
+                            <div class="guide-concept-card-header">
+                                <div class="guide-concept-card-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                        <polyline points="14 2 14 8 20 8"/>
+                                    </svg>
+                                </div>
+                                <h3 class="guide-concept-card-title" data-i18n="guide_xml_concept1_title">Leitura Nativa de Tags NFe, NFCe, CTe e NFSe</h3>
+                            </div>
+                            <p class="guide-concept-card-desc" data-i18n="guide_xml_concept1_desc">
+                                Você não precisa converter XMLs para PDF nem usar sistemas intermediários. O motor do ValidAí extrai diretamente as tags oficiais do padrão nacional (como <code>&lt;nNF&gt;</code>, <code>&lt;vNF&gt;</code>, <code>&lt;CNPJ&gt;</code> e tributos destacados).
+                            </p>
+                        </div>
+
+                        <div class="guide-concept-card">
+                            <div class="guide-concept-card-header">
+                                <div class="guide-concept-card-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="11" cy="11" r="8"/>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                                    </svg>
+                                </div>
+                                <h3 class="guide-concept-card-title" data-i18n="guide_xml_concept2_title">Pareamento Inteligente e Suporte a Parcelas</h3>
+                            </div>
+                            <p class="guide-concept-card-desc" data-i18n="guide_xml_concept2_desc">
+                                O sistema normaliza números com zeros à esquerda (ex: <code>00001046</code> no XML casa com <code>1046</code> na planilha) e, caso a nota fiscal tenha sido lançada em parcelas no financeiro, o motor agrupa as linhas e compara a soma contra o valor total da nota.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SEÇÃO 2: PASSO A PASSO DA CONCILIAÇÃO FISCAL -->
+                <section id="sec-xml-passos" class="guide-section">
+                    <div class="guide-section-header">
+                        <div class="guide-section-icon-wrap">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                                <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                                <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                                <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                            </svg>
+                        </div>
+                        <div class="guide-section-title-wrap">
+                            <h2 data-i18n="guide_xml_sec2_title">2. Passo a Passo da Conciliação Fiscal</h2>
+                            <p data-i18n="guide_xml_sec2_sub">Como carregar seus XMLs, alinhar a planilha e auditar as contas em 4 etapas.</p>
+                        </div>
+                    </div>
+
+                    <div class="guide-steps-grid">
+                        <!-- Passo 1 -->
+                        <div class="guide-step-card">
+                            <span class="guide-step-badge" data-i18n="guide_sec2_step1_badge">Passo 1</span>
+                            <h3 class="guide-step-title" data-i18n="guide_xml_step1_title">Carregar Pacote de XMLs e Planilha</h3>
+                            <p class="guide-step-desc" data-i18n="guide_xml_step1_desc">
+                                Arraste o arquivo <strong>.zip</strong> com todas as notas fiscais emitidas no período de um lado e a planilha financeira (.xlsx, .xls ou .csv) do outro. Você também pode enviar múltiplos arquivos .xml soltos.
+                            </p>
+                            <div class="guide-step-highlight">
+                                <span class="guide-step-highlight-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="16.5" y1="9.4" x2="7.55" y2="4.24"/>
+                                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                                        <line x1="12" y1="22.08" x2="12" y2="12"/>
+                                    </svg>
+                                </span>
+                                <div class="guide-step-highlight-content">
+                                    <strong>Praticidade:</strong> <span data-i18n="guide_xml_step1_tip">Pode enviar o .zip direto com subpastas organizadas por data ou filial.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Passo 2 -->
+                        <div class="guide-step-card">
+                            <span class="guide-step-badge" data-i18n="guide_sec2_step2_badge">Passo 2</span>
+                            <h3 class="guide-step-title" data-i18n="guide_xml_step2_title">Mapear Colunas da Planilha Financeira</h3>
+                            <p class="guide-step-desc" data-i18n="guide_xml_step2_desc">
+                                Confirme as colunas da sua planilha correspondentes ao <strong>Número da Nota (&lt;nNF&gt;)</strong>, <strong>Valor Total (&lt;vNF&gt;)</strong>, <strong>CNPJ do Fornecedor</strong> e <strong>Total de Impostos</strong>.
+                            </p>
+                            <div class="guide-step-highlight">
+                                <span class="guide-step-highlight-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                    </svg>
+                                </span>
+                                <div class="guide-step-highlight-content">
+                                    <strong>Blindagem:</strong> <span data-i18n="guide_xml_step2_tip">Se escolher uma coluna de texto no lugar do valor monetário, o sistema alerta antes de rodar.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Passo 3 -->
+                        <div class="guide-step-card">
+                            <span class="guide-step-badge" data-i18n="guide_sec2_step3_badge">Passo 3</span>
+                            <h3 class="guide-step-title" data-i18n="guide_xml_step3_title">Ajustar Tolerância e Diretrizes</h3>
+                            <p class="guide-step-desc" data-i18n="guide_xml_step3_desc">
+                                Defina a tolerância para arredondamentos de centavos (R$ 0,05, exato R$ 0,00 ou R$ 0,50), ative o tratamento de zeros à esquerda no número da nota e marque se deseja auditar omissões e impostos.
+                            </p>
+                            <div class="guide-step-highlight">
+                                <span class="guide-step-highlight-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="4" y1="21" x2="4" y2="14"/>
+                                        <line x1="4" y1="10" x2="4" y2="3"/>
+                                        <line x1="12" y1="21" x2="12" y2="12"/>
+                                        <line x1="12" y1="8" x2="12" y2="3"/>
+                                        <line x1="20" y1="21" x2="20" y2="16"/>
+                                        <line x1="20" y1="12" x2="20" y2="3"/>
+                                        <line x1="1" y1="14" x2="7" y2="14"/>
+                                        <line x1="9" y1="8" x2="15" y2="8"/>
+                                        <line x1="17" y1="16" x2="23" y2="16"/>
+                                    </svg>
+                                </span>
+                                <div class="guide-step-highlight-content">
+                                    <strong>Tolerância:</strong> <span data-i18n="guide_xml_step3_tip">Evita falsos alertas causados por pequenas dízimas de centavos em cálculos fiscais.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Passo 4 -->
+                        <div class="guide-step-card">
+                            <span class="guide-step-badge" data-i18n="guide_sec2_step4_badge">Passo 4</span>
+                            <h3 class="guide-step-title" data-i18n="guide_xml_step4_title">Auditar Resultados e Baixar Relatórios</h3>
+                            <p class="guide-step-desc" data-i18n="guide_xml_step4_desc">
+                                Analise o painel com total faturado nos XMLs vs. lançado no Excel, a diferença líquida e baixe o <strong>Relatório de Conciliação em Excel</strong> (4 abas com células pintadas) e a <strong>Planilha Espelho dos XMLs</strong>.
+                            </p>
+                            <div class="guide-step-highlight">
+                                <span class="guide-step-highlight-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </span>
+                                <div class="guide-step-highlight-content">
+                                    <strong>Espelho:</strong> <span data-i18n="guide_xml_step4_tip">A planilha espelho tabula todas as tags dos XMLs em colunas estruturadas no Excel.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SEÇÃO 3: O QUE É AUDITADO NO CRUZAMENTO -->
+                <section id="sec-xml-regras" class="guide-section">
+                    <div class="guide-section-header">
+                        <div class="guide-section-icon-wrap">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="m9 12 2 2 4-4"/>
+                            </svg>
+                        </div>
+                        <div class="guide-section-title-wrap">
+                            <h2 data-i18n="guide_xml_sec3_title">3. O que é Auditado no Cruzamento XML vs. Excel?</h2>
+                            <p data-i18n="guide_xml_sec3_sub">Conheça todos os batimentos realizados pelo motor fiscal e as tags extraídas automaticamente.</p>
+                        </div>
+                    </div>
+
+                    <div class="guide-rules-grid">
+                        <!-- Batimento 1: Valor Total -->
+                        <div class="guide-rule-card">
+                            <div class="guide-rule-header">
+                                <div class="guide-rule-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="12" y1="1" x2="12" y2="23"/>
+                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                    </svg>
+                                </div>
+                                <h3 class="guide-rule-name" data-i18n="guide_xml_rule1_name">Divergência de Valor Total (&lt;vNF&gt;)</h3>
+                            </div>
+                            <p class="guide-rule-desc" data-i18n="guide_xml_rule1_desc">
+                                Compara o valor faturado no documento fiscal emitido contra o montante lançado no contas a pagar ou extrato da planilha.
+                            </p>
+                            <div class="guide-rule-example">
+                                <div class="guide-rule-example-item valid">
+                                    <span>✔</span> <span>XML R$ 2.450,00 vs Planilha R$ 2.450,00 (Conciliado)</span>
+                                </div>
+                                <div class="guide-rule-example-item invalid">
+                                    <span>✘</span> <span>XML R$ 2.450,00 vs Planilha R$ 2.400,00 (Diferença de R$ 50,00 pintada em vermelho)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Batimento 2: XML Sem Lançamento no Excel -->
+                        <div class="guide-rule-card">
+                            <div class="guide-rule-header">
+                                <div class="guide-rule-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="12" y1="8" x2="12" y2="12"/>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                    </svg>
+                                </div>
+                                <h3 class="guide-rule-name" data-i18n="guide_xml_rule2_name">Notas Emitidas Sem Lançamento (Omissões)</h3>
+                            </div>
+                            <p class="guide-rule-desc" data-i18n="guide_xml_rule2_desc">
+                                Identifica notas fiscais geradas na SEFAZ pelo fornecedor contra a sua empresa que ainda não foram lançadas no financeiro.
+                            </p>
+                            <div class="guide-rule-example">
+                                <div class="guide-rule-example-item valid">
+                                    <span>✔</span> <span>Todas as notas faturadas localizadas no financeiro</span>
+                                </div>
+                                <div class="guide-rule-example-item invalid">
+                                    <span>✘</span> <span>NF 8841 (R$ 8.920,00): presente no XML mas ausente na planilha</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Batimento 3: Planilha Sem XML -->
+                        <div class="guide-rule-card">
+                            <div class="guide-rule-header">
+                                <div class="guide-rule-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                        <line x1="9" y1="15" x2="15" y2="15"/>
+                                    </svg>
+                                </div>
+                                <h3 class="guide-rule-name" data-i18n="guide_xml_rule3_name">Lançamentos Financeiros Sem Arquivo XML</h3>
+                            </div>
+                            <p class="guide-rule-desc" data-i18n="guide_xml_rule3_desc">
+                                Aponta pagamentos registrados na planilha que não possuem nenhum arquivo XML comprobatório correspondente no pacote.
+                            </p>
+                            <div class="guide-rule-example">
+                                <div class="guide-rule-example-item valid">
+                                    <span>✔</span> <span>Todo pagamento possui respectivo documento fiscal anexado</span>
+                                </div>
+                                <div class="guide-rule-example-item invalid">
+                                    <span>✘</span> <span>Linha 63 do Excel (R$ 1.200,00): sem XML correspondente</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Batimento 4: Divergência de CNPJ -->
+                        <div class="guide-rule-card">
+                            <div class="guide-rule-header">
+                                <div class="guide-rule-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="2" y="7" width="20" height="14" rx="2"/>
+                                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                                    </svg>
+                                </div>
+                                <h3 class="guide-rule-name" data-i18n="guide_xml_rule4_name">Conferência de CNPJ (Emitente / Filial)</h3>
+                            </div>
+                            <p class="guide-rule-desc" data-i18n="guide_xml_rule4_desc">
+                                Valida se o CNPJ lançado no contas a pagar confere com o emitente do XML, detectando confusões entre Matriz e Filial.
+                            </p>
+                            <div class="guide-rule-example">
+                                <div class="guide-rule-example-item valid">
+                                    <span>✔</span> <span>CNPJ do XML (12.345.678/0001-90) bate com a planilha</span>
+                                </div>
+                                <div class="guide-rule-example-item invalid">
+                                    <span>✘</span> <span>XML faturado na filial (.../0002-71) mas lançado no CNPJ matriz</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Batimento 5: Impostos e Tributos -->
+                        <div class="guide-rule-card">
+                            <div class="guide-rule-header">
+                                <div class="guide-rule-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 2v20"/>
+                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                    </svg>
+                                </div>
+                                <h3 class="guide-rule-name" data-i18n="guide_xml_rule5_name">Batimento de Impostos (ICMS/IPI/PIS/ISS)</h3>
+                            </div>
+                            <p class="guide-rule-desc" data-i18n="guide_xml_rule5_desc">
+                                Compara a soma dos tributos destacados no XML com os valores de retenção fiscal informados na planilha financeira.
+                            </p>
+                            <div class="guide-rule-example">
+                                <div class="guide-rule-example-item valid">
+                                    <span>✔</span> <span>Impostos no XML R$ 380,00 batem com retenções na planilha</span>
+                                </div>
+                                <div class="guide-rule-example-item invalid">
+                                    <span>✘</span> <span>XML destaca R$ 380,00 mas na planilha consta R$ 0,00 (risco fiscal)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Batimento 6: Agrupamento de Parcelas -->
+                        <div class="guide-rule-card">
+                            <div class="guide-rule-header">
+                                <div class="guide-rule-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="8" y1="6" x2="21" y2="6"/>
+                                        <line x1="8" y1="12" x2="21" y2="12"/>
+                                        <line x1="8" y1="18" x2="21" y2="18"/>
+                                    </svg>
+                                </div>
+                                <h3 class="guide-rule-name" data-i18n="guide_xml_rule6_name">Tratamento de Notas Parceladas</h3>
+                            </div>
+                            <p class="guide-rule-desc" data-i18n="guide_xml_rule6_desc">
+                                Quando uma mesma nota fiscal foi faturada em múltiplas parcelas (ex: 30/60/90 dias) em linhas separadas da planilha.
+                            </p>
+                            <div class="guide-rule-example">
+                                <div class="guide-rule-example-item valid">
+                                    <span>✔</span> <span>Soma das 3 parcelas (R$ 1.000 + R$ 1.000 + R$ 1.000) = XML R$ 3.000,00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mini-bloco de Tags do XML Lidas Automaticamente -->
+                    <div class="guide-xml-tags-card">
+                        <div class="guide-xml-tags-header">
+                            <h3 data-i18n="guide_xml_tags_title">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="16 18 22 12 16 6"/>
+                                    <polyline points="8 6 2 12 8 18"/>
+                                </svg>
+                                Tags Oficiais do Schema XML Extraídas Automaticamente
+                            </h3>
+                            <span class="guide-xml-tags-badge" data-i18n="guide_xml_tags_badge">Padrão Nacional SEFAZ / ABRASF</span>
+                        </div>
+                        <div class="guide-xml-tags-grid">
+                            <div class="guide-xml-tag-item">
+                                <code class="guide-xml-tag-code">&lt;nNF&gt; / &lt;nCT&gt;</code>
+                                <div class="guide-xml-tag-info">
+                                    <span class="guide-xml-tag-name">Número da Nota Fiscal</span>
+                                    <span class="guide-xml-tag-detail">Chave principal de cruzamento</span>
+                                </div>
+                            </div>
+                            <div class="guide-xml-tag-item">
+                                <code class="guide-xml-tag-code">&lt;vNF&gt; / &lt;vLiq&gt;</code>
+                                <div class="guide-xml-tag-info">
+                                    <span class="guide-xml-tag-name">Valor Total da Nota</span>
+                                    <span class="guide-xml-tag-detail">Batimento financeiro de centavos</span>
+                                </div>
+                            </div>
+                            <div class="guide-xml-tag-item">
+                                <code class="guide-xml-tag-code">&lt;dhEmi&gt; / &lt;dEmi&gt;</code>
+                                <div class="guide-xml-tag-info">
+                                    <span class="guide-xml-tag-name">Data de Emissão</span>
+                                    <span class="guide-xml-tag-detail">Convertida para padrão DD/MM/AAAA</span>
+                                </div>
+                            </div>
+                            <div class="guide-xml-tag-item">
+                                <code class="guide-xml-tag-code">&lt;CNPJ&gt; / &lt;CPF&gt;</code>
+                                <div class="guide-xml-tag-info">
+                                    <span class="guide-xml-tag-name">Emitente e Destinatário</span>
+                                    <span class="guide-xml-tag-detail">Validação de fornecedor e filial</span>
+                                </div>
+                            </div>
+                            <div class="guide-xml-tag-item">
+                                <code class="guide-xml-tag-code">&lt;chNFe&gt;</code>
+                                <div class="guide-xml-tag-info">
+                                    <span class="guide-xml-tag-name">Chave de Acesso (44 dígitos)</span>
+                                    <span class="guide-xml-tag-detail">Identificador oficial na SEFAZ</span>
+                                </div>
+                            </div>
+                            <div class="guide-xml-tag-item">
+                                <code class="guide-xml-tag-code">&lt;ICMSTot&gt;</code>
+                                <div class="guide-xml-tag-info">
+                                    <span class="guide-xml-tag-name">Tributos Destacados</span>
+                                    <span class="guide-xml-tag-detail">Soma de ICMS, ST, IPI, PIS, COFINS, ISS</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SEÇÃO 4: DICAS DE OURO FISCAIS -->
+                <section id="sec-xml-dicas" class="guide-section">
+                    <div class="guide-section-header">
+                        <div class="guide-section-icon-wrap">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 18h6"/>
+                                <path d="M10 22h4"/>
+                                <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/>
+                            </svg>
+                        </div>
+                        <div class="guide-section-title-wrap">
+                            <h2 data-i18n="guide_xml_sec4_title">4. Dicas de Ouro para Conciliação de XMLs</h2>
+                            <p data-i18n="guide_xml_sec4_sub">Práticas recomendadas para agilizar o fechamento contábil e auditoria financeira.</p>
+                        </div>
+                    </div>
+
+                    <div class="guide-tips-grid">
+                        <div class="guide-tip-card">
+                            <div class="guide-tip-num">1</div>
+                            <div class="guide-tip-content">
+                                <h3 data-i18n="guide_xml_tip1_title">Envie lotes inteiros compactados em .ZIP</h3>
+                                <p data-i18n="guide_xml_tip1_desc">
+                                    Não perca tempo descompactando arquivos ou convertendo para PDF. Basta selecionar ou arrastar o arquivo <strong>.zip</strong> com todas as notas baixadas do portal da SEFAZ ou do sistema de mensageria fiscal.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="guide-tip-card">
+                            <div class="guide-tip-num">2</div>
+                            <div class="guide-tip-content">
+                                <h3 data-i18n="guide_xml_tip2_title">Zeros à esquerda no número da nota</h3>
+                                <p data-i18n="guide_xml_tip2_desc">
+                                    Mantenha a regra <em>"Ignorar Zeros à Esquerda no Número da Nota"</em> ativada. Isso faz com que <code>00004580</code> no XML bata automaticamente com <code>4580</code> ou <code>NF 4580</code> da sua planilha financeira.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="guide-tip-card">
+                            <div class="guide-tip-num">3</div>
+                            <div class="guide-tip-content">
+                                <h3 data-i18n="guide_xml_tip3_title">Baixe a Planilha Espelho dos XMLs</h3>
+                                <p data-i18n="guide_xml_tip3_desc">
+                                    Precisa de uma tabela com todas as notas extraídas para enviar à contabilidade? Clique em <strong>"Baixar Espelho dos XMLs (.xlsx)"</strong>: ela gera uma planilha com todas as tags fiscais colunadas e organizadas.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="guide-tip-card">
+                            <div class="guide-tip-num">4</div>
+                            <div class="guide-tip-content">
+                                <h3 data-i18n="guide_xml_tip4_title">Auditoria de 4 abas para a equipe fiscal</h3>
+                                <p data-i18n="guide_xml_tip4_desc">
+                                    O Relatório de Auditoria Fiscal traz abas isoladas para <strong>"Planilha Auditada"</strong> (com células de valor e CNPJ pintadas em vermelho) e <strong>"XMLs Sem Lançamento"</strong>, ideal para cobrar notas que foram esquecidas no faturamento.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CTA FINAL XML -->
+                <section class="guide-cta-card">
+                    <h3 data-i18n="guide_cta_xml_title">Pronto para conciliar suas Notas Fiscais em segundos?</h3>
+                    <p data-i18n="guide_cta_xml_desc">Cruze o lote de XMLs contra sua planilha de Contas a Pagar ou Faturamento agora mesmo e detecte omissões e divergências na hora.</p>
+                    <a href="/validador-xml" class="btn-guide-cta">
+                        <span data-i18n="guide_cta_xml_btn">Ir para o Conciliador de Notas Fiscais</span>
+                        <svg width="18" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12 5 19 12 12 19"/>
+                        </svg>
+                    </a>
+                </section>
+
+            </div>
+
         </div>
     </main>
 
     <footer class="footer">
         <div class="container footer-content">
             <p data-i18n="footer_copyright">&copy; 2026 ValidAí. Todos os direitos reservados.</p>
+            <span class="version-tag" aria-hidden="true">v3.2</span>
         </div>
     </footer>
 
-    <!-- Script de Alternância de Tema Claro/Escuro e Toggle Planilhas/Texto -->
+    <!-- Script de Alternância de Tema Claro/Escuro e Toggle entre as 4 Ferramentas -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var themeToggleBtn = document.getElementById('theme-toggle-btn');
@@ -1089,45 +2181,70 @@
                 });
             }
 
-            // Alternância entre Guia de Planilhas e Guia de Texto
-            var btnGuidePlanilhas = document.getElementById('btn-guide-planilhas');
-            var btnGuideTexto = document.getElementById('btn-guide-texto');
-            var viewPlanilhas = document.getElementById('guide-view-planilhas');
-            var viewTexto = document.getElementById('guide-view-texto');
-            var heroPlanilhas = document.getElementById('hero-content-planilhas');
-            var heroTexto = document.getElementById('hero-content-texto');
+            // Alternância entre as 4 Ferramentas (Planilhas | Texto | Cadastros | XML)
+            var GUIDE_MODES = ['planilhas', 'texto', 'cadastros', 'xml'];
 
-            function setGuideMode(mode) {
-                if (mode === 'texto') {
-                    btnGuideTexto.classList.add('active');
-                    btnGuidePlanilhas.classList.remove('active');
-                    viewPlanilhas.style.display = 'none';
-                    viewTexto.style.display = 'flex';
-                    heroPlanilhas.style.display = 'none';
-                    heroTexto.style.display = 'block';
-                } else {
-                    btnGuidePlanilhas.classList.add('active');
-                    btnGuideTexto.classList.remove('active');
-                    viewTexto.style.display = 'none';
-                    viewPlanilhas.style.display = 'flex';
-                    heroTexto.style.display = 'none';
-                    heroPlanilhas.style.display = 'block';
+            function setGuideMode(mode, updateUrl) {
+                if (GUIDE_MODES.indexOf(mode) === -1) {
+                    mode = 'planilhas';
+                }
+
+                GUIDE_MODES.forEach(function(m) {
+                    var btn = document.getElementById('btn-guide-' + m);
+                    var view = document.getElementById('guide-view-' + m);
+                    var hero = document.getElementById('hero-content-' + m);
+                    if (m === mode) {
+                        if (btn) btn.classList.add('active');
+                        if (view) view.style.display = 'flex';
+                        if (hero) hero.style.display = 'block';
+                    } else {
+                        if (btn) btn.classList.remove('active');
+                        if (view) view.style.display = 'none';
+                        if (hero) hero.style.display = 'none';
+                    }
+                });
+
+                if (updateUrl && window.history && window.history.replaceState) {
+                    try {
+                        var currentUrl = new URL(window.location.href);
+                        currentUrl.searchParams.set('ferramenta', mode);
+                        currentUrl.searchParams.delete('modo');
+                        window.history.replaceState(null, '', currentUrl.pathname + '?' + currentUrl.searchParams.toString() + window.location.hash);
+                    } catch(e) {}
                 }
             }
 
-            if (btnGuidePlanilhas && btnGuideTexto) {
-                btnGuidePlanilhas.addEventListener('click', function() {
-                    setGuideMode('planilhas');
-                });
-                btnGuideTexto.addEventListener('click', function() {
-                    setGuideMode('texto');
-                });
-            }
+            // Leitura inicial de URL: parâmetros ?ferramenta= ou ?modo= ou hashes #cadastros, #xml, etc.
+            var initialMode = 'planilhas';
+            try {
+                var urlParams = new URLSearchParams(window.location.search);
+                var paramTool = urlParams.get('ferramenta') || urlParams.get('modo');
+                var hash = (window.location.hash || '').toLowerCase();
 
-            // Verifica se a URL pede modo=texto diretamente
-            if (window.location.search.indexOf('modo=texto') !== -1 || window.location.hash === '#texto') {
-                setGuideMode('texto');
-            }
+                if (paramTool) {
+                    var p = paramTool.toLowerCase();
+                    if (GUIDE_MODES.indexOf(p) !== -1) initialMode = p;
+                    else if (p === 'text') initialMode = 'texto';
+                    else if (p === 'cadastro' || p === 'higienizador' || p === 'cadastros') initialMode = 'cadastros';
+                    else if (p === 'nfe' || p === 'notas' || p === 'xml') initialMode = 'xml';
+                } else if (hash) {
+                    if (hash.indexOf('cadastros') !== -1) initialMode = 'cadastros';
+                    else if (hash.indexOf('xml') !== -1) initialMode = 'xml';
+                    else if (hash.indexOf('texto') !== -1) initialMode = 'texto';
+                    else if (hash.indexOf('planilhas') !== -1) initialMode = 'planilhas';
+                }
+            } catch(e) {}
+
+            setGuideMode(initialMode, false);
+
+            GUIDE_MODES.forEach(function(m) {
+                var btn = document.getElementById('btn-guide-' + m);
+                if (btn) {
+                    btn.addEventListener('click', function() {
+                        setGuideMode(m, true);
+                    });
+                }
+            });
         });
     </script>
 </body>

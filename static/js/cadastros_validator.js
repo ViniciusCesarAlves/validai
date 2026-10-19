@@ -16,6 +16,7 @@
     const filenameDisplay = document.getElementById('cadastros-filename-display');
     const filesizeDisplay = document.getElementById('cadastros-filesize-display');
     const btnRead = document.getElementById('btn-read-cadastros');
+    const btnTryExample = document.getElementById('btn-cadastros-try-example');
     const uploadAlert = document.getElementById('cadastros-upload-alert');
     const uploadAlertMsg = document.getElementById('cadastros-upload-alert-msg');
 
@@ -155,6 +156,60 @@
         if (fileMeta) fileMeta.style.display = 'inline-flex';
         dropZone.classList.add('file-loaded');
         btnRead.disabled = false;
+    }
+
+    // Testar Exemplo de Base Cadastral
+    if (btnTryExample) {
+        btnTryExample.addEventListener('click', async () => {
+            clearUploadError();
+            btnTryExample.disabled = true;
+            const originalHtml = btnTryExample.innerHTML;
+            btnTryExample.innerHTML = '<span class="spinner" style="display: inline-block;"></span> Carregando Exemplo...';
+
+            try {
+                const res = await fetch('/api/cadastros/load-example', {
+                    method: 'POST'
+                });
+                const data = await res.json();
+
+                if (!res.ok || data.error) {
+                    showUploadError(data.error || 'Falha ao carregar base cadastral de exemplo.');
+                    return;
+                }
+
+                currentSessionId = data.session_id;
+                window.cadastrosSampleData = data.sample_data || [];
+
+                // Atualiza dropzone visual com o arquivo de exemplo
+                if (filenameDisplay) filenameDisplay.textContent = data.filename || 'Base_Clientes_Para_Higienizar.xlsx';
+                if (filesizeDisplay) filesizeDisplay.textContent = '12.8 KB';
+                if (fileMeta) fileMeta.style.display = 'inline-flex';
+                if (dropZone) dropZone.classList.add('file-loaded');
+                if (btnRead) btnRead.disabled = false;
+
+                // Preenche resumo do Passo 2
+                infoFilename.textContent = data.filename;
+                infoRows.textContent = `${Number(data.total_rows).toLocaleString('pt-BR')} linhas`;
+                infoCols.textContent = `${data.total_cols} colunas`;
+
+                // Popula selects de mapeamento
+                populateSelect(selectColDoc, data.cols, data.suggested.col_doc);
+                populateSelect(selectColName, data.cols, data.suggested.col_name);
+                populateSelect(selectColEmail, data.cols, data.suggested.col_email);
+                populateSelect(selectColPhone, data.cols, data.suggested.col_phone);
+
+                // Alterna para Passo 2 com rolagem suave
+                stepUpload.style.display = 'none';
+                stepConfig.style.display = 'block';
+                window.scrollTo({ top: stepConfig.offsetTop - 80, behavior: 'smooth' });
+
+            } catch (err) {
+                showUploadError('Erro de conexão ao carregar exemplo de cadastros.');
+            } finally {
+                btnTryExample.disabled = false;
+                btnTryExample.innerHTML = originalHtml;
+            }
+        });
     }
 
     // Leitura inicial de cabeçalhos
@@ -466,11 +521,11 @@
         items.forEach(item => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td style="text-align: center; font-weight: 600;">${item.row}</td>
+                <td style="text-align: center; white-space: nowrap;"><span class="badge-line">${item.row}</span></td>
                 <td><strong>${escapeHtml(item.name || '-')}</strong></td>
-                <td><code class="code-pill code-danger">${escapeHtml(item.original || '(vazio)')}</code></td>
-                <td>${item.cleaned ? `<code class="code-pill">${escapeHtml(item.cleaned)}</code>` : '<span style="color:#94a3af;">-</span>'}</td>
-                <td><span class="badge-audit" style="color: var(--danger);">${escapeHtml(item.reason)}</span></td>
+                <td><span class="key-code text-danger" style="background: rgba(239, 68, 68, 0.1);">${escapeHtml(item.original || '(vazio)')}</span></td>
+                <td>${item.cleaned ? `<span class="key-code text-success" style="background: rgba(34, 197, 94, 0.1);">${escapeHtml(item.cleaned)}</span>` : '<span style="color:#94a3af;">-</span>'}</td>
+                <td><span class="status-badge-diff">${escapeHtml(item.reason)}</span></td>
             `;
             tbodyDocs.appendChild(tr);
         });
@@ -488,8 +543,8 @@
             const linesStr = item.lines.join(', ');
             tr.innerHTML = `
                 <td><strong>${escapeHtml(item.column)}</strong></td>
-                <td><code class="code-pill code-warning">${escapeHtml(item.value)}</code></td>
-                <td style="text-align: center;"><span class="tab-btn-badge" style="background: rgba(245, 158, 11, 0.15); color: #d97706;">${item.count}x</span></td>
+                <td><span class="key-code">${escapeHtml(item.value)}</span></td>
+                <td style="text-align: center; white-space: nowrap;"><span class="status-badge-warning">${item.count}x</span></td>
                 <td><span style="font-size: 12.5px; font-weight: 600; color: var(--text-muted);">Linhas: ${linesStr}</span></td>
                 <td>${escapeHtml(item.sample_name || '-')}</td>
             `;
@@ -507,11 +562,11 @@
         items.forEach(item => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td style="text-align: center; font-weight: 600;">${item.row}</td>
+                <td style="text-align: center; white-space: nowrap;"><span class="badge-line">${item.row}</span></td>
                 <td><strong>${escapeHtml(item.name || '-')}</strong></td>
-                <td><span class="badge-ready" style="font-size: 11px;">${item.type}</span></td>
-                <td><code class="code-pill" style="color: #ea580c; background: rgba(234, 88, 12, 0.1);">${escapeHtml(item.original || '(vazio)')}</code></td>
-                <td><span style="font-size: 12.5px; font-weight: 600; color: #ea580c;">${escapeHtml(item.issue)}</span></td>
+                <td style="text-align: center; white-space: nowrap;"><span class="status-badge-info">${item.type}</span></td>
+                <td><span class="key-code">${escapeHtml(item.original || '(vazio)')}</span></td>
+                <td><span class="status-badge-warning">${escapeHtml(item.issue)}</span></td>
                 <td>${item.suggestion ? `<span style="font-size: 12.5px; font-weight: 700; color: #16a34a;">💡 ${escapeHtml(item.suggestion)}</span>` : '<span style="color:#94a3af;">-</span>'}</td>
             `;
             tbodyContacts.appendChild(tr);
@@ -547,8 +602,8 @@
             const tr = document.createElement('tr');
             const tdLine = document.createElement('td');
             tdLine.style.textAlign = 'center';
-            tdLine.style.fontWeight = '600';
-            tdLine.textContent = r._row_num;
+            tdLine.style.whiteSpace = 'nowrap';
+            tdLine.innerHTML = `<span class="badge-line">${r._row_num}</span>`;
             tr.appendChild(tdLine);
 
             cols.forEach(c => {

@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="ofx_page_title">{{ seo.title }}</title>
+    <meta name="description" content="{{ seo.description }}">
+    <meta name="robots" content="{{ seo.robots }}">
+    <link rel="canonical" href="https://validai.app.br{{ request.path }}">
+
+    <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
+    <meta property="og:title" content="{{ seo.title }}">
+    <meta property="og:description" content="{{ seo.description }}">
+    <meta property="og:url" content="https://validai.app.br{{ request.path }}">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="{{ seo.og_image }}">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:site_name" content="ValidAí">
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ seo.title }}">
+    <meta name="twitter:description" content="{{ seo.description }}">
+    <meta name="twitter:image" content="{{ seo.og_image }}">
+
+    <link rel="icon" type="image/png" href="/static/images/logo.png?v=3">
+    
+    <!-- Google Fonts: Outfit e Montserrat -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/static/css/style.css?v=34">
+
+    <!-- Dados Estruturados (Schema.org em JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": ["WebApplication", "SoftwareApplication"],
+      "name": "ValidAí - Conciliador de Taxas e Extratos (.OFX vs Vendas)",
+      "url": "https://validai.app.br/conciliador-taxas",
+      "description": "Cruze extratos bancários e de maquininhas (.OFX) contra seu relatório de vendas do PDV/ERP. Audite taxas cobradas, detecte cobranças a maior e vendas não repassadas.",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "All",
+      "inLanguage": "pt-BR",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "BRL"
+      },
+      "featureList": [
+        "Conciliação de Taxas e Extratos (.OFX vs Relatório de Vendas PDV/ERP)",
+        "Detecção de Cobranças a Maior e Taxas Abusivas de Maquininhas",
+        "Auditoria de Vendas Não Repassadas e Pendências de Crédito",
+        "Conciliador de Notas Fiscais (XML NFe/NFSe vs Planilha Financeira Excel)",
+        "Higienizador de Cadastros (CPF, CNPJ, E-mail e Duplicados)"
+      ]
+    }
+    </script>
+
+    <!-- Anti-flicker e Leitura Instantânea de Tema e Idioma -->
+    <script>
+        (function() {
+            try {
+                var lang = localStorage.getItem('validai_lang') || 'pt';
+                document.documentElement.setAttribute('lang', lang === 'pt' ? 'pt-BR' : (lang === 'es' ? 'es-ES' : 'en-US'));
+                var theme = localStorage.getItem('splitc_theme');
+                if (theme === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    document.documentElement.classList.add('dark-theme');
+                    document.addEventListener('DOMContentLoaded', function() {
+                        if (document.body) {
+                            document.body.classList.add('dark-theme');
+                        }
+                    });
+                }
+            } catch(e) {}
+        })();
+    </script>
+    <script src="/static/js/i18n.js?v=6" defer></script>
+</head>
+<body>
+
+    <!-- Header com Navegação e Logo Oficial ValidAí -->
+    <header class="navbar">
+        <div class="container nav-content">
+            <div class="header-left-group">
+                <a href="/" class="header-brand-link" title="ValidAí - Início">
+                    <img src="/static/images/logo.png?v=3" alt="ValidAí Logo" class="brand-logo brand-logo-light" width="144" height="42" fetchpriority="high" decoding="async">
+                    <img src="/static/images/logo-white.png?v=3" alt="ValidAí Logo" class="brand-logo brand-logo-dark" width="144" height="42" loading="lazy" decoding="async">
+                </a>
+
+                <!-- Navegação Principal -->
+                <nav class="nav-menu" aria-label="Navegação Principal">
+                    <a href="/" class="nav-menu-link">
+                        <svg class="nav-menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="3" y1="9" x2="21" y2="9"/>
+                            <line x1="9" y1="21" x2="9" y2="9"/>
+                        </svg>
+                        <span data-i18n="nav_sheets">Validador Planilhas</span>
+                    </a>
+                    <a href="/validador-texto" class="nav-menu-link">
+                        <svg class="nav-menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                            <line x1="10" y1="9" x2="8" y2="9"/>
+                        </svg>
+                        <span data-i18n="nav_text">Validador Texto</span>
+                    </a>
+
+                    <!-- Menu Dropdown: Mais Validadores (Com Conciliador de Taxas Ativo) -->
+                    <div class="nav-dropdown-wrapper" id="nav-solutions-dropdown">
+                        <button type="button" class="nav-menu-link nav-dropdown-btn active" id="nav-solutions-btn" aria-haspopup="true" aria-expanded="false" aria-label="Abrir menu de mais validadores" title="Mais Validadores">
+                            <svg class="nav-menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                                <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                                <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                                <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                            </svg>
+                            <span data-i18n="nav_solutions">Mais Validadores</span>
+                            <svg class="nav-dropdown-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </button>
+                        <div class="nav-dropdown-menu" id="nav-solutions-menu" role="menu" aria-label="Mais Validadores">
+                            <!-- 1. Higienizador de Cadastros -->
+                            <a href="/validador-cadastros" class="nav-dropdown-item" role="menuitem">
+                                <div class="nav-dropdown-item-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="9" cy="7" r="4"/>
+                                        <polyline points="16 11 18 13 22 9"/>
+                                    </svg>
+                                </div>
+                                <div class="nav-dropdown-item-content">
+                                    <div class="nav-dropdown-item-header">
+                                        <span class="nav-dropdown-item-title" data-i18n="module_cadastros_title">Higienizador de Cadastros</span>
+                                    </div>
+                                    <span class="nav-dropdown-item-subtitle" data-i18n="module_cadastros_sub">Validação de CPF/CNPJ, e-mails e duplicados</span>
+                                </div>
+                            </a>
+
+                            <!-- 2. Conciliador de Notas Fiscais (XML) -->
+                            <a href="/validador-xml" class="nav-dropdown-item" role="menuitem">
+                                <div class="nav-dropdown-item-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                        <polyline points="14 2 14 8 20 8"/>
+                                        <polyline points="9 15 7 13 9 11"/>
+                                        <polyline points="15 15 17 13 15 11"/>
+                                    </svg>
+                                </div>
+                                <div class="nav-dropdown-item-content">
+                                    <div class="nav-dropdown-item-header">
+                                        <span class="nav-dropdown-item-title" data-i18n="module_xml_title">Conciliador de Notas Fiscais (XML)</span>
+                                    </div>
+                                    <span class="nav-dropdown-item-subtitle" data-i18n="module_xml_sub">Cruzamento de XMLs (NFe/NFSe) vs. Excel</span>
+                                </div>
+                            </a>
+
+                            <!-- 3. Conciliação de Taxas e Extratos (.OFX) (PÁGINA ATIVA) -->
+                            <a href="/conciliador-taxas" class="nav-dropdown-item active-page" role="menuitem">
+                                <div class="nav-dropdown-item-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="2" y="5" width="20" height="14" rx="2"/>
+                                        <line x1="2" y1="10" x2="22" y2="10"/>
+                                        <circle cx="7" cy="15" r="1.5"/>
+                                        <line x1="12" y1="15" x2="17" y2="15"/>
+                                    </svg>
+                                </div>
+                                <div class="nav-dropdown-item-content">
+                                    <div class="nav-dropdown-item-header">
+                                        <span class="nav-dropdown-item-title" data-i18n="module_ofx_title">Conciliação de Taxas e Extratos (.OFX)</span>
+                                        <span class="nav-dropdown-item-badge current-badge" data-i18n="badge_active">Ativo</span>
+                                    </div>
+                                    <span class="nav-dropdown-item-subtitle" data-i18n="module_ofx_sub">Auditoria de maquininhas, PIX e marketplaces</span>
+                                </div>
+                            </a>
+
+                            <!-- 4. Auditoria de Folha e RH -->
+                            <a href="/auditoria-rh" class="nav-dropdown-item" role="menuitem" data-upcoming="true">
+                                <div class="nav-dropdown-item-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="2" y="7" width="20" height="14" rx="2"/>
+                                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                                        <circle cx="12" cy="12" r="2"/>
+                                    </svg>
+                                </div>
+                                <div class="nav-dropdown-item-content">
+                                    <div class="nav-dropdown-item-header">
+                                        <span class="nav-dropdown-item-title" data-i18n="module_rh_title">Auditoria de Folha e RH</span>
+                                        <span class="nav-dropdown-item-badge" data-i18n="badge_coming_soon">Em breve</span>
+                                    </div>
+                                    <span class="nav-dropdown-item-subtitle" data-i18n="module_rh_sub">Batimento de folha de pagamento e benefícios</span>
+                                </div>
+                            </a>
+
+                            <!-- 5. Comparador de JSON / APIs -->
+                            <a href="/validador-json" class="nav-dropdown-item" role="menuitem" data-upcoming="true">
+                                <div class="nav-dropdown-item-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="16 18 22 12 16 6"/>
+                                        <polyline points="8 6 2 12 8 18"/>
+                                        <line x1="14" y1="4" x2="10" y2="20"/>
+                                    </svg>
+                                </div>
+                                <div class="nav-dropdown-item-content">
+                                    <div class="nav-dropdown-item-header">
+                                        <span class="nav-dropdown-item-title" data-i18n="module_json_title">Comparador de JSON / APIs</span>
+                                        <span class="nav-dropdown-item-badge" data-i18n="badge_coming_soon">Em breve</span>
+                                    </div>
+                                    <span class="nav-dropdown-item-subtitle" data-i18n="module_json_sub">Diferenças estruturais entre payloads e objetos</span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+
+            <div class="header-right-actions">
+                <a href="/como-usar" class="nav-menu-link" title="Guia e Ajuda">
+                    <svg class="nav-menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <span data-i18n="nav_how_to_use">Como usar?</span>
+                </a>
+
+                <!-- Dropdown de Idiomas (PT / ES / EN) -->
+                <div class="lang-dropdown-wrapper" id="lang-dropdown-wrapper">
+                    <button type="button" class="lang-toggle-btn" id="lang-toggle-btn" aria-haspopup="true" aria-expanded="false" aria-label="Selecionar idioma" title="Idioma / Language">
+                        <svg class="lang-globe-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="2" y1="12" x2="22" y2="12"/>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                        </svg>
+                        <span class="lang-current-code" id="lang-current-code">PT</span>
+                        <svg class="lang-arrow-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </button>
+                    <div class="lang-dropdown-menu" id="lang-dropdown-menu" role="menu" aria-label="Opções de Idioma">
+                        <button type="button" class="lang-option active" data-lang="pt" role="menuitem">
+                            <span class="lang-flag">🇧🇷</span>
+                            <span class="lang-name">Português</span>
+                            <span class="lang-badge">PT</span>
+                        </button>
+                        <button type="button" class="lang-option" data-lang="es" role="menuitem">
+                            <span class="lang-flag">🇪🇸</span>
+                            <span class="lang-name">Español</span>
+                            <span class="lang-badge">ES</span>
+                        </button>
+                        <button type="button" class="lang-option" data-lang="en" role="menuitem">
+                            <span class="lang-flag">🇺🇸</span>
+                            <span class="lang-name">English</span>
+                            <span class="lang-badge">EN</span>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="button" class="theme-toggle-btn" id="theme-toggle-btn" title="Alternar tema claro/escuro" aria-label="Alternar tema claro ou escuro" data-i18n-title="nav_toggle_theme">
+                    <svg class="theme-icon-svg" width="19" height="19" viewBox="0 0 24 24">
+                        <defs>
+                            <linearGradient id="theme-grad-ofx" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#6AE099"/>
+                                <stop offset="100%" stop-color="#4FD580"/>
+                            </linearGradient>
+                        </defs>
+                        <g class="sun-icon">
+                            <circle cx="12" cy="12" r="4.5"/>
+                            <line x1="12" y1="2" x2="12" y2="4"/>
+                            <line x1="12" y1="20" x2="12" y2="22"/>
+                            <line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/>
+                            <line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/>
+                            <line x1="2" y1="12" x2="4" y2="12"/>
+                            <line x1="20" y1="12" x2="22" y2="12"/>
+                            <line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/>
+                            <line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/>
+                        </g>
+                        <path class="moon-icon-path" d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container main-content">
+
+        <!-- Cabeçalho Semântico de Apresentação (H1 SEO On-Page) -->
+        <div class="seo-page-header">
+            <div class="seo-page-header-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="5" width="20" height="14" rx="2"/>
+                    <line x1="2" y1="10" x2="22" y2="10"/>
+                    <circle cx="7" cy="15" r="1.5"/>
+                    <line x1="12" y1="15" x2="17" y2="15"/>
+                </svg>
+            </div>
+            <div class="seo-page-header-text">
+                <h1 class="seo-page-title" data-i18n="seo_h1_ofx">Conciliação de Taxas e Extratos (.OFX vs Vendas)</h1>
+                <p class="seo-page-subtitle" data-i18n="seo_sub_ofx">Bata relatórios de vendas do seu PDV/ERP contra o extrato bancário ou da maquininha (.OFX). Audite taxas cobradas e detecte cobranças a maior.</p>
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- PASSO 1: CARREGAR EXTRATO (.OFX) + PLANILHA DE VENDAS     -->
+        <!-- ======================================================== -->
+        <section class="card step-card" id="step-upload-ofx">
+            <div class="card-header">
+                <div class="step-indicator" data-i18n="ofx_step1_badge">Passo 1</div>
+                <div>
+                    <h2 data-i18n="ofx_step1_title">Carregar Extrato (.OFX) e Relatório de Vendas (PDV / ERP)</h2>
+                    <p class="subtext" data-i18n="ofx_step1_desc">Suba o extrato bancário ou da adquirente (.ofx) de um lado e o relatório de vendas do seu sistema (.xlsx, .xls ou .csv) do outro.</p>
+                </div>
+            </div>
+
+            <div class="upload-grid">
+                <!-- Dropzone 1: Arquivo .OFX ou Pacote .ZIP com .OFX -->
+                <div class="dropzone" id="drop-ofx-file">
+                    <input type="file" id="file-ofx-input" aria-label="Selecionar arquivo OFX de extrato bancário ou da maquininha" accept=".ofx,.zip" multiple class="file-input">
+                    <div class="dropzone-content">
+                        <div class="dropzone-icon">
+                            <svg class="dropzone-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                                <line x1="2" y1="10" x2="22" y2="10"/>
+                                <circle cx="7" cy="15" r="1.5"/>
+                                <line x1="12" y1="15" x2="17" y2="15"/>
+                            </svg>
+                        </div>
+                        <h3 data-i18n="ofx_drop_ofx_title">Extrato da Conta ou Maquininha (.OFX)</h3>
+                        <p class="dropzone-hint" data-i18n="ofx_drop_ofx_hint">Arraste seu arquivo .ofx (Stone, Cielo, Rede, PagBank, Mercado Pago, bancos) ou .zip</p>
+                        <div class="doc-browse-pill">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            <span data-i18n="doc_browse_file">Procurar arquivo</span>
+                        </div>
+                        <div class="file-meta" id="file-meta-ofx" style="display: none;">
+                            <span class="filename" id="filename-ofx">extrato.ofx</span>
+                            <span class="filesize" id="filesize-ofx">0 KB</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dropzone 2: Relatório de Vendas (.xlsx, .xls, .csv) -->
+                <div class="dropzone" id="drop-sales-sheet">
+                    <input type="file" id="file-sales-input" aria-label="Selecionar relatório de vendas do PDV ou ERP" accept=".xlsx,.xls,.csv" class="file-input">
+                    <div class="dropzone-content">
+                        <div class="dropzone-icon">
+                            <svg class="dropzone-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="3" y1="9" x2="21" y2="9"/>
+                                <line x1="9" y1="21" x2="9" y2="9"/>
+                            </svg>
+                        </div>
+                        <h3 data-i18n="ofx_drop_sheet_title">Relatório de Vendas do PDV / ERP</h3>
+                        <p class="dropzone-hint" data-i18n="ofx_drop_sheet_hint">Planilha de vendas da loja (.xlsx, .xls ou .csv) com Valor Bruto, Data e NSU/ID</p>
+                        <div class="doc-browse-pill">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            <span data-i18n="doc_browse_file">Procurar arquivo</span>
+                        </div>
+                        <div class="file-meta" id="file-meta-sales" style="display: none;">
+                            <span class="filename" id="filename-sales">vendas.xlsx</span>
+                            <span class="filesize" id="filesize-sales">0 KB</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerta de erro de upload -->
+            <div id="ofx-upload-alert" class="alert-box alert-error" style="display: none; margin-top: 16px;">
+                <div class="alert-icon-wrapper">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                </div>
+                <div class="alert-box-content">
+                    <strong class="alert-title" data-i18n="ofx_upload_err_title">Falha na Leitura dos Arquivos</strong>
+                    <p class="alert-desc" id="ofx-upload-alert-msg"></p>
+                </div>
+                <button type="button" class="alert-box-close" id="btn-close-ofx-upload-alert" aria-label="Fechar aviso">&times;</button>
+            </div>
+
+            <!-- Rodapé do Passo 1 -->
+            <div class="action-footer action-footer-between">
+                <div class="action-footer-left">
+                    <button type="button" class="btn btn-pill-outline" id="btn-ofx-try-example" title="Carregar extrato OFX e vendas de exemplo para testar">
+                        <span class="btn-text" data-i18n="btn_try_example">Testar Exemplo</span>
+                    </button>
+                </div>
+                <div class="action-footer-right">
+                    <button type="button" class="btn btn-pill-gradient" id="btn-ofx-upload" disabled>
+                        <span class="btn-text" data-i18n="ofx_btn_read_files">Ler Arquivos e Mapear Colunas</span>
+                        <span class="spinner" style="display: none;"></span>
+                        <span class="btn-circle-icon">→</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- PASSO 2: MAPEAR COLUNAS E CONFIGURAR TAXA ESPERADA (%)   -->
+        <!-- ======================================================== -->
+        <section class="card step-card" id="step-config-ofx" style="display: none;">
+            <div class="card-header">
+                <div class="step-indicator" data-i18n="ofx_step2_badge">Passo 2</div>
+                <div>
+                    <h2 data-i18n="ofx_step2_title">Mapear Colunas e Configurar Taxa Contratada (%)</h2>
+                    <p class="subtext" data-i18n="ofx_step2_desc">Confirme as colunas da planilha de vendas e informe a taxa acordada com a operadora para verificar se o valor líquido bate com precisão.</p>
+                </div>
+            </div>
+
+            <!-- Barra de Resumo dos Arquivos -->
+            <div class="single-file-info-bar">
+                <div class="single-info-pill">
+                    <svg class="splitc-icon splitc-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="5" width="20" height="14" rx="2"/>
+                        <line x1="2" y1="10" x2="22" y2="10"/>
+                    </svg>
+                    <span data-i18n="ofx_info_pack_label">Extrato OFX:</span>
+                    <strong id="info-ofx-name">-</strong>
+                    <span class="badge-recommended" id="info-ofx-count-badge" style="margin-left: 4px;">0 transações</span>
+                </div>
+                <div class="single-info-pill">
+                    <svg class="splitc-icon splitc-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="3" y1="9" x2="21" y2="9"/>
+                        <line x1="9" y1="21" x2="9" y2="9"/>
+                    </svg>
+                    <span data-i18n="ofx_info_sheet_label">Vendas PDV/ERP:</span>
+                    <strong id="info-sales-name">-</strong>
+                    <span id="info-sales-rows" style="color: var(--text-muted); font-size: 12px;">(0 linhas)</span>
+                </div>
+            </div>
+
+            <!-- Mapeamento das Colunas da Planilha de Vendas -->
+            <div class="tolerance-box" id="box-mapping-ofx" style="margin-bottom: 24px;">
+                <div class="tolerance-header">
+                    <h3>
+                        <svg class="splitc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <line x1="3" y1="9" x2="21" y2="9"/>
+                            <line x1="9" y1="21" x2="9" y2="9"/>
+                        </svg>
+                        <span data-i18n="ofx_box_map_title">Colunas da Planilha de Vendas</span>
+                    </h3>
+                    <span class="badge-recommended" data-i18n="badge_auto_detected">Detecção Automática</span>
+                </div>
+                <p class="tolerance-desc" data-i18n="ofx_box_map_desc">
+                    Selecione as colunas correspondentes ao Código/NSU da venda, Valor Bruto pago pelo cliente, Data e Operadora.
+                </p>
+
+                <div class="mapping-fields-grid">
+                    <!-- Coluna 1: NSU / ID Venda / Pedido -->
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="select-ofx-col-id">
+                            <strong data-i18n="ofx_col_id_label">ID da Venda / NSU / TID *</strong>
+                            <span class="help-text">Código identificador único da transação na maquininha ou pedido</span>
+                        </label>
+                        <div class="select-wrapper">
+                            <select id="select-ofx-col-id" class="form-select"></select>
+                        </div>
+                    </div>
+
+                    <!-- Coluna 2: Valor Bruto da Venda -->
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="select-ofx-col-gross">
+                            <strong data-i18n="ofx_col_gross_label">Valor Bruto da Venda (R$) *</strong>
+                            <span class="help-text">Valor total cobrado do cliente para base de cálculo da taxa</span>
+                        </label>
+                        <div class="select-wrapper">
+                            <select id="select-ofx-col-gross" class="form-select"></select>
+                        </div>
+                    </div>
+
+                    <!-- Coluna 3: Data da Venda -->
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="select-ofx-col-date">
+                            <strong data-i18n="ofx_col_date_label">Data da Venda</strong>
+                            <span class="help-text">Data em que a transação ocorreu para conciliar com o crédito</span>
+                        </label>
+                        <div class="select-wrapper">
+                            <select id="select-ofx-col-date" class="form-select"></select>
+                        </div>
+                    </div>
+
+                    <!-- Coluna 4: Adquirente / Bandeira (Opcional) -->
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="select-ofx-col-acquirer">
+                            <strong data-i18n="ofx_col_acquirer_label">Adquirente / Meio de Pagamento (Opcional)</strong>
+                            <span class="help-text">Nome da maquininha (Stone, Cielo) ou canal de venda</span>
+                        </label>
+                        <div class="select-wrapper">
+                            <select id="select-ofx-col-acquirer" class="form-select"></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BLOCO DE CONFIGURAÇÃO DA TAXA ESPERADA (%) E TOLERÂNCIAS -->
+            <div class="tolerance-box" id="box-rates-ofx" style="margin-bottom: 24px;">
+                <div class="tolerance-header">
+                    <h3>
+                        <svg class="splitc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        <span data-i18n="ofx_box_rate_title">Taxa Contratada (%) e Regras de Batimento</span>
+                    </h3>
+                </div>
+                <p class="tolerance-desc" data-i18n="ofx_box_rate_desc">
+                    Informe a taxa percentual acordada com sua maquininha ou marketplace. O motor calculará o Líquido Esperado e alertará se o valor creditado no extrato for menor do que o contratado.
+                </p>
+
+                <!-- BLOCO SUPERIOR: Configuração da Taxa Contratada (%) com Atalhos + Input Manual Destacado -->
+                <div class="rate-config-card">
+                    <div class="rate-header-row">
+                        <label for="input-expected-rate" style="display: block; margin-bottom: 4px;">
+                            <strong data-i18n="ofx_input_rate_label">Taxa Esperada / Contratada (%) *</strong>
+                            <span class="help-text" style="display: block; margin-top: 2px;">Escolha um dos atalhos mais comuns ou digite a taxa manual do seu contrato:</span>
+                        </label>
+                    </div>
+
+                    <div class="rate-controls-row">
+                        <!-- 1. Atalhos Rápidos (Pílulas ValidAí) -->
+                        <div class="rate-presets-group">
+                            <span class="rate-group-subtitle">Atalhos rápidos:</span>
+                            <div class="mode-toggle-pill rate-presets-pill" role="group" aria-label="Atalhos rápidos de taxas">
+                                <button type="button" class="mode-btn btn-preset-rate" data-rate="1.20">
+                                    <span>Débito (1,2%)</span>
+                                </button>
+                                <button type="button" class="mode-btn btn-preset-rate active" data-rate="3.50">
+                                    <span>Crédito (3,5%)</span>
+                                </button>
+                                <button type="button" class="mode-btn btn-preset-rate" data-rate="5.00">
+                                    <span>Parcelado (5,0%)</span>
+                                </button>
+                                <button type="button" class="mode-btn btn-preset-rate" data-rate="12.00">
+                                    <span>Marketplace (12%)</span>
+                                </button>
+                                <button type="button" class="mode-btn btn-preset-rate" data-rate="18.00">
+                                    <span>iFood (18%)</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Divisor Visual "OU" -->
+                        <div class="rate-divider-vertical" aria-hidden="true">
+                            <span>OU</span>
+                        </div>
+
+                        <!-- 2. Bloco com Alto Destaque: Digitar Taxa Manualmente -->
+                        <div class="rate-manual-group">
+                            <label for="input-expected-rate" class="rate-group-subtitle" style="cursor: pointer;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                </svg>
+                                Digitar taxa manual:
+                            </label>
+                            <div class="rate-manual-input-box" onclick="document.getElementById('input-expected-rate').focus()">
+                                <input type="number" id="input-expected-rate" step="0.01" min="0" max="100" value="3.50" class="rate-inner-input" placeholder="0,00" aria-label="Digitar taxa esperada manual em porcentagem">
+                                <span class="rate-symbol-suffix">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BLOCO INFERIOR: Os dois seletores de tolerância lado a lado em 2 colunas como estava antes -->
+                <div class="mapping-fields-grid">
+                    <!-- Tolerância de Centavos -->
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="select-ofx-tolerance">
+                            <strong data-i18n="ofx_tol_cents_label">Tolerância para Centavos (R$)</strong>
+                            <span class="help-text">Margem aceita para variações de dízimas e arredondamentos</span>
+                        </label>
+                        <div class="select-wrapper">
+                            <select id="select-ofx-tolerance" class="form-select">
+                                <option value="0.05" selected>Até R$ 0,05 (Padrão de Arredondamento)</option>
+                                <option value="0.00">R$ 0,00 (Exato ao Centavo)</option>
+                                <option value="0.50">Até R$ 0,50 (Tolerância Moderada)</option>
+                                <option value="1.00">Até R$ 1,00 (Tolerância Ampla)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Janela de Compensação (Dias) -->
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="select-ofx-date-tol">
+                            <strong data-i18n="ofx_tol_days_label">Janela de Compensação / Repasse</strong>
+                            <span class="help-text">Prazo entre a data da venda no PDV e o crédito no extrato OFX</span>
+                        </label>
+                        <div class="select-wrapper">
+                            <select id="select-ofx-date-tol" class="form-select">
+                                <option value="3" selected>Até 3 dias úteis (D+1 a D+3)</option>
+                                <option value="1">Mesmo dia ou D+1 (Pix e Débito)</option>
+                                <option value="7">Até 7 dias corridos</option>
+                                <option value="31">Até 31 dias (Crédito D+30)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerta de Validação de Configuração -->
+            <div id="ofx-process-alert" class="alert-box alert-error" style="display: none; margin-bottom: 20px;">
+                <div class="alert-icon-wrapper">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                </div>
+                <div class="alert-box-content">
+                    <strong class="alert-title" id="ofx-process-alert-title" data-i18n="ofx_config_err_title">Ajuste de Mapeamento Necessário</strong>
+                    <p class="alert-desc" id="ofx-process-alert-msg"></p>
+                </div>
+                <button type="button" class="alert-box-close" id="btn-close-ofx-process-alert" aria-label="Fechar aviso">&times;</button>
+            </div>
+
+            <!-- Rodapé do Passo 2 -->
+            <div class="action-footer action-footer-between">
+                <div class="action-footer-left">
+                    <button type="button" class="btn btn-pill-outline" id="btn-ofx-back-step1">
+                        <span class="btn-text" data-i18n="btn_back">← Trocar Arquivos</span>
+                    </button>
+                </div>
+                <div class="action-footer-right">
+                    <button type="button" class="btn btn-pill-gradient" id="btn-process-ofx">
+                        <span class="btn-text" data-i18n="ofx_btn_reconcile">Conciliar Taxas e Extrato</span>
+                        <span class="spinner" style="display: none;"></span>
+                        <span class="btn-circle-icon">→</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- PASSO 3: DASHBOARD DE RESULTADOS E AUDITORIA DE TAXAS     -->
+        <!-- ======================================================== -->
+        <section class="card step-card" id="step-results-ofx" style="display: none;">
+            <div class="card-header">
+                <div class="step-indicator" data-i18n="ofx_step3_badge">Passo 3</div>
+                <div>
+                    <h2 data-i18n="ofx_step3_title">Resultado da Conciliação de Taxas e Extratos (PDV vs. Extrato OFX)</h2>
+                    <p class="subtext" data-i18n="ofx_step3_desc">Auditoria concluída. Analise se as taxas cobradas bateram com o contrato, descubra cobranças a maior e baixe os relatórios em Excel.</p>
+                </div>
+            </div>
+
+            <!-- Banner Sucesso (100% Conciliado) -->
+            <div class="result-banner banner-success" id="ofx-banner-success" style="display: none;">
+                <div class="banner-icon">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                </div>
+                <div class="banner-content">
+                    <h3 id="ofx-banner-success-title" data-i18n="ofx_banner_success_title">Conciliação 100% Aprovada! Todas as taxas conferem!</h3>
+                    <p id="ofx-banner-success-desc" data-i18n="ofx_banner_success_desc">Todas as vendas do PDV foram localizadas no extrato OFX e as taxas praticadas pela adquirente bateram rigorosamente com o contratado.</p>
+                </div>
+            </div>
+
+            <!-- Banner Alerta (Com Divergências de Taxa ou Vendas Não Repassadas) -->
+            <div class="result-banner banner-alert" id="ofx-banner-diffs" style="display: none;">
+                <div class="banner-icon">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                </div>
+                <div class="banner-content">
+                    <h3 id="ofx-banner-diffs-title" data-i18n="ofx_banner_diffs_title">Atenção na Auditoria: Foram identificadas taxas a maior ou vendas não repassadas!</h3>
+                    <p id="ofx-banner-diffs-msg" data-i18n="ofx_banner_diffs_desc">Confira abaixo as vendas com desconto indevido de taxas ou valores que não caíram no extrato bancário.</p>
+                </div>
+            </div>
+
+            <!-- Grid de 6 KPIs (2 Linhas x 3 Colunas) Padronizado -->
+            <div class="kpi-grid">
+                <!-- KPI 1: Faturamento Bruto (PDV) -->
+                <div class="kpi-card">
+                    <div class="kpi-label" data-i18n="ofx_kpi_gross_label">Faturamento Bruto (PDV)</div>
+                    <div class="kpi-val" id="ofx-kpi-gross-val">R$ 0,00</div>
+                    <div class="kpi-sub" id="ofx-kpi-sales-count">0 vendas analisadas</div>
+                </div>
+
+                <!-- KPI 2: Taxa de Conciliação Aprovada -->
+                <div class="kpi-card">
+                    <div class="kpi-label" data-i18n="ofx_kpi_rate_label">Vendas 100% Conciliadas</div>
+                    <div class="kpi-val text-success" id="ofx-kpi-reconciled-pct">0%</div>
+                    <div class="kpi-sub" id="ofx-kpi-reconciled-count">0 vendas sem divergência</div>
+                </div>
+
+                <!-- KPI 3: Cobrança a Maior (Prejuízo) -->
+                <div class="kpi-card">
+                    <div class="kpi-label" data-i18n="ofx_kpi_loss_label">Cobrança a Maior (Prejuízo)</div>
+                    <div class="kpi-val text-danger" id="ofx-kpi-loss-val">R$ 0,00</div>
+                    <div class="kpi-sub text-danger" id="ofx-kpi-divergent-count">0 vendas com taxa a maior</div>
+                </div>
+
+                <!-- KPI 4: Vendas Não Repassadas -->
+                <div class="kpi-card">
+                    <div class="kpi-label" data-i18n="ofx_kpi_unpaid_label">Vendas Não Repassadas</div>
+                    <div class="kpi-val text-warning" id="ofx-kpi-unpaid-count">0</div>
+                    <div class="kpi-sub" data-i18n="ofx_kpi_unpaid_hint">no PDV sem repasse no OFX</div>
+                </div>
+
+                <!-- KPI 5: Créditos Avulsos no Extrato -->
+                <div class="kpi-card">
+                    <div class="kpi-label" data-i18n="ofx_kpi_orphan_label">Créditos Avulsos no OFX</div>
+                    <div class="kpi-val text-orange" id="ofx-kpi-orphan-count">0</div>
+                    <div class="kpi-sub" id="ofx-kpi-orphan-sub" data-i18n="ofx_kpi_orphan_hint">créditos sem venda no PDV</div>
+                </div>
+
+                <!-- KPI 6: Total Creditado no Extrato -->
+                <div class="kpi-card">
+                    <div class="kpi-label" data-i18n="ofx_kpi_credited_label">Total Creditado no Extrato</div>
+                    <div class="kpi-val text-info" id="ofx-kpi-credited-val">R$ 0,00</div>
+                    <div class="kpi-sub" id="ofx-kpi-exp-net-val">Líquido Esperado: R$ 0,00</div>
+                </div>
+            </div>
+
+            <!-- Seção de Download dos Relatórios em Excel Padronizada -->
+            <div class="download-section">
+                <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                    <a href="#" id="btn-ofx-download-audit" class="btn btn-pill-gradient btn-lg" download>
+                        <span class="btn-text" data-i18n="ofx_btn_down_audit">Baixar Relatório de Auditoria (.xlsx)</span>
+                        <span class="btn-circle-icon">↓</span>
+                    </a>
+                    <a href="#" id="btn-ofx-download-mirror" class="btn btn-pill-outline btn-lg" download>
+                        <span class="btn-text" data-i18n="ofx_btn_down_mirror">Baixar Espelho dos Lançamentos OFX (.xlsx)</span>
+                        <span class="btn-circle-icon">↓</span>
+                    </a>
+                </div>
+                <p class="download-hint" style="text-align: center; margin-top: 10px;" data-i18n="ofx_dl_hint">
+                    O Relatório de Auditoria destaca em cores as taxas abusivas, valores a restituir e vendas não repassadas. O Espelho OFX traz todos os créditos bancários convertidos em tabela Excel.
+                </p>
+            </div>
+
+            <!-- Abas de Navegação dos Resultados Padronizadas -->
+            <div class="result-nav-tabs" id="ofx-results-tabs" style="margin-top: 28px;">
+                <button type="button" class="result-nav-tab-btn active" data-filter="all">
+                    <svg class="splitc-icon tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    <span data-i18n="ofx_tab_all">Todas as Vendas</span>
+                    <span class="tab-btn-badge" id="badge-ofx-all">0</span>
+                </button>
+                <button type="button" class="result-nav-tab-btn" data-filter="TAXA_A_MAIOR">
+                    <svg class="splitc-icon tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                    </svg>
+                    <span data-i18n="ofx_tab_divergent">Taxa Divergente / Cobrança a Maior</span>
+                    <span class="tab-btn-badge" id="badge-ofx-divergent">0</span>
+                </button>
+                <button type="button" class="result-nav-tab-btn" data-filter="CONCILIADO">
+                    <svg class="splitc-icon tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span data-i18n="ofx_tab_reconciled">100% Conciliadas</span>
+                    <span class="tab-btn-badge" id="badge-ofx-reconciled">0</span>
+                </button>
+                <button type="button" class="result-nav-tab-btn" data-filter="NAO_REPASSADO">
+                    <svg class="splitc-icon tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <span data-i18n="ofx_tab_unpaid">Vendas Não Repassadas</span>
+                    <span class="tab-btn-badge" id="badge-ofx-unpaid">0</span>
+                </button>
+                <button type="button" class="result-nav-tab-btn" data-filter="CREDITO_SEM_VENDA">
+                    <svg class="splitc-icon tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <span data-i18n="ofx_tab_orphan">Créditos Avulsos no OFX</span>
+                    <span class="tab-btn-badge" id="badge-ofx-orphan">0</span>
+                </button>
+            </div>
+
+            <!-- Tabela Interativa de Batimento -->
+            <div class="diff-table-section">
+                <div class="diff-table-header">
+                    <h3 data-i18n="ofx_table_title">Detalhamento da Auditoria Linha a Linha (Vendas vs. Extrato OFX)</h3>
+                    <div class="input-search-wrapper" style="width: 280px; max-width: 100%;">
+                        <svg class="input-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="text" id="ofx-table-search" placeholder="Buscar por NSU, adquirente, valor..." class="search-input" style="width: 100%;">
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table-diff table-financial" id="table-ofx-reconciliation">
+                        <thead>
+                            <tr>
+                                <th style="width: 140px; text-align: center; white-space: nowrap;">Status</th>
+                                <th style="width: 110px; text-align: center; white-space: nowrap;">NSU / ID</th>
+                                <th style="white-space: nowrap;">Adquirente</th>
+                                <th style="width: 105px; text-align: center; white-space: nowrap;">Data Venda</th>
+                                <th style="width: 105px; text-align: center; white-space: nowrap;">Data Repasse</th>
+                                <th style="text-align: right; white-space: nowrap;">Valor Bruto (R$)</th>
+                                <th style="text-align: center; white-space: nowrap;">Taxa Contratada</th>
+                                <th style="text-align: right; white-space: nowrap;">Líq. Esperado (R$)</th>
+                                <th style="text-align: right; white-space: nowrap;">Creditado OFX (R$)</th>
+                                <th style="text-align: center; white-space: nowrap;">Taxa Efetiva</th>
+                                <th style="text-align: right; white-space: nowrap;">Diferença (R$)</th>
+                                <th style="min-width: 250px;">Diagnóstico / Ação Recomendada</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-ofx-reconciliation"></tbody>
+                    </table>
+                </div>
+
+                <!-- Paginação Padronizada -->
+                <div id="ofx-pagination-wrap" class="table-pagination-bar">
+                    <span id="ofx-pagination-info">Mostrando 0 registros</span>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" class="btn btn-pill-outline" id="btn-prev-page" style="padding: 5px 14px; font-size: 12px;" disabled>Anterior</button>
+                        <button type="button" class="btn btn-pill-outline" id="btn-next-page" style="padding: 5px 14px; font-size: 12px;">Próximo</button>
+                    </div>
+                </div>
+                <div class="pagination-hint">
+                    Exibindo os lançamentos auditados. Baixe o relatório Excel para a auditoria contábil completa com células coloridas.
+                </div>
+            </div>
+
+            <!-- Rodapé do Passo 3 -->
+            <div class="action-footer" style="justify-content: center; margin-top: 28px;">
+                <button type="button" class="btn btn-pill-outline" id="btn-restart-ofx">
+                    <svg class="btn-sheet-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                        <path d="M3 3v5h5"/>
+                    </svg>
+                    <span data-i18n="ofx_btn_restart">Conciliar Novo Extrato</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SEÇÃO SEMÂNTICA DE PERGUNTAS FREQUENTES (FAQ SEO ON-PAGE) -->
+        <!-- ======================================================== -->
+        <section class="seo-faq-section" aria-labelledby="faq-ofx-heading">
+            <div class="seo-faq-header">
+                <span class="seo-faq-badge">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <span>Dúvidas Frequentes</span>
+                </span>
+                <h2 class="seo-faq-title" id="faq-ofx-heading">Perguntas Frequentes sobre Conciliação de Taxas e Extratos (.OFX)</h2>
+                <p class="seo-faq-subtitle">Como bater relatórios de vendas contra extratos de maquininhas e auditar taxas abusivas.</p>
+            </div>
+
+            <div class="seo-faq-list">
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>O que é um arquivo .OFX e onde consigo baixá-lo?</span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        O arquivo <code>.OFX</code> (Open Financial Exchange) é o formato padrão utilizado por instituições financeiras para exportação de extratos bancários. Você pode baixá-lo no Internet Banking do seu banco (Itaú, Bradesco, Santander, Banco do Brasil, Inter, etc.) ou no portal da sua maquininha de cartão (Stone, Cielo, Rede, PagBank, Mercado Pago).
+                    </div>
+                </details>
+
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>Como o ValidAí calcula se a taxa da maquininha foi cobrada a maior?</span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        Para cada venda do seu PDV, o sistema multiplica o Valor Bruto pela Taxa Esperada (%) informada por você. Em seguida, compara o <strong>Líquido Esperado</strong> com o <strong>Valor Efetivamente Creditado</strong> no extrato OFX. Se o crédito for inferior (além da margem de centavos), o sistema calcula o percentual real cobrado e destaca o prejuízo exato em R$ para contestação.
+                    </div>
+                </details>
+
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>O que significa uma "Venda Não Repassada"?</span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        É uma venda que consta registrada no seu sistema de loja (PDV ou ERP), mas cujo pagamento nunca foi identificado no extrato bancário ou da operadora. Esse apontamento permite identificar furos de caixa ou vendas que a adquirente esqueceu de pagar.
+                    </div>
+                </details>
+
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>Quais operadoras de cartão e marketplaces são compatíveis?</span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        O conciliador é universal e compatível com todas as principais adquirentes e plataformas do mercado: Stone, Cielo, Rede, PagBank, Getnet, SafraPay, Mercado Pago, iFood, Mercado Livre, Shopee e extratos bancários de qualquer banco brasileiro.
+                    </div>
+                </details>
+
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>Meus dados financeiros e extratos estão seguros?</span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        Sim, 100% seguros. O processamento dos arquivos .OFX e das planilhas de vendas é realizado na memória temporária da sessão, com criptografia de ponta a ponta e sem gravação definitiva de extratos bancários em bancos de dados, em estrita conformidade com a LGPD.
+                    </div>
+                </details>
+            </div>
+
+            <div class="seo-faq-help-cta">
+                <div class="seo-faq-help-text">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <span>Ficou com dúvida de como usar?</span>
+                </div>
+                <a href="/como-usar" class="seo-faq-help-link">
+                    <span>Acessar página Como Usar</span>
+                    <span aria-hidden="true">→</span>
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Rodapé Padrão Web -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <p data-i18n="footer_copyright">© 2026 ValidAí. Todos os direitos reservados.</p>
+            <span class="version-tag" aria-hidden="true">v3.2</span>
+        </div>
+    </footer>
+
+    <!-- Script Controlador do Conciliador de Taxas e Extratos OFX -->
+    <script src="/static/js/ofx_validator.js?v=5" defer></script>
+</body>
+</html>
+

@@ -78,6 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const filesizeA = document.getElementById('filesize-a');
     const filesizeB = document.getElementById('filesize-b');
     const btnReadHeaders = document.getElementById('btn-read-headers');
+    const btnSheetsTryExample = document.getElementById('btn-sheets-try-example');
 
     // Elementos DOM - Passo 2
     const stepConfig = document.getElementById('step-config');
@@ -254,6 +255,83 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setupDropzone(dropzoneA, fileInputA, fileMetaA, filenameA, filesizeA, 'fileA');
     setupDropzone(dropzoneB, fileInputB, fileMetaB, filenameB, filesizeB, 'fileB');
+
+    // ----------------------------------------------------
+    // PASSO 1: TESTAR EXEMPLO DE PLANILHAS
+    // ----------------------------------------------------
+    if (btnSheetsTryExample) {
+        btnSheetsTryExample.addEventListener('click', async () => {
+            btnSheetsTryExample.disabled = true;
+            const originalHtml = btnSheetsTryExample.innerHTML;
+            btnSheetsTryExample.innerHTML = '<span class="spinner" style="display: inline-block;"></span> Carregando Exemplo...';
+
+            try {
+                const response = await fetch('/api/sheets/load-example', {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    alert(data.error || 'Erro ao carregar exemplo de planilhas.');
+                    return;
+                }
+
+                // Atualizar dropzones com os arquivos de demonstração
+                filenameA.textContent = data.filename_a || 'Base_Vendas_ERP_Anterior.xlsx';
+                filesizeA.textContent = '14.2 KB';
+                fileMetaA.style.display = 'inline-flex';
+                dropzoneA.classList.add('file-loaded');
+
+                filenameB.textContent = data.filename_b || 'Base_Vendas_ERP_Atualizada.xlsx';
+                filesizeB.textContent = '14.5 KB';
+                fileMetaB.style.display = 'inline-flex';
+                dropzoneB.classList.add('file-loaded');
+
+                btnReadHeaders.disabled = false;
+
+                state.sessionId = data.session_id;
+                state.columnsA = data.cols_a;
+                state.columnsB = data.cols_b;
+                state.initialMapping = { ...(data.column_mapping || {}) };
+                state.mapping = data.column_mapping || {};
+                state.selectedSecondaryKeys = [];
+                state.isManualMapping = false;
+
+                state.mappingList = Object.entries(state.mapping).map(([colA, colB], idx) => ({
+                    id: 'map_' + idx + '_' + Math.random().toString(36).substring(2, 7),
+                    colA: colA,
+                    colB: colB
+                }));
+
+                selectPrimaryKey.innerHTML = '<option value="">Selecione a chave primária...</option>';
+                state.columnsA.forEach(col => {
+                    const opt = document.createElement('option');
+                    opt.value = col;
+                    opt.textContent = col;
+                    selectPrimaryKey.appendChild(opt);
+                });
+
+                if (data.suggested_keys && data.suggested_keys.length > 0) {
+                    selectPrimaryKey.value = data.suggested_keys[0];
+                }
+
+                renderSecondaryKeysOptions();
+                updateSecondaryKeysUI();
+                renderMappingTable();
+
+                stepConfig.style.display = 'block';
+                stepConfig.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            } catch (err) {
+                console.error(err);
+                alert('Falha na comunicação com o servidor: ' + err.message);
+            } finally {
+                btnSheetsTryExample.disabled = false;
+                btnSheetsTryExample.innerHTML = originalHtml;
+            }
+        });
+    }
 
     // ----------------------------------------------------
     // PASSO 1 -> PASSO 2: LER CABEÇALHOS

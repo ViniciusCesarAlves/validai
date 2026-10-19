@@ -883,3 +883,50 @@ def generate_excel_diff_report(summary: dict, diff_records: list,
     wb.save(output_path)
     return output_path
 
+
+def create_demo_files(output_dir):
+    """
+    Cria dois arquivos Excel (.xlsx) com bases fictícias empresariais para demonstração
+    do comparador de planilhas.
+    Contém:
+    - 11 registros de vendas/pedidos
+    - Divergência de valores e descontos em PED-1004
+    - Divergência de status de entrega em PED-1006
+    - 1 pedido exclusivo da Base A (PED-1011 cancelado/removido na Base B)
+    - 1 pedido exclusivo da Base B (PED-1012 novo faturamento inserido)
+    """
+    path_a = os.path.join(output_dir, "Base_Vendas_ERP_Anterior.xlsx")
+    path_b = os.path.join(output_dir, "Base_Vendas_ERP_Atualizada.xlsx")
+
+    data_a = [
+        {"ID_Pedido": "PED-1001", "Data_Venda": "01/10/2026", "Cliente": "Tech Solutions Brasil Ltda", "Vendedor": "Ana Paula", "Valor_Bruto": 4500.00, "Desconto": 150.00, "Valor_Liquido": 4350.00, "Status_Entrega": "Entregue"},
+        {"ID_Pedido": "PED-1002", "Data_Venda": "02/10/2026", "Cliente": "Mercado & Varejo Express", "Vendedor": "Lucas Silva", "Valor_Bruto": 1850.50, "Desconto": 0.00, "Valor_Liquido": 1850.50, "Status_Entrega": "Entregue"},
+        {"ID_Pedido": "PED-1003", "Data_Venda": "03/10/2026", "Cliente": "Indústrias Alfa S/A", "Vendedor": "Mariana Souza", "Valor_Bruto": 9200.00, "Desconto": 300.00, "Valor_Liquido": 8900.00, "Status_Entrega": "Entregue"},
+        {"ID_Pedido": "PED-1004", "Data_Venda": "04/10/2026", "Cliente": "Distribuidora Nacional de Peças", "Vendedor": "Carlos Eduardo", "Valor_Bruto": 1540.00, "Desconto": 40.00, "Valor_Liquido": 1500.00, "Status_Entrega": "Entregue"},
+        {"ID_Pedido": "PED-1005", "Data_Venda": "05/10/2026", "Cliente": "Hospital Santa Clara", "Vendedor": "Ana Paula", "Valor_Bruto": 12800.00, "Desconto": 500.00, "Valor_Liquido": 12300.00, "Status_Entrega": "Entregue"},
+        {"ID_Pedido": "PED-1006", "Data_Venda": "06/10/2026", "Cliente": "Logística Global Express", "Vendedor": "Lucas Silva", "Valor_Bruto": 3200.00, "Desconto": 100.00, "Valor_Liquido": 3100.00, "Status_Entrega": "Pendente"},
+        {"ID_Pedido": "PED-1007", "Data_Venda": "07/10/2026", "Cliente": "Padaria & Confeitaria Central", "Vendedor": "Mariana Souza", "Valor_Bruto": 890.00, "Desconto": 0.00, "Valor_Liquido": 890.00, "Status_Entrega": "Entregue"},
+        {"ID_Pedido": "PED-1008", "Data_Venda": "08/10/2026", "Cliente": "Escola Futuro Brilhante", "Vendedor": "Carlos Eduardo", "Valor_Bruto": 6400.00, "Desconto": 200.00, "Valor_Liquido": 6200.00, "Status_Entrega": "Entregue"},
+        {"ID_Pedido": "PED-1009", "Data_Venda": "09/10/2026", "Cliente": "Auto Peças Progresso", "Vendedor": "Ana Paula", "Valor_Bruto": 2750.00, "Desconto": 50.00, "Valor_Liquido": 2700.00, "Status_Entrega": "Entregue"},
+        {"ID_Pedido": "PED-1010", "Data_Venda": "10/10/2026", "Cliente": "Construtora Horizonte S/A", "Vendedor": "Lucas Silva", "Valor_Bruto": 15200.00, "Desconto": 800.00, "Valor_Liquido": 14400.00, "Status_Entrega": "Entregue"},
+        {"ID_Pedido": "PED-1011", "Data_Venda": "11/10/2026", "Cliente": "Farmácia Popular do Povo", "Vendedor": "Mariana Souza", "Valor_Bruto": 1150.00, "Desconto": 0.00, "Valor_Liquido": 1150.00, "Status_Entrega": "Cancelado"}
+    ]
+
+    data_b = [
+        {"ID_Pedido": "PED-1001", "Data_Venda": "01/10/2026", "Cliente": "Tech Solutions Brasil Ltda", "Vendedor": "Ana Paula", "Valor_Bruto": 4500.00, "Desconto": 150.00, "Valor_Liquido": 4350.00, "Status_Entrega": "Entregue"},
+        {"ID_Pedido": "PED-1002", "Data_Venda": "02/10/2026", "Cliente": "Mercado & Varejo Express", "Vendedor": "Lucas Silva", "Valor_Bruto": 1850.50, "Desconto": 0.00, "Valor_Liquido": 1850.50, "Status_Entrega": "Entregue"},
+        {"ID_Pedido": "PED-1003", "Data_Venda": "03/10/2026", "Cliente": "Indústrias Alfa S/A", "Vendedor": "Mariana Souza", "Valor_Bruto": 9200.00, "Desconto": 300.00, "Valor_Liquido": 8900.00, "Status_Entrega": "Entregue"},
+        {"ID_Pedido": "PED-1004", "Data_Venda": "04/10/2026", "Cliente": "Distribuidora Nacional de Peças", "Vendedor": "Carlos Eduardo", "Valor_Bruto": 1540.00, "Desconto": 120.00, "Valor_Liquido": 1420.00, "Status_Entrega": "Entregue"}, # Divergência de Desconto e Líquido!
+        {"ID_Pedido": "PED-1005", "Data_Venda": "05/10/2026", "Cliente": "Hospital Santa Clara", "Vendedor": "Ana Paula", "Valor_Bruto": 12800.00, "Desconto": 500.00, "Valor_Liquido": 12300.00, "Status_Entrega": "Entregue"},
+        {"ID_Pedido": "PED-1006", "Data_Venda": "06/10/2026", "Cliente": "Logística Global Express", "Vendedor": "Lucas Silva", "Valor_Bruto": 3200.00, "Desconto": 100.00, "Valor_Liquido": 3100.00, "Status_Entrega": "Faturado"}, # Divergência de Status (era Pendente)!
+        {"ID_Pedido": "PED-1007", "Data_Venda": "07/10/2026", "Cliente": "Padaria & Confeitaria Central", "Vendedor": "Mariana Souza", "Valor_Bruto": 890.00, "Desconto": 0.00, "Valor_Liquido": 890.00, "Status_Entrega": "Entregue"},
+        {"ID_Pedido": "PED-1008", "Data_Venda": "08/10/2026", "Cliente": "Escola Futuro Brilhante", "Vendedor": "Carlos Eduardo", "Valor_Bruto": 6400.00, "Desconto": 200.00, "Valor_Liquido": 6200.00, "Status_Entrega": "Entregue"},
+        {"ID_Pedido": "PED-1009", "Data_Venda": "09/10/2026", "Cliente": "Auto Peças Progresso", "Vendedor": "Ana Paula", "Valor_Bruto": 2750.00, "Desconto": 50.00, "Valor_Liquido": 2700.00, "Status_Entrega": "Entregue"},
+        {"ID_Pedido": "PED-1010", "Data_Venda": "10/10/2026", "Cliente": "Construtora Horizonte S/A", "Vendedor": "Lucas Silva", "Valor_Bruto": 15200.00, "Desconto": 800.00, "Valor_Liquido": 14400.00, "Status_Entrega": "Entregue"},
+        {"ID_Pedido": "PED-1012", "Data_Venda": "12/10/2026", "Cliente": "Restaurante Sabor & Cia", "Vendedor": "Carlos Eduardo", "Valor_Bruto": 2300.00, "Desconto": 50.00, "Valor_Liquido": 2250.00, "Status_Entrega": "Entregue"} # Novo pedido em B
+    ]
+
+    pd.DataFrame(data_a).to_excel(path_a, index=False)
+    pd.DataFrame(data_b).to_excel(path_b, index=False)
+    return path_a, "Base_Vendas_ERP_Anterior.xlsx", path_b, "Base_Vendas_ERP_Atualizada.xlsx"
+

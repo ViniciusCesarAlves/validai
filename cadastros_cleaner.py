@@ -1025,3 +1025,116 @@ def generate_audit_excel(df_audit, summary, invalid_docs, duplicates, suspicious
 
     wb.save(output_path)
 
+
+def create_demo_file(output_dir):
+    """
+    Cria uma planilha Excel (.xlsx) com uma base cadastral mista e realista para demonstração
+    do Higienizador de Cadastros.
+    Contém:
+    - 11 registros com clientes e empresas
+    - CPFs e CNPJs válidos (formatados e sem máscara)
+    - 1 CPF com zero à esquerda ausente (10 dígitos - recuperável pelo Módulo 11)
+    - 1 CPF matematicamente inválido (dígito verificador incorreto)
+    - 1 CNPJ matematicamente inválido
+    - 1 registro duplicado (mesmo CPF em duas linhas)
+    - 1 e-mail com erro de digitação/sintaxe (sem domínio TLD)
+    - Nomes com formatação despadronizada (maiúsculas excessivas e múltiplos espaços)
+    - Telefones com e sem formatação
+    """
+    filepath = os.path.join(output_dir, "Base_Clientes_Para_Higienizar.xlsx")
+
+    demo_data = [
+        {
+            "ID_Cliente": "CLI-1001",
+            "Nome_Cliente": "   MARCOS   VINICIUS DE SOUZA   ",
+            "CPF_CNPJ": "52998224725",  # CPF válido sem máscara (529.982.247-25)
+            "Email": "marcos.souza@empresa.com.br",
+            "Telefone_WhatsApp": "11987654321",
+            "Cidade_UF": "São Paulo/SP"
+        },
+        {
+            "ID_Cliente": "CLI-1002",
+            "Nome_Cliente": "JULIANA FERREIRA LIMA ADVOCACIA",
+            "CPF_CNPJ": "11.144.980/0001-12",  # CNPJ válido formatado
+            "Email": "contato@julianalima.adv.br",
+            "Telefone_WhatsApp": "(11) 3245-8899",
+            "Cidade_UF": "Campinas/SP"
+        },
+        {
+            "ID_Cliente": "CLI-1003",
+            "Nome_Cliente": "carlos eduardo almeida silva",
+            "CPF_CNPJ": "4589214750",  # CPF com zero à esquerda ausente (10 dígitos, vira 045.892.147-50)
+            "Email": "carlos.almeida@email.com",
+            "Telefone_WhatsApp": "21988776655",
+            "Cidade_UF": "Rio de Janeiro/RJ"
+        },
+        {
+            "ID_Cliente": "CLI-1004",
+            "Nome_Cliente": "BEATRIZ SANTOS OLIVEIRA",
+            "CPF_CNPJ": "123.456.789-00",  # CPF Inválido (dígitos verificadores incorretos)
+            "Email": "beatriz.oliveira@gmail.com",
+            "Telefone_WhatsApp": "(31) 99123-4567",
+            "Cidade_UF": "Belo Horizonte/MG"
+        },
+        {
+            "ID_Cliente": "CLI-1005",
+            "Nome_Cliente": "AUTO MECANICA PROGRESSO LTDA",
+            "CPF_CNPJ": "11.222.333/0001-99",  # CNPJ Inválido
+            "Email": "financeiro@mecanicaprogresso.com.br",
+            "Telefone_WhatsApp": "4133445566",
+            "Cidade_UF": "Curitiba/PR"
+        },
+        {
+            "ID_Cliente": "CLI-1006",
+            "Nome_Cliente": "FERNANDA COSTA RIBEIRO",
+            "CPF_CNPJ": "21589347862",  # CPF Válido
+            "Email": "fernanda.costa@empresa",  # E-mail inválido (sem extensão de domínio)
+            "Telefone_WhatsApp": "(61) 98111-2233",
+            "Cidade_UF": "Brasília/DF"
+        },
+        {
+            "ID_Cliente": "CLI-1007",
+            "Nome_Cliente": "MARCOS VINICIUS DE SOUZA (FILIAL)",
+            "CPF_CNPJ": "52998224725",  # Duplicado com CLI-1001!
+            "Email": "marcos.souza@empresa.com.br",
+            "Telefone_WhatsApp": "11987654321",
+            "Cidade_UF": "São Paulo/SP"
+        },
+        {
+            "ID_Cliente": "CLI-1008",
+            "Nome_Cliente": "CAMILA ROCHA BARBOSA",
+            "CPF_CNPJ": "87541236900",  # CPF Válido
+            "Email": "camila.rocha@techcorp.io",
+            "Telefone_WhatsApp": "71987651234",
+            "Cidade_UF": "Salvador/BA"
+        },
+        {
+            "ID_Cliente": "CLI-1009",
+            "Nome_Cliente": "DISTRIBUIDORA ALIANCA NORTE S.A.",
+            "CPF_CNPJ": "33.000.167/0001-01",  # CNPJ Válido
+            "Email": "suprimentos@aliancanorte.com.br",
+            "Telefone_WhatsApp": "(81) 3456-7890",
+            "Cidade_UF": "Recife/PE"
+        },
+        {
+            "ID_Cliente": "CLI-1010",
+            "Nome_Cliente": "LUCAS SILVEIRA MENDES",
+            "CPF_CNPJ": "04589214750",  # CPF Válido com zero à esquerda
+            "Email": "lucas.mendes@provedor.com.br",
+            "Telefone_WhatsApp": "48999887766",
+            "Cidade_UF": "Florianópolis/SC"
+        },
+        {
+            "ID_Cliente": "CLI-1011",
+            "Nome_Cliente": "INDÚSTRIA METALÚRGICA SUL LTDA",
+            "CPF_CNPJ": "04.123.456/0001-08",  # CNPJ Válido
+            "Email": "fiscal@metalurgicasul.ind.br",
+            "Telefone_WhatsApp": "(51) 3322-1100",
+            "Cidade_UF": "Porto Alegre/RS"
+        }
+    ]
+
+    df = pd.DataFrame(demo_data)
+    df.to_excel(filepath, index=False)
+    return filepath, "Base_Clientes_Para_Higienizar.xlsx"
+

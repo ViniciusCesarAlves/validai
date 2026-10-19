@@ -33,6 +33,16 @@ def test_full_pipeline():
     print(f"  Colunas detectadas em B: {len(upload_res['cols_b'])}")
     print(f"  Mapeamento de Data_Fechamento: {upload_res['column_mapping'].get('Data_Fechamento')}")
 
+    # 2.1 Teste de Carregamento de Exemplo de Planilhas (/api/sheets/load-example)
+    res_sheets_ex = client.post('/api/sheets/load-example')
+    assert res_sheets_ex.status_code == 200, f"Falha POST /api/sheets/load-example: {res_sheets_ex.status_code}"
+    sheets_ex_json = res_sheets_ex.get_json()
+    assert 'session_id' in sheets_ex_json
+    assert sheets_ex_json['rows_a_count'] == 11
+    assert sheets_ex_json['rows_b_count'] == 11
+    assert 'ID_Pedido' in sheets_ex_json['suggested_keys']
+    print("[OK] Carregamento de exemplo demonstrativo de planilhas (/api/sheets/load-example) validado com sucesso!")
+
     # 3. Teste com seletor único da esquerda (sem colunas complementares)
     compare_payload_single = {
         'session_id': session_id,
@@ -278,9 +288,13 @@ def test_full_pipeline():
     html_guide = res_guide.data.decode('utf-8')
     assert 'btn-guide-planilhas' in html_guide
     assert 'btn-guide-texto' in html_guide
+    assert 'btn-guide-cadastros' in html_guide
+    assert 'btn-guide-xml' in html_guide
     assert 'guide-view-planilhas' in html_guide
     assert 'guide-view-texto' in html_guide
-    print("[OK] GET /como-usar renderizado com toggle Validar Planilhas / Validar Texto e ambos os guias!")
+    assert 'guide-view-cadastros' in html_guide
+    assert 'guide-view-xml' in html_guide
+    print("[OK] GET /como-usar renderizado com seletor das 4 ferramentas (Planilhas, Texto, Cadastros, XML) e todos os guias!")
 
     # 12. Teste do Dropdown de Idiomas (PT, ES, EN) e Internacionalização (i18n) em todas as páginas
     res_i18n_js = client.get('/static/js/i18n.js')
@@ -403,6 +417,18 @@ def test_full_pipeline():
     assert mapping['col_email'] == 'Email_Contato'
     assert mapping['col_phone'] == 'Telefone_Celular'
     print("[OK] Upload de base de cadastros e detecção automática de colunas realizado com sucesso!")
+
+    # B.1 Teste de Carregamento de Exemplo de Cadastros (/api/cadastros/load-example)
+    res_cad_ex = client.post('/api/cadastros/load-example')
+    assert res_cad_ex.status_code == 200, f"Falha POST /api/cadastros/load-example: {res_cad_ex.status_code}"
+    cad_ex_json = res_cad_ex.get_json()
+    assert 'session_id' in cad_ex_json
+    assert cad_ex_json['total_rows'] == 11
+    assert cad_ex_json['suggested']['col_doc'] == 'CPF_CNPJ'
+    assert cad_ex_json['suggested']['col_name'] == 'Nome_Cliente'
+    assert cad_ex_json['suggested']['col_email'] == 'Email'
+    assert cad_ex_json['suggested']['col_phone'] == 'Telefone_WhatsApp'
+    print("[OK] Carregamento de exemplo demonstrativo de cadastros (/api/cadastros/load-example) validado com sucesso!")
 
     # C. Teste do Processamento e Regras de Higienização
     process_payload = {
@@ -593,7 +619,71 @@ def test_full_pipeline():
     print("[OK] Planilha Espelho dos XMLs Extraídos gerada e validada com sucesso!")
 
     # =========================================================================
-    # 16. TESTE COMPLETO DE SEO TÉCNICO E SEMÂNTICO (META TAGS, OG, H1, FAQ, JSON-LD, ROBOTS E SITEMAP)
+    # 16. TESTE COMPLETO DO CONCILIADOR DE TAXAS E EXTRATOS (.OFX VS VENDAS ERP)
+    # =========================================================================
+    print("\n--- Testando Conciliador de Taxas e Extratos (.OFX vs Vendas) ---")
+
+    # A. Carregamento de exemplo demonstrativo (.ofx e .xlsx gerados pelo backend)
+    res_ofx_example = client.post('/api/ofx/load-example')
+    assert res_ofx_example.status_code == 200, f"Falha POST /api/ofx/load-example: {res_ofx_example.status_code}"
+    ofx_ex_data = res_ofx_example.get_json()
+    assert 'session_id' in ofx_ex_data
+    ofx_sess_id = ofx_ex_data['session_id']
+    assert ofx_ex_data['ofx_count'] == 8
+    assert ofx_ex_data['sheet_rows'] == 8
+    assert ofx_ex_data['suggested']['col_gross_val'] == 'Valor_Bruto'
+    assert ofx_ex_data['suggested']['col_id'] == 'ID_Venda_NSU'
+    print(f"[OK] Dados de exemplo OFX carregados com sucesso: {ofx_ex_data['ofx_count']} transações bancárias e {ofx_ex_data['sheet_rows']} vendas no PDV.")
+
+    # B. Execução da conciliação com Taxa Esperada de 3.50%
+    reconcile_payload = {
+        'session_id': ofx_sess_id,
+        'col_id': 'ID_Venda_NSU',
+        'col_gross_val': 'Valor_Bruto',
+        'col_date': 'Data_Venda',
+        'col_acquirer': 'Adquirente',
+        'expected_rate_pct': 3.5,
+        'tolerance_cents': 0.05,
+        'date_tolerance_days': 3
+    }
+    res_ofx_rec = client.post('/api/ofx/reconcile', json=reconcile_payload)
+    assert res_ofx_rec.status_code == 200, f"Falha POST /api/ofx/reconcile: {res_ofx_rec.status_code}"
+    ofx_rec_data = res_ofx_rec.get_json()
+    assert ofx_rec_data['success'] is True
+    assert 'report_id' in ofx_rec_data
+    ofx_rep_id = ofx_rec_data['report_id']
+
+    kpis = ofx_rec_data['kpis']
+    assert kpis['total_sales_count'] == 8
+    assert kpis['divergent_fees_count'] == 1, f"Deveria ter 1 venda com taxa a maior (esperado 1, obteve {kpis['divergent_fees_count']})"
+    assert kpis['unpaid_sales_count'] == 1, f"Deveria ter 1 venda não repassada (esperado 1, obteve {kpis['unpaid_sales_count']})"
+    assert kpis['orphan_credits_count'] == 1, f"Deveria ter 1 crédito avulso no OFX (esperado 1, obteve {kpis['orphan_credits_count']})"
+    assert kpis['reconciled_count'] == 6, f"Deveria ter 6 vendas 100% conciliadas (esperado 6, obteve {kpis['reconciled_count']})"
+    assert kpis['total_divergence_loss'] == 17.0, f"Prejuízo divergente esperado R$ 17.00, obteve {kpis['total_divergence_loss']}"
+    print(f"[OK] Motor de Conciliação validou com precisão: 6 conciliadas, 1 taxa a maior (prejuízo R$ {kpis['total_divergence_loss']}), 1 não repassada e 1 crédito avulso.")
+
+    # C. Download e validação do Relatório de Auditoria Excel (4 abas com células pintadas)
+    res_dl_ofx_audit = client.get(f'/api/ofx/download-audit/{ofx_rep_id}')
+    assert res_dl_ofx_audit.status_code == 200
+    assert len(res_dl_ofx_audit.data) > 5000
+    wb_ofx_audit = openpyxl.load_workbook(io.BytesIO(res_dl_ofx_audit.data))
+    assert 'Resumo Executivo' in wb_ofx_audit.sheetnames
+    assert 'Conciliação Completa' in wb_ofx_audit.sheetnames
+    assert 'Divergências e Pendências' in wb_ofx_audit.sheetnames
+    assert 'Espelho Extrato OFX' in wb_ofx_audit.sheetnames
+    assert len(wb_ofx_audit['Resumo Executivo']._images) >= 1, "Logo ValidAí ausente no Resumo Executivo OFX!"
+    print("[OK] Relatório de Auditoria OFX validado com 4 abas, formatação monetária, células pintadas e Logo ValidAí!")
+
+    # D. Download do Espelho Tabulado do Extrato OFX
+    res_dl_ofx_mirror = client.get(f'/api/ofx/download-mirror/{ofx_rep_id}')
+    assert res_dl_ofx_mirror.status_code == 200
+    assert len(res_dl_ofx_mirror.data) > 3000
+    wb_ofx_mirror = openpyxl.load_workbook(io.BytesIO(res_dl_ofx_mirror.data))
+    assert 'Extrato OFX Tabulado' in wb_ofx_mirror.sheetnames
+    print("[OK] Espelho Tabulado do Extrato OFX gerado e validado com sucesso!")
+
+    # =========================================================================
+    # 17. TESTE COMPLETO DE SEO TÉCNICO E SEMÂNTICO (META TAGS, OG, H1, FAQ, JSON-LD, ROBOTS E SITEMAP)
     # =========================================================================
     print("\n--- Testando Otimização de SEO Técnico e Semântico (ValidAí) ---")
     import json as json_mod
@@ -619,6 +709,11 @@ def test_full_pipeline():
             'title': 'Conciliador de Notas Fiscais (XML NFe/NFSe vs Excel) | ValidAí',
             'description': 'Cruze dados de arquivos XML de Notas Fiscais (NFe e NFSe) contra planilhas de controle no Excel de forma automatizada.',
             'h1': 'Conciliador de Notas Fiscais (XML NFe/NFSe vs Excel)',
+        },
+        '/conciliador-taxas': {
+            'title': 'Conciliador de Taxas e Extratos (.OFX vs Vendas) | ValidAí',
+            'description': 'Audite taxas de maquininhas (Stone, Cielo, Rede) e repasses de marketplaces contra extratos bancários .OFX.',
+            'h1': 'Conciliação de Taxas e Extratos (.OFX vs Vendas)',
         },
         '/como-usar': {
             'title': 'Como Usar o ValidAí | Guia Completo de Validação e Auditoria de Dados',
@@ -690,14 +785,14 @@ def test_full_pipeline():
     print("[OK] Seção de Perguntas Frequentes (<details>/<summary>) e Schema FAQPage + WebApplication validados na Home!")
 
     # Verificar rotas "Em Breve" com proteção de Crawl Budget (noindex, follow)
-    upcoming_routes = ['/conciliador-taxas', '/auditoria-rh', '/validador-json']
+    upcoming_routes = ['/auditoria-rh', '/validador-json']
     for up_route in upcoming_routes:
         res_up = client.get(up_route)
         assert res_up.status_code == 200, f"Rota Em Breve {up_route} retornou {res_up.status_code}"
         up_html = res_up.data.decode('utf-8')
         assert '<meta name="robots" content="noindex, follow">' in up_html, f"Falta noindex, follow em {up_route}"
         assert f'<link rel="canonical" href="https://validai.app.br{up_route}">' in up_html
-    print("[OK] Proteção de Crawl Budget (<meta name=\"robots\" content=\"noindex, follow\">) validada em /conciliador-taxas, /auditoria-rh e /validador-json!")
+    print("[OK] Proteção de Crawl Budget (<meta name=\"robots\" content=\"noindex, follow\">) validada em /auditoria-rh e /validador-json!")
 
     # Verificar /robots.txt, /sitemap.xml e /health
     res_robots = client.get('/robots.txt')
@@ -714,11 +809,11 @@ def test_full_pipeline():
     assert res_sitemap.status_code == 200
     assert 'xml' in res_sitemap.mimetype
     sitemap_xml = res_sitemap.data.decode('utf-8')
-    for active_url in ['https://validai.app.br/', 'https://validai.app.br/validador-texto', 'https://validai.app.br/validador-cadastros', 'https://validai.app.br/validador-xml', 'https://validai.app.br/como-usar']:
+    for active_url in ['https://validai.app.br/', 'https://validai.app.br/validador-texto', 'https://validai.app.br/validador-cadastros', 'https://validai.app.br/validador-xml', 'https://validai.app.br/conciliador-taxas', 'https://validai.app.br/como-usar']:
         assert f'<loc>{active_url}</loc>' in sitemap_xml, f"URL {active_url} ausente no sitemap.xml"
-    for excluded_url in ['/conciliador-taxas', '/auditoria-rh', '/validador-json', '/health']:
+    for excluded_url in ['/auditoria-rh', '/validador-json', '/health']:
         assert excluded_url not in sitemap_xml, f"Rota {excluded_url} não deveria estar no sitemap.xml"
-    print("[OK] /sitemap.xml servido corretamente com todas as 5 URLs canônicas ativas e sem /health!")
+    print("[OK] /sitemap.xml servido corretamente com todas as 6 URLs canônicas ativas e sem /health!")
 
     res_health_get = client.get('/health')
     assert res_health_get.status_code == 200

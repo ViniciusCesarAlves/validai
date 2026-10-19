@@ -28,7 +28,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=20">
+    <link rel="stylesheet" href="/static/css/style.css?v=34">
     <script>
         (function() {
             try {
@@ -42,7 +42,7 @@
             } catch(e) {}
         })();
     </script>
-    <script src="/static/js/i18n.js?v=4" defer></script>
+    <script src="/static/js/i18n.js?v=5" defer></script>
 
     <!-- Schema.org JSON-LD: WebApplication / SoftwareApplication -->
     <script type="application/ld+json">
@@ -106,6 +106,22 @@
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "A normalização inteligente equipara automaticamente variações de formatação que representam o mesmo valor real: moedas e decimais ('R$ 15.650,00' e '15650.00'), formatos de data ('01/08/2026' e '2026-08-01'), diferenças entre letras maiúsculas e minúsculas, zeros à esquerda e espaços extras no início ou fim das células."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "O que é a Chave Primária (Identificador Principal) e qual coluna devo escolher?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A Chave Primária é a coluna que identifica exclusivamente cada registro nas duas planilhas, como CPF, CNPJ, Código do Produto, Número da Nota Fiscal ou ID do Pedido. Graças a ela, o ValidAí localiza e cruza o mesmo registro com precisão mesmo que as planilhas estejam fora de ordem."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "É possível auditar apenas uma planilha isolada para achar duplicidades e erros internos?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sim! Basta alternar para o modo 'Auditar 1 Base' no topo do Passo 1. Nele você pode aplicar 12 tipos de regras de consistência em uma única planilha, como busca de valores duplicados, campos vazios obrigatórios, validação de apenas números ou letras e comparação entre duas colunas do mesmo arquivo."
           }
         }
       ]
@@ -195,7 +211,7 @@
                             </a>
 
                             <!-- 3. Conciliação de Taxas e Extratos (.OFX) -->
-                            <a href="/conciliador-taxas" class="nav-dropdown-item" role="menuitem" data-upcoming="true">
+                            <a href="/conciliador-taxas" class="nav-dropdown-item" role="menuitem">
                                 <div class="nav-dropdown-item-icon">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <rect x="2" y="5" width="20" height="14" rx="2"/>
@@ -207,7 +223,7 @@
                                 <div class="nav-dropdown-item-content">
                                     <div class="nav-dropdown-item-header">
                                         <span class="nav-dropdown-item-title" data-i18n="module_ofx_title">Conciliação de Taxas e Extratos (.OFX)</span>
-                                        <span class="nav-dropdown-item-badge" data-i18n="badge_coming_soon">Em breve</span>
+                                        <span class="nav-dropdown-item-badge new-badge" data-i18n="badge_new">Novo</span>
                                     </div>
                                     <span class="nav-dropdown-item-subtitle" data-i18n="module_ofx_sub">Auditoria de maquininhas, PIX e marketplaces</span>
                                 </div>
@@ -317,7 +333,6 @@
                         <path class="moon-icon-path" d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646z"/>
                     </svg>
                 </button>
-                <span class="version-tag">v2.0</span>
             </div>
         </div>
     </header>
@@ -434,12 +449,19 @@
                 </div>
             </div>
 
-            <div class="action-footer">
-                <button type="button" class="btn btn-pill-gradient" id="btn-read-headers" disabled>
-                    <span class="btn-text" data-i18n="sheets_btn_read_headers">Ler Cabeçalhos e Continuar</span>
-                    <span class="spinner" style="display: none;"></span>
-                    <span class="btn-circle-icon">→</span>
-                </button>
+            <div class="action-footer action-footer-between">
+                <div class="action-footer-left">
+                    <button type="button" class="btn btn-pill-outline" id="btn-sheets-try-example" title="Carregar duas planilhas de exemplo para testar">
+                        <span class="btn-text" data-i18n="btn_try_example">Testar Exemplo</span>
+                    </button>
+                </div>
+                <div class="action-footer-right">
+                    <button type="button" class="btn btn-pill-gradient" id="btn-read-headers" disabled>
+                        <span class="btn-text" data-i18n="sheets_btn_read_headers">Ler Cabeçalhos e Continuar</span>
+                        <span class="spinner" style="display: none;"></span>
+                        <span class="btn-circle-icon">→</span>
+                    </button>
+                </div>
             </div>
         </section>
 
@@ -1600,6 +1622,39 @@
                         Antes de comparar os valores, o algoritmo de normalização inteligente do ValidAí pode ignorar diferenças irrelevantes entre sistemas, como letras maiúsculas/minúsculas, acentuação, espaços duplos, zeros à esquerda em códigos, formatos de datas (<code>DD/MM/AAAA</code> vs <code>AAAA-MM-DD</code>) e símbolos de moeda (<code>R$ 1.500,00</code> vs <code>1500.0</code>), destacando apenas divergências reais de conteúdo.
                     </div>
                 </details>
+
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>O que é a Chave Primária (Identificador Principal) e qual coluna devo escolher?</span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        A Chave Primária é a coluna que identifica exclusivamente cada registro nas duas planilhas, como CPF, CNPJ, Código do Produto, Número da Nota Fiscal ou ID do Pedido. Graças a ela, o ValidAí localiza e cruza o mesmo registro com precisão mesmo que as planilhas estejam fora de ordem ou tenham quantidades de linhas diferentes.
+                    </div>
+                </details>
+
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>É possível auditar apenas uma planilha isolada para achar duplicidades e erros internos?</span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        Sim! Basta alternar para o modo <strong>Auditar 1 Base</strong> no topo do Passo 1. Nele você pode aplicar 12 tipos de regras de consistência em uma única planilha, como busca de valores duplicados, campos vazios obrigatórios, validação de apenas números ou letras e comparação entre duas colunas do mesmo arquivo.
+                    </div>
+                </details>
+            </div>
+
+            <div class="seo-faq-help-cta">
+                <div class="seo-faq-help-text">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <span>Ficou com dúvida de como usar?</span>
+                </div>
+                <a href="/como-usar" class="seo-faq-help-link">
+                    <span>Acessar página Como Usar</span>
+                    <span aria-hidden="true">→</span>
+                </a>
             </div>
         </section>
 
@@ -1608,6 +1663,7 @@
     <footer class="footer">
         <div class="container footer-content">
             <p data-i18n="footer_copyright">&copy; 2026 ValidAí. Todos os direitos reservados.</p>
+            <span class="version-tag" aria-hidden="true">v3.2</span>
         </div>
     </footer>
 
@@ -1717,6 +1773,6 @@
         </div>
     </div>
 
-    <script src="/static/js/app.js?v=2" defer></script>
+    <script src="/static/js/app.js?v=6" defer></script>
 </body>
 </html>
