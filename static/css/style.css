@@ -8039,3 +8039,12 @@ body:not(.dark-theme) .btn-cookie-settings {
     width: 100%;
     min-height: 90px;
 }
+
+/* Colapso Automático de Anúncios Não Preenchidos (Google AdSense unfilled) */
+.adsbygoogle[data-ad-status="unfilled"] {
+    display: none !important;
+}
+
+.validai-ad-wrapper:has(.adsbygoogle[data-ad-status="unfilled"]) {
+    display: none !important;
+}

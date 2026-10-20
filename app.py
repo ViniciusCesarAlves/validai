@@ -179,14 +179,18 @@ def inject_seo_metadata():
         }
     }
 
+ADSENSE_SLOTS_ENABLED = os.environ.get('ADSENSE_SLOTS_ENABLED', 'false').lower() == 'true'
+
 @app.context_processor
 def inject_ads_context():
     adsense_id = os.environ.get('ADSENSE_CLIENT_ID', 'ca-pub-3178662755020611').strip()
+    slots_enabled = os.environ.get('ADSENSE_SLOTS_ENABLED', 'false').lower() == 'true'
     # show_ads: True por padrão para visitantes e plano Standard; False no futuro para assinantes Plus/Pro
     show_ads = True
     return {
         'show_ads': show_ads,
-        'adsense_client_id': adsense_id
+        'adsense_client_id': adsense_id,
+        'adsense_slots_enabled': slots_enabled
     }
 
 

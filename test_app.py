@@ -1061,16 +1061,39 @@ def test_full_pipeline():
         assert f'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={prod_pub_id}' in page_html, f"Script AdSense ausente em {p_route}"
     print(f"[OK] Meta tag de verificação e script oficial ({prod_pub_id}) validados no <head> de todas as páginas públicas!")
 
-    # Validação dos Containers de Anúncio com CLS Protegido
-    res_home_ads = client.get('/')
-    home_html = res_home_ads.data.decode('utf-8')
-    assert '<ins class="adsbygoogle' in home_html, "Container de anúncio deve estar presente na Home!"
-    assert prod_pub_id in home_html, f"ID {prod_pub_id} deve constar no bloco de anúncio!"
+    # Validação da Ocultação de Containers Visuais (ADSENSE_SLOTS_ENABLED = false por padrão)
+    # Cenário A: Slots desativados (durante fase de aprovação do AdSense)
+    if 'ADSENSE_SLOTS_ENABLED' in os.environ:
+        del os.environ['ADSENSE_SLOTS_ENABLED']
+    res_home_disabled = client.get('/')
+    home_disabled_html = res_home_disabled.data.decode('utf-8')
+    assert '<div class="validai-ad-wrapper"' not in home_disabled_html, "Caixa visual de anúncio NÃO deve ser renderizada quando ADSENSE_SLOTS_ENABLED=false!"
+    assert '<ins class="adsbygoogle' not in home_disabled_html, "Tag <ins adsbygoogle> NÃO deve ser renderizada quando ADSENSE_SLOTS_ENABLED=false!"
+    assert 'class="validai-ad-badge"' not in home_disabled_html, "Badge 'PUBLICIDADE' NÃO deve ser exibida quando ADSENSE_SLOTS_ENABLED=false!"
+    print("[OK] Containers visuais 100% ocultos com ADSENSE_SLOTS_ENABLED=false (tela limpa durante aprovação)!")
 
-    res_guide_ads = client.get('/como-usar')
-    guide_html = res_guide_ads.data.decode('utf-8')
-    assert '<ins class="adsbygoogle' in guide_html, "Container de anúncio deve constar em /como-usar!"
-    print(f"[OK] Containers de anúncios ({prod_pub_id}) validados com proteção contra CLS e inserção precisa!")
+    # Cenário B: Slots ativados explicitamente (quando o Google aprovar a conta)
+    os.environ['ADSENSE_SLOTS_ENABLED'] = 'true'
+    try:
+        res_home_enabled = client.get('/')
+        home_enabled_html = res_home_enabled.data.decode('utf-8')
+        assert '<div class="validai-ad-wrapper"' in home_enabled_html, "Container visual deve ser renderizado quando ADSENSE_SLOTS_ENABLED=true!"
+        assert '<ins class="adsbygoogle' in home_enabled_html, "Tag <ins adsbygoogle> deve ser renderizada quando ADSENSE_SLOTS_ENABLED=true!"
+        assert prod_pub_id in home_enabled_html, f"ID {prod_pub_id} deve constar no bloco de anúncio!"
+
+        res_guide_enabled = client.get('/como-usar')
+        guide_enabled_html = res_guide_enabled.data.decode('utf-8')
+        assert '<ins class="adsbygoogle' in guide_enabled_html, "Container de anúncio deve constar em /como-usar quando ativo!"
+        print(f"[OK] Containers visuais ativados com sucesso quando ADSENSE_SLOTS_ENABLED=true!")
+    finally:
+        if 'ADSENSE_SLOTS_ENABLED' in os.environ:
+            del os.environ['ADSENSE_SLOTS_ENABLED']
+
+    # Validação da Regra CSS para Anúncios Não Preenchidos (unfilled)
+    with open('static/css/style.css', 'r', encoding='utf-8') as f_css:
+        css_content = f_css.read()
+    assert '.adsbygoogle[data-ad-status="unfilled"]' in css_content, "Regra CSS data-ad-status='unfilled' deve constar em style.css!"
+    print("[OK] Regra CSS de colapso automático para anúncios 'unfilled' validada com sucesso!")
 
     print("\nTODOS OS TESTES PASSARAM COM 100% DE SUCESSO!")
 
