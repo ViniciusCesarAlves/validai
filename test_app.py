@@ -1033,33 +1033,44 @@ def test_full_pipeline():
         assert 'href="/sobre"' in chk_html, f"Link /sobre ausente no footer em {check_route}"
     print("[OK] Banner de Cookies LGPD e links institucionais validados no footer de todas as páginas!")
 
-    # 18.5 Proteção de CLS e Condicionalidade de Anúncios AdSense
-    # Cenário A: Sem variável de ambiente ADSENSE_CLIENT_ID (Padrão de Segurança / Homologação)
-    if 'ADSENSE_CLIENT_ID' in os.environ:
-        del os.environ['ADSENSE_CLIENT_ID']
-    res_no_ads = client.get('/')
-    no_ads_html = res_no_ads.data.decode('utf-8')
-    assert '<ins class="adsbygoogle' not in no_ads_html, "Anúncio não deve ser renderizado quando ADSENSE_CLIENT_ID estiver vazio!"
-    assert 'pagead2.googlesyndication.com' not in no_ads_html, "Script AdSense não deve carregar sem ADSENSE_CLIENT_ID!"
-    print("[OK] Regra Crítica Validada: Sem ADSENSE_CLIENT_ID, os blocos ficam 100% ocultos/não renderizados!")
+    # 18.5 Conexão, Verificação e Validação do Google AdSense & ads.txt
+    prod_pub_id = 'ca-pub-3178662755020611'
+    
+    # Validação da Rota Pública /ads.txt
+    res_ads_txt = client.get('/ads.txt')
+    assert res_ads_txt.status_code == 200, f"/ads.txt deve retornar status 200, retornou {res_ads_txt.status_code}"
+    assert 'text/plain' in res_ads_txt.content_type, f"Content-Type de /ads.txt deve ser text/plain, retornou {res_ads_txt.content_type}"
+    ads_txt_body = res_ads_txt.data.decode('utf-8').strip()
+    expected_ads_line = "google.com, pub-3178662755020611, DIRECT, f08c47fec0942fa0"
+    assert expected_ads_line in ads_txt_body, f"Linha esperada ausente em /ads.txt: {ads_txt_body}"
+    print("[OK] Rota /ads.txt validada (HTTP 200, text/plain e linha oficial do Google AdSense)!")
 
-    # Cenário B: Com variável de ambiente ADSENSE_CLIENT_ID ativa
-    test_pub_id = 'ca-pub-1234567890123456'
-    os.environ['ADSENSE_CLIENT_ID'] = test_pub_id
-    try:
-        res_with_ads = client.get('/')
-        with_ads_html = res_with_ads.data.decode('utf-8')
-        assert '<ins class="adsbygoogle' in with_ads_html, "Anúncio deve ser renderizado quando ADSENSE_CLIENT_ID estiver ativo!"
-        assert test_pub_id in with_ads_html, "Client ID do AdSense deve constar no bloco!"
-        assert 'pagead2.googlesyndication.com' in with_ads_html, "Script AdSense deve carregar quando ADSENSE_CLIENT_ID estiver ativo!"
-        
-        # Testar também em /como-usar
-        res_guide_ads = client.get('/como-usar')
-        guide_ads_html = res_guide_ads.data.decode('utf-8')
-        assert '<ins class="adsbygoogle' in guide_ads_html, "Anúncio deve constar em /como-usar antes do banner final!"
-        print(f"[OK] Containers de anúncios ({test_pub_id}) validados com proteção contra CLS e inserção precisa!")
-    finally:
-        del os.environ['ADSENSE_CLIENT_ID']
+    # Validação do robots.txt permitindo /ads.txt
+    res_robots = client.get('/robots.txt')
+    robots_body = res_robots.data.decode('utf-8')
+    assert 'Disallow: /ads.txt' not in robots_body, "/ads.txt NÃO pode estar bloqueado no robots.txt!"
+    assert 'Allow: /ads.txt' in robots_body, "robots.txt deve permitir explicitamente /ads.txt!"
+    print("[OK] robots.txt validado sem bloqueios para /ads.txt!")
+
+    # Validação da Meta Tag e Script Oficial em todas as páginas públicas
+    public_routes = ['/', '/como-usar', '/privacidade', '/termos', '/sobre', '/auditoria-rh', '/conciliador-taxas']
+    for p_route in public_routes:
+        res_page = client.get(p_route)
+        page_html = res_page.data.decode('utf-8')
+        assert f'<meta name="google-adsense-account" content="{prod_pub_id}">' in page_html, f"Meta tag AdSense ausente em {p_route}"
+        assert f'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={prod_pub_id}' in page_html, f"Script AdSense ausente em {p_route}"
+    print(f"[OK] Meta tag de verificação e script oficial ({prod_pub_id}) validados no <head> de todas as páginas públicas!")
+
+    # Validação dos Containers de Anúncio com CLS Protegido
+    res_home_ads = client.get('/')
+    home_html = res_home_ads.data.decode('utf-8')
+    assert '<ins class="adsbygoogle' in home_html, "Container de anúncio deve estar presente na Home!"
+    assert prod_pub_id in home_html, f"ID {prod_pub_id} deve constar no bloco de anúncio!"
+
+    res_guide_ads = client.get('/como-usar')
+    guide_html = res_guide_ads.data.decode('utf-8')
+    assert '<ins class="adsbygoogle' in guide_html, "Container de anúncio deve constar em /como-usar!"
+    print(f"[OK] Containers de anúncios ({prod_pub_id}) validados com proteção contra CLS e inserção precisa!")
 
     print("\nTODOS OS TESTES PASSARAM COM 100% DE SUCESSO!")
 

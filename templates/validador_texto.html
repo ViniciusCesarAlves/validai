@@ -28,7 +28,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=37">
+    <link rel="stylesheet" href="/static/css/style.css?v=38">
     {% include 'partials/ads_head.html' %}
     <link rel="stylesheet" href="/static/css/text_validator.css?v=17">
 
@@ -68,6 +68,7 @@
                     document.documentElement.classList.add('dark-theme');
                     document.addEventListener('DOMContentLoaded', function() {
                         if (document.body) {
+                            document.body.setAttribute('data-theme', 'dark');
                             document.body.classList.add('dark-theme');
                         }
                     });
@@ -75,7 +76,7 @@
             } catch(e) {}
         })();
     </script>
-    <script src="/static/js/i18n.js?v=4" defer></script>
+    <script src="/static/js/i18n.js?v=10" defer></script>
 </head>
 <body>
 
@@ -681,6 +682,6 @@
 
     {% include 'partials/footer.html' %}
 
-    <script src="/static/js/text_validator.js?v=2" defer></script>
+    <script src="/static/js/text_validator.js?v=10" defer></script>
 </body>
 </html>

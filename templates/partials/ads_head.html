@@ -1,5 +1,6 @@
-{% if show_ads and adsense_client_id %}
-    <!-- Google AdSense Script Oficial (Ativo apenas quando ADSENSE_CLIENT_ID está configurado) -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ adsense_client_id }}" crossorigin="anonymous"></script>
-{% endif %}
-
+    <!-- Google AdSense - Meta de Verificação de Propriedade do Site -->
+    <meta name="google-adsense-account" content="ca-pub-3178662755020611">
+    {% if show_ads %}
+    <!-- Google AdSense Script Oficial -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3178662755020611" crossorigin="anonymous"></script>
+    {% endif %}

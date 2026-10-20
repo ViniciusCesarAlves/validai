@@ -181,7 +181,7 @@ def inject_seo_metadata():
 
 @app.context_processor
 def inject_ads_context():
-    adsense_id = os.environ.get('ADSENSE_CLIENT_ID', '').strip()
+    adsense_id = os.environ.get('ADSENSE_CLIENT_ID', 'ca-pub-3178662755020611').strip()
     # show_ads: True por padrão para visitantes e plano Standard; False no futuro para assinantes Plus/Pro
     show_ads = True
     return {
@@ -251,12 +251,22 @@ def robots_txt():
     content = (
         "User-agent: *\n"
         "Allow: /\n"
+        "Allow: /ads.txt\n"
         "Disallow: /api/\n"
         "Disallow: /health\n"
         "\n"
         f"Sitemap: {SITE_DOMAIN}/sitemap.xml\n"
     )
     return Response(content, mimetype='text/plain; charset=utf-8')
+
+
+@app.route('/ads.txt')
+def ads_txt():
+    content = "google.com, pub-3178662755020611, DIRECT, f08c47fec0942fa0\n"
+    response = Response(content, mimetype='text/plain; charset=utf-8')
+    response.headers['Content-Type'] = 'text/plain; charset=utf-8'
+    response.headers['Cache-Control'] = 'public, max-age=86400'
+    return response
 
 
 @app.route('/sitemap.xml')

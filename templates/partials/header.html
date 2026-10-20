@@ -242,11 +242,17 @@
                 if (isDark) {
                     docEl.setAttribute('data-theme', 'dark');
                     docEl.classList.add('dark-theme');
-                    if (document.body) document.body.classList.add('dark-theme');
+                    if (document.body) {
+                        document.body.setAttribute('data-theme', 'dark');
+                        document.body.classList.add('dark-theme');
+                    }
                 } else {
                     docEl.removeAttribute('data-theme');
                     docEl.classList.remove('dark-theme');
-                    if (document.body) document.body.classList.remove('dark-theme');
+                    if (document.body) {
+                        document.body.removeAttribute('data-theme');
+                        document.body.classList.remove('dark-theme');
+                    }
                 }
                 var btn = document.getElementById('theme-toggle-btn');
                 if (btn) {
@@ -256,15 +262,18 @@
             }
 
             function toggleTheme() {
+                var current = getSavedTheme();
                 var docEl = document.documentElement;
-                var isDark = docEl.getAttribute('data-theme') === 'dark' ||
-                             docEl.classList.contains('dark-theme') ||
-                             (document.body && document.body.classList.contains('dark-theme'));
-                var next = isDark ? 'light' : 'dark';
+                var isDarkNow = (current === 'dark') ||
+                                (docEl.getAttribute('data-theme') === 'dark') ||
+                                (docEl.classList && docEl.classList.contains('dark-theme')) ||
+                                (document.body && document.body.classList && document.body.classList.contains('dark-theme'));
+                var next = isDarkNow ? 'light' : 'dark';
                 applyTheme(next);
                 try {
                     localStorage.setItem(THEME_KEY, next);
                 } catch(e) {}
+                return next;
             }
 
             window.ValidAiTheme = {
@@ -273,26 +282,36 @@
                 get: getSavedTheme
             };
 
-            function initThemeButton() {
-                var btn = document.getElementById('theme-toggle-btn');
-                if (!btn) return;
-                if (btn._themeBound) return;
-                btn._themeBound = true;
-
-                // Sincroniza estado visual inicial
-                applyTheme(getSavedTheme());
-
-                btn.addEventListener('click', function(e) {
+            function handleThemeClick(e) {
+                var target = e.target;
+                var btn = target && target.closest ? target.closest('#theme-toggle-btn') : null;
+                if (!btn && target && (target.id === 'theme-toggle-btn' || (target.classList && target.classList.contains('theme-toggle-btn')))) {
+                    btn = target;
+                }
+                if (btn) {
                     e.preventDefault();
+                    e.stopPropagation();
+                    if (typeof e.stopImmediatePropagation === 'function') {
+                        e.stopImmediatePropagation();
+                    }
                     toggleTheme();
-                });
+                }
             }
 
-            // Inicializa imediatamente se o botão já estiver no DOM
-            initThemeButton();
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initThemeButton);
+            // Intercepta cliques no botão na fase de CAPTURA global (document level).
+            // Isso garante que NENHUM listener residual em cache possa cancelar ou reverter o tema.
+            document.addEventListener('click', handleThemeClick, true);
+
+            function initThemeState() {
+                applyTheme(getSavedTheme());
             }
+
+            // Sincroniza imediatamente e garante sincronismo no carregamento da página
+            initThemeState();
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initThemeState);
+            }
+            window.addEventListener('pageshow', initThemeState);
         })();
     </script>
 
