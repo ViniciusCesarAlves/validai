@@ -1,0 +1,804 @@
+<!-- Widget Fixo no Canto Inferior Esquerdo: Âncora de Planos e Status de Limites -->
+{% if user_summary is defined %}
+<style>
+/* Estilos Críticos e Imediatos do Widget Fixo (Proteção contra Cache) */
+.fixed-bottom-left-stack {
+    position: fixed !important;
+    bottom: 24px !important;
+    left: 24px !important;
+    z-index: 950 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    font-family: 'Outfit', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    pointer-events: auto !important;
+}
+
+body.has-cookie-banner .fixed-bottom-left-stack {
+    bottom: 96px !important;
+}
+
+@media (max-width: 768px) {
+    .fixed-bottom-left-stack {
+        bottom: 16px !important;
+        left: 16px !important;
+        gap: 8px !important;
+    }
+    body.has-cookie-banner .fixed-bottom-left-stack {
+        bottom: 130px !important;
+    }
+}
+
+/* 1. Âncora de Planos (Quadrado Laranja) */
+.fixed-planos-anchor {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    height: 38px !important;
+    padding: 0 16px 0 14px !important;
+    border-radius: 9999px !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1.5px solid rgba(245, 158, 11, 0.6) !important;
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.15), 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    color: #b45309 !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    white-space: nowrap !important;
+}
+
+.fixed-planos-anchor .fixed-planos-anchor-icon {
+    stroke: #d97706;
+    transition: transform 0.2s ease;
+}
+
+.fixed-planos-anchor .fixed-planos-anchor-arrow {
+    stroke: #d97706;
+    opacity: 0.7;
+    transition: transform 0.2s ease;
+}
+
+.fixed-planos-anchor:hover {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    color: #ffffff !important;
+    border-color: #f59e0b !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35) !important;
+}
+
+.fixed-planos-anchor:hover .fixed-planos-anchor-icon,
+.fixed-planos-anchor:hover .fixed-planos-anchor-arrow {
+    stroke: #ffffff !important;
+    opacity: 1 !important;
+}
+
+.fixed-planos-anchor:hover .fixed-planos-anchor-arrow {
+    transform: translateX(2px);
+}
+
+html[data-theme="dark"] .fixed-planos-anchor,
+body.dark-theme .fixed-planos-anchor {
+    background: rgba(23, 24, 32, 0.96) !important;
+    border-color: rgba(245, 158, 11, 0.45) !important;
+    color: #fbbf24 !important;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45) !important;
+}
+
+html[data-theme="dark"] .fixed-planos-anchor .fixed-planos-anchor-icon,
+html[data-theme="dark"] .fixed-planos-anchor .fixed-planos-anchor-arrow,
+body.dark-theme .fixed-planos-anchor .fixed-planos-anchor-icon,
+body.dark-theme .fixed-planos-anchor .fixed-planos-anchor-arrow {
+    stroke: #fbbf24;
+}
+
+html[data-theme="dark"] .fixed-planos-anchor:hover,
+body.dark-theme .fixed-planos-anchor:hover {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    color: #ffffff !important;
+    border-color: #fbbf24 !important;
+    box-shadow: 0 6px 22px rgba(245, 158, 11, 0.45) !important;
+}
+
+html[data-theme="dark"] .fixed-planos-anchor:hover .fixed-planos-anchor-icon,
+html[data-theme="dark"] .fixed-planos-anchor:hover .fixed-planos-anchor-arrow,
+body.dark-theme .fixed-planos-anchor:hover .fixed-planos-anchor-icon,
+body.dark-theme .fixed-planos-anchor:hover .fixed-planos-anchor-arrow {
+    stroke: #ffffff;
+}
+
+/* 2. Container do Status do Plano e Validações Restantes (Quadrado Verde) */
+.fixed-plan-status-container {
+    position: relative !important;
+}
+
+.fixed-plan-pill {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    height: 44px !important;
+    padding: 0 16px 0 12px !important;
+    border-radius: 9999px !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1.5px solid rgba(79, 213, 128, 0.5) !important;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.1), 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    color: var(--text-main, #0f172a) !important;
+    cursor: pointer !important;
+    font-family: inherit !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    outline: none !important;
+    user-select: none !important;
+    white-space: nowrap !important;
+}
+
+.fixed-plan-pill:hover {
+    transform: translateY(-2px) !important;
+    border-color: #4FD580 !important;
+    box-shadow: 0 8px 25px rgba(79, 213, 128, 0.25), 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+}
+
+.fixed-plan-status-container.open .fixed-plan-pill {
+    border-color: #4FD580 !important;
+    box-shadow: 0 0 0 3px rgba(79, 213, 128, 0.25) !important;
+}
+
+html[data-theme="dark"] .fixed-plan-pill,
+body.dark-theme .fixed-plan-pill {
+    background: rgba(20, 21, 27, 0.96) !important;
+    border: 1.5px solid rgba(79, 213, 128, 0.35) !important;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45) !important;
+    color: #f1f5f9 !important;
+}
+
+html[data-theme="dark"] .fixed-plan-pill:hover,
+body.dark-theme .fixed-plan-pill:hover {
+    border-color: #4FD580 !important;
+    box-shadow: 0 8px 30px rgba(79, 213, 128, 0.3) !important;
+}
+
+.fixed-plan-pill-icon {
+    font-size: 16px !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.fixed-plan-pill-text {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1px !important;
+    line-height: 1.15 !important;
+}
+
+.fixed-plan-pill-title {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    color: #64748b !important;
+}
+
+html[data-theme="dark"] .fixed-plan-pill-title,
+body.dark-theme .fixed-plan-pill-title {
+    color: #94a3b8 !important;
+}
+
+.fixed-plan-pill-badge {
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    color: #15803d !important;
+}
+
+html[data-theme="dark"] .fixed-plan-pill-badge,
+body.dark-theme .fixed-plan-pill-badge {
+    color: #4FD580 !important;
+}
+
+.fixed-plan-pill-badge.badge-pro {
+    color: #d97706 !important;
+}
+
+html[data-theme="dark"] .fixed-plan-pill-badge.badge-pro,
+body.dark-theme .fixed-plan-pill-badge.badge-pro {
+    color: #fbbf24 !important;
+}
+
+.fixed-plan-pill-badge.badge-plus {
+    color: #2563eb !important;
+}
+
+html[data-theme="dark"] .fixed-plan-pill-badge.badge-plus,
+body.dark-theme .fixed-plan-pill-badge.badge-plus {
+    color: #60a5fa !important;
+}
+
+.fixed-plan-pill-chevron {
+    color: #64748b !important;
+    transition: transform 0.25s ease !important;
+    margin-left: 2px !important;
+}
+
+.fixed-plan-status-container.open .fixed-plan-pill-chevron {
+    transform: rotate(180deg) !important;
+}
+
+/* Card / Popover Expansível de Detalhes */
+.fixed-plan-card {
+    position: absolute !important;
+    bottom: calc(100% + 12px) !important;
+    left: 0 !important;
+    width: 320px !important;
+    max-width: calc(100vw - 32px) !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.16), 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+    padding: 18px 20px !important;
+    display: none;
+    flex-direction: column !important;
+    gap: 14px !important;
+    opacity: 0 !important;
+    transform: translateY(10px) scale(0.97) !important;
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 960 !important;
+}
+
+.fixed-plan-status-container.open .fixed-plan-card {
+    display: flex !important;
+    opacity: 1 !important;
+    transform: translateY(0) scale(1) !important;
+}
+
+html[data-theme="dark"] .fixed-plan-card,
+body.dark-theme .fixed-plan-card {
+    background: #171820 !important;
+    border-color: #2a2d3a !important;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6) !important;
+}
+
+.fixed-plan-card-header {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding-bottom: 12px !important;
+}
+
+html[data-theme="dark"] .fixed-plan-card-header,
+body.dark-theme .fixed-plan-card-header {
+    border-bottom-color: #2a2d3a !important;
+}
+
+.fixed-plan-card-title-group {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+}
+
+.fixed-plan-card-eyebrow {
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.08em !important;
+    color: #64748b !important;
+}
+
+.fixed-plan-card-heading {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.plan-card-icon {
+    font-size: 16px !important;
+    line-height: 1 !important;
+}
+
+.plan-card-name {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+}
+
+html[data-theme="dark"] .plan-card-name,
+body.dark-theme .plan-card-name {
+    color: #f8fafc !important;
+}
+
+.plan-card-tag {
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    padding: 2px 8px !important;
+    border-radius: 9999px !important;
+}
+
+.plan-card-tag.tag-std {
+    background: rgba(79, 213, 128, 0.15) !important;
+    color: #15803d !important;
+}
+
+html[data-theme="dark"] .plan-card-tag.tag-std,
+body.dark-theme .plan-card-tag.tag-std {
+    color: #4FD580 !important;
+}
+
+.plan-card-tag.tag-plus {
+    background: rgba(59, 130, 246, 0.15) !important;
+    color: #2563eb !important;
+}
+
+html[data-theme="dark"] .plan-card-tag.tag-plus,
+body.dark-theme .plan-card-tag.tag-plus {
+    color: #60a5fa !important;
+}
+
+.plan-card-tag.tag-pro {
+    background: rgba(245, 158, 11, 0.18) !important;
+    color: #d97706 !important;
+}
+
+html[data-theme="dark"] .plan-card-tag.tag-pro,
+body.dark-theme .plan-card-tag.tag-pro {
+    color: #fbbf24 !important;
+}
+
+.fixed-plan-card-close {
+    background: transparent !important;
+    border: none !important;
+    color: #64748b !important;
+    cursor: pointer !important;
+    padding: 4px !important;
+    border-radius: 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.15s ease !important;
+}
+
+.fixed-plan-card-close:hover {
+    color: #0f172a !important;
+    background: #f1f5f9 !important;
+}
+
+html[data-theme="dark"] .fixed-plan-card-close:hover,
+body.dark-theme .fixed-plan-card-close:hover {
+    color: #f8fafc !important;
+    background: #242735 !important;
+}
+
+.fixed-plan-card-body {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+}
+
+.plan-limit-item {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+}
+
+.plan-limit-info {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    font-size: 12.5px !important;
+}
+
+.plan-limit-label {
+    color: #64748b !important;
+    font-weight: 500 !important;
+}
+
+html[data-theme="dark"] .plan-limit-label,
+body.dark-theme .plan-limit-label {
+    color: #94a3b8 !important;
+}
+
+.plan-limit-counter {
+    color: #0f172a !important;
+    font-weight: 600 !important;
+}
+
+html[data-theme="dark"] .plan-limit-counter,
+body.dark-theme .plan-limit-counter {
+    color: #f1f5f9 !important;
+}
+
+.plan-limit-badge-unlimited {
+    color: #15803d !important;
+    font-weight: 700 !important;
+    font-size: 11.5px !important;
+}
+
+html[data-theme="dark"] .plan-limit-badge-unlimited,
+body.dark-theme .plan-limit-badge-unlimited {
+    color: #4FD580 !important;
+}
+
+.plan-limit-badge-locked {
+    color: #b45309 !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    background: rgba(245, 158, 11, 0.12) !important;
+    padding: 1px 7px !important;
+    border-radius: 9999px !important;
+}
+
+html[data-theme="dark"] .plan-limit-badge-locked,
+body.dark-theme .plan-limit-badge-locked {
+    color: #fbbf24 !important;
+}
+
+.plan-limit-subhint {
+    font-size: 11px !important;
+    color: #64748b !important;
+    line-height: 1.35 !important;
+}
+
+html[data-theme="dark"] .plan-limit-subhint,
+body.dark-theme .plan-limit-subhint {
+    color: #94a3b8 !important;
+}
+
+.plan-limit-val {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #0f172a !important;
+}
+
+html[data-theme="dark"] .plan-limit-val,
+body.dark-theme .plan-limit-val {
+    color: #f1f5f9 !important;
+}
+
+.badge-no-ads {
+    color: #15803d !important;
+    font-weight: 700 !important;
+}
+
+html[data-theme="dark"] .badge-no-ads,
+body.dark-theme .badge-no-ads {
+    color: #4FD580 !important;
+}
+
+.badge-has-ads {
+    color: #64748b !important;
+    font-size: 11px !important;
+}
+
+/* Barra de Progresso */
+.plan-progress-track {
+    width: 100% !important;
+    height: 6px !important;
+    border-radius: 9999px !important;
+    background: #e2e8f0 !important;
+    overflow: hidden !important;
+    position: relative !important;
+}
+
+html[data-theme="dark"] .plan-progress-track,
+body.dark-theme .plan-progress-track {
+    background: #272a37 !important;
+}
+
+.plan-progress-fill {
+    height: 100% !important;
+    border-radius: 9999px !important;
+    background: #4FD580 !important;
+    transition: width 0.3s ease !important;
+}
+
+.plan-progress-fill.progress-warning {
+    background: #f59e0b !important;
+}
+
+.plan-progress-fill.progress-danger {
+    background: #ef4444 !important;
+}
+
+.fixed-plan-card-footer {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    padding-top: 10px !important;
+    border-top: 1px solid #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .fixed-plan-card-footer,
+body.dark-theme .fixed-plan-card-footer {
+    border-top-color: #2a2d3a !important;
+}
+
+.fixed-plan-cta-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    padding: 9px 16px !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 2px 8px rgba(79, 213, 128, 0.25) !important;
+}
+
+.fixed-plan-cta-btn.btn-cta-upgrade {
+    background: linear-gradient(135deg, #4FD580 0%, #22c55e 100%) !important;
+    color: #052e16 !important;
+}
+
+.fixed-plan-cta-btn.btn-cta-upgrade:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 14px rgba(79, 213, 128, 0.4) !important;
+}
+
+.fixed-plan-cta-btn.btn-cta-pro {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25) !important;
+}
+
+.fixed-plan-cta-btn.btn-cta-pro:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4) !important;
+}
+
+.fixed-plan-reset-note {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    font-size: 11px !important;
+    color: #64748b !important;
+}
+
+html[data-theme="dark"] .fixed-plan-reset-note,
+body.dark-theme .fixed-plan-reset-note {
+    color: #94a3b8 !important;
+}
+</style>
+
+<aside class="fixed-bottom-left-stack" id="fixed-bottom-left-stack" aria-label="Acesso a Planos e Limites de Uso" style="position: fixed; bottom: 24px; left: 24px; z-index: 950; display: flex; flex-direction: column; align-items: flex-start; gap: 10px;">
+
+    <!-- 1. Âncora de Planos (Quadrado Laranja) -->
+    <a href="/planos" class="fixed-planos-anchor" id="fixed-planos-anchor" title="Ver Planos e Preços">
+        <svg class="fixed-planos-anchor-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="6 3 18 3 22 9 12 22 2 9 6 3"/>
+        </svg>
+        <span class="fixed-planos-anchor-label">Planos</span>
+        <svg class="fixed-planos-anchor-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="9 18 15 12 9 6"/>
+        </svg>
+    </a>
+
+    <!-- 2. Status do Plano e Validações Restantes (Quadrado Verde) -->
+    <div class="fixed-plan-status-container" id="fixed-plan-widget" style="position: relative;">
+        <!-- Card / Popover Expansível de Detalhes (Oculto por padrão via inline style) -->
+        <div class="fixed-plan-card" id="fixed-plan-card" role="dialog" aria-modal="false" aria-label="Detalhes de Limites do Plano" aria-hidden="true" style="display: none;">
+            <div class="fixed-plan-card-header">
+                <div class="fixed-plan-card-title-group">
+                    <span class="fixed-plan-card-eyebrow">SEU PLANO ATUAL</span>
+                    <div class="fixed-plan-card-heading">
+                        {% if user_summary.plan == 'pro' %}
+                            <span class="plan-card-icon plan-card-icon-pro">💎</span>
+                            <strong class="plan-card-name">Plano Pro</strong>
+                            <span class="plan-card-tag tag-pro">Ilimitado</span>
+                        {% elif user_summary.plan == 'plus' %}
+                            <span class="plan-card-icon plan-card-icon-plus">⭐</span>
+                            <strong class="plan-card-name">Plano Plus</strong>
+                            <span class="plan-card-tag tag-plus">R$ 4,99/mês</span>
+                        {% else %}
+                            <span class="plan-card-icon plan-card-icon-std">⚡</span>
+                            <strong class="plan-card-name">Plano Standard</strong>
+                            <span class="plan-card-tag tag-std">Gratuito</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <button type="button" class="fixed-plan-card-close" id="fixed-plan-close-btn" aria-label="Fechar painel de limites" title="Fechar">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+
+            <div class="fixed-plan-card-body">
+                <!-- Limite 1: Validações Básicas -->
+                <div class="plan-limit-item">
+                    <div class="plan-limit-info">
+                        <span class="plan-limit-label">Básicos (Planilhas & Texto)</span>
+                        {% if user_summary.plan == 'standard' %}
+                            {% set remaining_basic = [0, 3 - (user_summary.daily_basic|default(0))]|max %}
+                            <span class="plan-limit-counter">
+                                {% if remaining_basic == 1 %}
+                                    <strong>Falta 1</strong> validação hoje
+                                {% elif remaining_basic > 1 %}
+                                    <strong>Faltam {{ remaining_basic }}</strong> validações hoje
+                                {% else %}
+                                    <strong style="color: #ef4444;">0 restantes</strong> (limite atingido)
+                                {% endif %}
+                            </span>
+                        {% else %}
+                            <span class="plan-limit-badge-unlimited">Ilimitadas ✓</span>
+                        {% endif %}
+                    </div>
+                    {% if user_summary.plan == 'standard' %}
+                        {% set basic_pct = [100, ((user_summary.daily_basic|default(0)) / 3 * 100)]|min %}
+                        <div class="plan-progress-track">
+                            <div class="plan-progress-fill{{ ' progress-warning' if user_summary.daily_basic == 2 else (' progress-danger' if user_summary.daily_basic >= 3 else '') }}" style="width: {{ basic_pct }}%;"></div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Limite 2: Validadores Especiais -->
+                <div class="plan-limit-item">
+                    <div class="plan-limit-info">
+                        <span class="plan-limit-label">Especiais (XML, OFX, RH, Cad.)</span>
+                        {% if user_summary.plan == 'pro' %}
+                            <span class="plan-limit-badge-unlimited">Ilimitadas ✓</span>
+                        {% elif user_summary.plan == 'plus' %}
+                            <span class="plan-limit-counter"><strong id="widget-special-used">{{ user_summary.daily_special }}</strong> / 1 hoje</span>
+                        {% else %}
+                            <span class="plan-limit-badge-locked">🔒 Teste de Exemplo</span>
+                        {% endif %}
+                    </div>
+                    {% if user_summary.plan == 'standard' %}
+                        <span class="plan-limit-subhint">Arquivos reais requerem Plus ou Pro. O botão "Testar Exemplo" é livre.</span>
+                    {% endif %}
+                </div>
+
+                <!-- Limite 3: Tamanho por arquivo -->
+                <div class="plan-limit-item">
+                    <div class="plan-limit-info">
+                        <span class="plan-limit-label">Capacidade por Arquivo</span>
+                        <span class="plan-limit-val">
+                            {% if user_summary.plan == 'pro' %}
+                                Até 30.000 linhas
+                            {% elif user_summary.plan == 'plus' %}
+                                5.000 linhas • 30 cols
+                            {% else %}
+                                500 linhas • 20 cols
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Limite 4: Anúncios -->
+                <div class="plan-limit-item">
+                    <div class="plan-limit-info">
+                        <span class="plan-limit-label">Experiência sem Anúncios</span>
+                        <span class="plan-limit-val">
+                            {% if user_summary.plan in ['plus', 'pro'] %}
+                                <span class="badge-no-ads">Sem Anúncios ✓</span>
+                            {% else %}
+                                <span class="badge-has-ads">Com Anúncios</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fixed-plan-card-footer">
+                {% if user_summary.plan == 'pro' %}
+                    <a href="/planos" class="fixed-plan-cta-btn btn-cta-pro">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="6 3 18 3 22 9 12 22 2 9 6 3"/></svg>
+                        <span>Ver Benefícios do Plano Pro</span>
+                    </a>
+                {% elif user_summary.plan == 'plus' %}
+                    <a href="/planos" class="fixed-plan-cta-btn btn-cta-upgrade">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="6 3 18 3 22 9 12 22 2 9 6 3"/></svg>
+                        <span>Migrar para o Pro 💎</span>
+                    </a>
+                {% else %}
+                    <a href="/planos" class="fixed-plan-cta-btn btn-cta-upgrade">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="6 3 18 3 22 9 12 22 2 9 6 3"/></svg>
+                        <span>Fazer Upgrade (a partir de R$ 4,99) 💎</span>
+                    </a>
+                {% endif %}
+                <div class="fixed-plan-reset-note">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>Limites diários renovam às 00:00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pílula de Status (Quadrado Verde) -->
+        <button type="button" class="fixed-plan-pill status-pill-{{ user_summary.plan }}" id="fixed-plan-pill-btn" aria-haspopup="dialog" aria-expanded="false" title="Clique para ver detalhes do plano e limites diários">
+            <span class="fixed-plan-pill-icon plan-icon-{{ user_summary.plan }}">
+                {% if user_summary.plan == 'pro' %}💎{% elif user_summary.plan == 'plus' %}⭐{% else %}⚡{% endif %}
+            </span>
+            <div class="fixed-plan-pill-text">
+                <span class="fixed-plan-pill-title">Plano {{ user_summary.plan_name }}</span>
+                <span class="fixed-plan-pill-badge badge-{{ user_summary.plan }}">
+                    {% if user_summary.plan == 'pro' %}
+                        Ilimitado
+                    {% elif user_summary.plan == 'plus' %}
+                        Ilimitado
+                    {% else %}
+                        {% set remaining_basic = [0, 3 - (user_summary.daily_basic|default(0))]|max %}
+                        {% if remaining_basic == 1 %}
+                            Falta 1 validação
+                        {% elif remaining_basic > 1 %}
+                            Faltam {{ remaining_basic }} validações
+                        {% else %}
+                            0 validações restantes
+                        {% endif %}
+                    {% endif %}
+                </span>
+            </div>
+            <svg class="fixed-plan-pill-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="18 15 12 9 6 15"/>
+            </svg>
+        </button>
+    </div>
+</aside>
+
+<script>
+    (function() {
+        var widget = document.getElementById('fixed-plan-widget');
+        var pillBtn = document.getElementById('fixed-plan-pill-btn');
+        var card = document.getElementById('fixed-plan-card');
+        var closeBtn = document.getElementById('fixed-plan-close-btn');
+
+        if (!widget || !pillBtn || !card) return;
+
+        function toggleCard(e) {
+            if (e) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+            var isOpen = widget.classList.contains('open');
+            if (isOpen) {
+                closeCard();
+            } else {
+                openCard();
+            }
+        }
+
+        function openCard() {
+            widget.classList.add('open');
+            card.style.display = 'flex';
+            pillBtn.setAttribute('aria-expanded', 'true');
+            card.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeCard() {
+            widget.classList.remove('open');
+            card.style.display = 'none';
+            pillBtn.setAttribute('aria-expanded', 'false');
+            card.setAttribute('aria-hidden', 'true');
+        }
+
+        pillBtn.addEventListener('click', toggleCard);
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                closeCard();
+            });
+        }
+
+        document.addEventListener('click', function(e) {
+            if (widget.classList.contains('open') && !widget.contains(e.target)) {
+                closeCard();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && widget.classList.contains('open')) {
+                closeCard();
+            }
+        });
+    })();
+</script>
+{% endif %}

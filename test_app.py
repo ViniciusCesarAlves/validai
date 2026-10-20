@@ -1,10 +1,16 @@
 import os
 import io
+import uuid
 import app
 
 def test_full_pipeline():
     print("Iniciando testes integrados da aplicacao SplitC...")
     client = app.app.test_client()
+
+    # Configura sessao Pro para testes de integracao com arquivos grandes (47 colunas)
+    with client.session_transaction() as sess:
+        sess['user_id'] = 'mock_pro_test'
+        sess['user_email'] = 'pro@validai.app.br'
 
     # 1. Teste da rota inicial e favicon
     res = client.get('/')
@@ -1052,7 +1058,8 @@ def test_full_pipeline():
     assert 'Allow: /ads.txt' in robots_body, "robots.txt deve permitir explicitamente /ads.txt!"
     print("[OK] robots.txt validado sem bloqueios para /ads.txt!")
 
-    # Validação da Meta Tag e Script Oficial em todas as páginas públicas
+    # Validação da Meta Tag e Script Oficial em todas as páginas públicas (Visitante / Standard)
+    client.get('/logout')
     public_routes = ['/', '/como-usar', '/privacidade', '/termos', '/sobre', '/auditoria-rh', '/conciliador-taxas']
     for p_route in public_routes:
         res_page = client.get(p_route)
@@ -1094,6 +1101,196 @@ def test_full_pipeline():
         css_content = f_css.read()
     assert '.adsbygoogle[data-ad-status="unfilled"]' in css_content, "Regra CSS data-ad-status='unfilled' deve constar em style.css!"
     print("[OK] Regra CSS de colapso automático para anúncios 'unfilled' validada com sucesso!")
+
+    # =========================================================================
+    # 19. TESTES DO SISTEMA DE PLANOS, MONETIZAÇÃO, AUTENTICAÇÃO E BLINDAGEM RAM
+    # =========================================================================
+    print("\n--- Testando Sistema de Planos, Monetização, Autenticação e Blindagem RAM ---")
+    
+    # 19.1 Página /planos
+    res_planos = client.get('/planos')
+    assert res_planos.status_code == 200, f"Falha GET /planos: {res_planos.status_code}"
+    html_planos = res_planos.data.decode('utf-8')
+    assert 'Standard' in html_planos
+    assert 'Plus' in html_planos
+    assert 'Pro' in html_planos
+    assert 'R$ 4,99' in html_planos
+    assert 'R$ 9,99' in html_planos
+    print("[OK] Página /planos renderizada com os 3 cards de planos e preços oficiais!")
+
+    # 19.2 Blindagem de RAM (Limite 12 MB - HTTP 413)
+    big_payload = b'0' * (13 * 1024 * 1024)
+    res_413 = client.post('/api/single/upload-headers', data={'file': (io.BytesIO(big_payload), 'huge.xlsx')}, content_type='multipart/form-data')
+    assert res_413.status_code == 413, f"Upload > 12 MB deveria retornar 413, mas retornou {res_413.status_code}"
+    assert 'excede o limite máximo permitido de 12 MB' in res_413.get_json()['error']
+    print("[OK] Blindagem de RAM: Upload acima de 12 MB bloqueado com HTTP 413 e mensagem amigável!")
+
+    # 19.3 Plano Standard (Visitante Anônimo)
+    client.get('/logout')
+    
+    # Validador Especial bloqueado para arquivos reais no Standard
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        cad_csv_path = os.path.join(tmp_dir, 'cad_test.csv')
+        with open(cad_csv_path, 'w', encoding='utf-8') as f:
+            f.write("CPF,NOME\n11144477735,Cliente Teste\n")
+        with open(cad_csv_path, 'rb') as f:
+            res_cad_up = client.post('/api/cadastros/upload-headers', data={'file': (f, 'cad_test.csv')}, content_type='multipart/form-data')
+    assert res_cad_up.status_code == 200
+    cad_sid = res_cad_up.get_json()['session_id']
+    
+    res_spec_block = client.post('/api/cadastros/process', json={
+        'session_id': cad_sid,
+        'col_doc': 'CPF',
+        'col_name': 'NOME'
+    })
+    assert res_spec_block.status_code == 403, f"Deveria bloquear ferramenta especial com 403 no Standard, retornou {res_spec_block.status_code}"
+    err_spec = res_spec_block.get_json()
+    assert err_spec['error'] == 'plan_limit'
+    assert err_spec['limit_type'] == 'special_locked'
+    assert err_spec['required_plan'] == 'plus'
+    print("[OK] Bloqueio de arquivos reais em validadores avançados no plano Standard validado com HTTP 403 (special_locked)!")
+
+    # Exemplo liberado e gratuito em ferramenta especial
+    res_cad_ex = client.post('/api/cadastros/load-example')
+    assert res_cad_ex.status_code == 200
+    ex_sid = res_cad_ex.get_json()['session_id']
+    res_spec_free = client.post('/api/cadastros/process', json={
+        'session_id': ex_sid,
+        'col_doc': 'CPF_Cliente',
+        'col_name': 'Nome_Razao'
+    })
+    assert res_spec_free.status_code == 200
+    print("[OK] 'Testar Exemplo' em ferramenta avançada 100% liberado e gratuito no Standard!")
+
+    # Limite de colunas e linhas do Standard dentro de contexto de requisição
+    with app.app.test_request_context():
+        from services.plan_manager import check_validation_permission
+        allowed_cols, err_cols, status_cols = check_validation_permission(tool_type='basic', rows=10, cols=25, is_sample=False)
+        assert allowed_cols is False
+        assert status_cols == 403
+        assert err_cols['limit_type'] == 'columns'
+        print("[OK] Trava de segurança de 20 colunas no plano Standard validada com HTTP 403 (columns)!")
+
+        allowed_rows, err_rows, status_rows = check_validation_permission(tool_type='basic', rows=600, cols=10, is_sample=False)
+        assert allowed_rows is False
+        assert status_rows == 403
+        assert err_rows['limit_type'] == 'rows'
+        print("[OK] Trava de segurança de 500 linhas no plano Standard validada com HTTP 403 (rows)!")
+
+    # 19.4 Teste de Autenticação e API de Usuário
+    res_me_anon = client.get('/api/auth/me')
+    assert res_me_anon.status_code == 200
+    summary_anon = res_me_anon.get_json()['summary']
+    assert summary_anon['is_logged_in'] is False
+    assert summary_anon['plan'] == 'standard'
+    assert summary_anon['show_ads'] is True
+    print("[OK] Endpoint /api/auth/me validado para visitante anônimo (Standard, show_ads=True)!")
+
+    # 19.5 Teste do Plano Pro (Sem anúncios e ilimitado)
+    with client.session_transaction() as sess:
+        sess['user_id'] = 'mock_pro_test'
+        sess['user_email'] = 'pro@validai.app.br'
+    
+    res_me_pro = client.get('/api/auth/me')
+    assert res_me_pro.status_code == 200
+    summary_pro = res_me_pro.get_json()['summary']
+    assert summary_pro['is_logged_in'] is True
+    assert summary_pro['plan'] == 'pro'
+    assert summary_pro['show_ads'] is False
+    print("[OK] Endpoint /api/auth/me validado para assinante Pro (Ilimitado, show_ads=False)!")
+
+    # 19.6 Teste de Checkout Mercado Pago
+    res_chk_plus = client.get('/checkout/plus', follow_redirects=False)
+    assert res_chk_plus.status_code == 302
+    assert 'mercadopago.com' in res_chk_plus.headers.get('Location', '')
+    print(f"[OK] Rota /checkout/plus gera link oficial do Mercado Pago: {res_chk_plus.headers.get('Location')[:55]}...")
+
+    res_chk_pro = client.get('/checkout/pro', follow_redirects=False)
+    assert res_chk_pro.status_code == 302
+    assert 'mercadopago.com' in res_chk_pro.headers.get('Location', '')
+    print(f"[OK] Rota /checkout/pro gera link oficial do Mercado Pago: {res_chk_pro.headers.get('Location')[:55]}...")
+
+    # 19.7 Teste do Modal de Autenticação e OAuth Google / Cadastro / Termos
+    res_cb_page = client.get('/auth/callback')
+    assert res_cb_page.status_code == 200
+    assert 'Conectando com o Google' in res_cb_page.get_data(as_text=True)
+    print("[OK] Rota /auth/callback renderizada com ponte do Supabase JS SDK!")
+
+    res_cb_err = client.get('/auth/callback?error=access_denied&error_description=Cancelado+pelo+usuario', follow_redirects=False)
+    assert res_cb_err.status_code == 302
+    assert '/login?error=' in res_cb_err.headers.get('Location', '')
+    print("[OK] Erro de OAuth redireciona adequadamente para a tela de login!")
+
+    # Teste de API OAuth Callback
+    test_oauth_id = str(uuid.uuid4())
+    test_oauth_email = f"user_oauth_{uuid.uuid4().hex[:8]}@validai.app.br"
+    res_oauth_post = client.post('/api/auth/oauth-callback', json={
+        'user_id': test_oauth_id,
+        'email': test_oauth_email
+    })
+    assert res_oauth_post.status_code == 200
+    oauth_json = res_oauth_post.get_json()
+    assert oauth_json['success'] is True
+    assert oauth_json['user']['email'] == test_oauth_email
+    print("[OK] Endpoint /api/auth/oauth-callback validado (cria sessão e sincroniza perfil)!")
+
+    # Teste de Validação de Cadastro: Senhas divergentes e Termos desmarcados
+    res_cad_diff_pwd = client.post('/api/auth/cadastro', json={
+        'email': 'novo@validai.app.br',
+        'password': 'senhaForte123',
+        'password_confirm': 'outraSenhaDiferente',
+        'terms': True
+    })
+    assert res_cad_diff_pwd.status_code == 400
+    assert 'não coincidem' in res_cad_diff_pwd.get_json()['error']
+    print("[OK] Validação de cadastro: senhas divergentes bloqueadas com sucesso!")
+
+    res_cad_no_terms = client.post('/api/auth/cadastro', json={
+        'email': 'novo@validai.app.br',
+        'password': 'senhaForte123',
+        'password_confirm': 'senhaForte123',
+        'terms': False
+    })
+    assert res_cad_no_terms.status_code == 400
+    assert 'Termos de Uso' in res_cad_no_terms.get_json()['error']
+    print("[OK] Validação de cadastro: termos desmarcados bloqueados com sucesso!")
+
+    # Teste de Recuperação de Senha
+    res_recup = client.post('/api/auth/recuperar-senha', json={'email': 'usuario@validai.app.br'})
+    assert res_recup.status_code == 200
+    assert res_recup.get_json()['success'] is True
+    print("[OK] Endpoint /api/auth/recuperar-senha validado com sucesso!")
+
+    # Desloga para testar a renderização das telas públicas /login e /cadastro
+    client.get('/logout')
+
+    # Teste de Renderização dos Botões Google e Termos nas Telas /login e /cadastro
+    res_login_page = client.get('/login')
+    assert res_login_page.status_code == 200
+    login_html = res_login_page.get_data(as_text=True)
+    assert 'Continuar com o Google' in login_html
+    assert 'ou continue com e-mail' in login_html
+    assert 'Esqueci minha senha' in login_html
+    print("[OK] Tela /login renderizada com Botão Google, divisor e 'Esqueci minha senha'!")
+
+    res_cad_page = client.get('/cadastro')
+    assert res_cad_page.status_code == 200
+    cad_html = res_cad_page.get_data(as_text=True)
+    assert 'Continuar com o Google' in cad_html
+    assert 'ou continue com e-mail' in cad_html
+    assert 'Confirme sua senha' in cad_html
+    assert 'Li e aceito os' in cad_html
+    print("[OK] Tela /cadastro renderizada com Botão Google, 'Confirme sua senha' e Checkbox de Termos!")
+
+    # Teste no Modal Unificado de Autenticação (renderizado em páginas públicas)
+    res_home_modal = client.get('/')
+    assert res_home_modal.status_code == 200
+    home_html = res_home_modal.get_data(as_text=True)
+    assert 'validai-auth-modal' in home_html
+    assert 'Continuar com o Google' in home_html
+    assert 'signup-password-confirm' in home_html
+    assert 'signup-terms' in home_html
+    print("[OK] Modal Unificado de Autenticação validado com Botão Google, Confirmação e Termos!")
 
     print("\nTODOS OS TESTES PASSARAM COM 100% DE SUCESSO!")
 

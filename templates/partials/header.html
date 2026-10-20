@@ -1,8 +1,402 @@
 {% set curr_path = request.path if request is defined and request.path is defined else '' %}
 {% set in_dropdown = curr_path in ['/validador-cadastros', '/validador-xml', '/conciliador-taxas', '/auditoria-rh'] %}
+
+<style>
+/* Estilos Críticos da Header (Proteção Definitiva contra Cache) */
+/* Seletor de Idioma (Padronizado e Harmonizado na Navbar) */
+.lang-toggle-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    height: 36px !important;
+    padding: 0 13px !important;
+    border-radius: 9999px !important;
+    background: #ffffff !important;
+    border: 1.5px solid var(--border-color, #e2e8f0) !important;
+    color: var(--text-main, #0f172a) !important;
+    font-family: inherit !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    outline: none !important;
+    user-select: none !important;
+}
+.lang-toggle-btn:hover {
+    border-color: #cbd5e1 !important;
+    background: #f8fafc !important;
+    color: #15803d !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08) !important;
+}
+.lang-toggle-btn.active,
+.lang-dropdown-wrapper.open .lang-toggle-btn {
+    border-color: #4FD580 !important;
+    box-shadow: 0 0 0 3px rgba(79, 213, 128, 0.2) !important;
+    color: #15803d !important;
+}
+.lang-globe-icon {
+    stroke: currentColor !important;
+    flex-shrink: 0 !important;
+    transition: transform 0.2s ease, stroke 0.2s ease !important;
+}
+.lang-toggle-btn:hover .lang-globe-icon {
+    transform: rotate(15deg) !important;
+    stroke: #15803d !important;
+}
+.lang-dropdown-wrapper.open .lang-globe-icon {
+    stroke: #15803d !important;
+}
+.lang-arrow-icon {
+    stroke: currentColor !important;
+    opacity: 0.65 !important;
+    transition: transform 0.2s ease !important;
+    flex-shrink: 0 !important;
+}
+.lang-toggle-btn:hover .lang-arrow-icon {
+    opacity: 1 !important;
+    stroke: #15803d !important;
+}
+.lang-dropdown-wrapper.open .lang-arrow-icon {
+    transform: rotate(180deg) !important;
+    opacity: 1 !important;
+    stroke: #15803d !important;
+}
+
+[data-theme="dark"] .lang-toggle-btn,
+.dark-theme .lang-toggle-btn {
+    background: #17181f !important;
+    border-color: #2d313e !important;
+    color: #f1f5f9 !important;
+    box-shadow: none !important;
+}
+[data-theme="dark"] .lang-toggle-btn:hover,
+.dark-theme .lang-toggle-btn:hover {
+    border-color: #4FD580 !important;
+    background: rgba(79, 213, 128, 0.08) !important;
+    color: #4FD580 !important;
+}
+[data-theme="dark"] .lang-toggle-btn:hover .lang-globe-icon,
+.dark-theme .lang-toggle-btn:hover .lang-globe-icon {
+    stroke: #4FD580 !important;
+}
+[data-theme="dark"] .lang-dropdown-wrapper.open .lang-toggle-btn,
+.dark-theme .lang-dropdown-wrapper.open .lang-toggle-btn {
+    border-color: #4FD580 !important;
+    color: #4FD580 !important;
+}
+[data-theme="dark"] .lang-dropdown-wrapper.open .lang-globe-icon,
+.dark-theme .lang-dropdown-wrapper.open .lang-globe-icon {
+    stroke: #4FD580 !important;
+}
+[data-theme="dark"] .lang-toggle-btn:hover .lang-arrow-icon,
+.dark-theme .lang-toggle-btn:hover .lang-arrow-icon,
+[data-theme="dark"] .lang-dropdown-wrapper.open .lang-arrow-icon,
+.dark-theme .lang-dropdown-wrapper.open .lang-arrow-icon {
+    stroke: #4FD580 !important;
+}
+
+.header-login-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    height: 36px !important;
+    padding: 0 16px !important;
+    border-radius: 9999px !important;
+    background: #ffffff !important;
+    border: 1.5px solid var(--border-color, #e2e8f0) !important;
+    color: var(--text-main, #0f172a) !important;
+    font-family: inherit !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
+}
+.header-login-btn:hover {
+    border-color: #4FD580 !important;
+    color: #15803d !important;
+    background: rgba(79, 213, 128, 0.08) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06) !important;
+}
+[data-theme="dark"] .header-login-btn,
+.dark-theme .header-login-btn {
+    background: #17181f !important;
+    border-color: #2d313e !important;
+    color: #f1f5f9 !important;
+}
+[data-theme="dark"] .header-login-btn:hover,
+.dark-theme .header-login-btn:hover {
+    border-color: #4FD580 !important;
+    color: #4FD580 !important;
+    background: rgba(79, 213, 128, 0.12) !important;
+}
+
+.user-profile-menu-wrapper {
+    position: relative !important;
+    display: inline-block !important;
+}
+.header-user-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    height: 36px !important;
+    padding: 2px 14px 2px 5px !important;
+    border-radius: 9999px !important;
+    background: #ffffff !important;
+    border: 1.5px solid var(--border-color, #e2e8f0) !important;
+    color: var(--text-main, #0f172a) !important;
+    font-family: inherit !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+    transition: all 0.2s ease !important;
+    box-sizing: border-box !important;
+}
+.header-user-btn:hover {
+    border-color: #4FD580 !important;
+    transform: translateY(-1px) !important;
+}
+[data-theme="dark"] .header-user-btn,
+.dark-theme .header-user-btn {
+    background: #17181f !important;
+    border-color: #2d313e !important;
+    color: #f1f5f9 !important;
+}
+.user-avatar-circle {
+    width: 26px !important;
+    height: 26px !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
+    flex-shrink: 0 !important;
+}
+.user-avatar-circle.avatar-standard {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+}
+.user-avatar-circle.avatar-plus {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+}
+.user-avatar-circle.avatar-pro {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+}
+.header-user-name {
+    max-width: 110px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+.user-profile-dropdown {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    right: 0 !important;
+    width: 240px !important;
+    background: var(--bg-card, #ffffff) !important;
+    border: 1px solid var(--border-color, #e2e8f0) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+    padding: 12px !important;
+    display: none !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    z-index: 1000 !important;
+}
+.user-profile-dropdown.show {
+    display: flex !important;
+    animation: fadeInDropdown 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+[data-theme="dark"] .user-profile-dropdown,
+.dark-theme .user-profile-dropdown {
+    background: #17181f !important;
+    border-color: #2d313e !important;
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.5) !important;
+}
+.user-dropdown-header {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    padding: 4px 8px 8px 8px !important;
+}
+.user-dropdown-email {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: var(--text-main, #0f172a) !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+.user-dropdown-plan-badge {
+    align-self: flex-start !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding: 2px 8px !important;
+    border-radius: 9999px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+.user-dropdown-plan-badge.badge-standard {
+    background: rgba(16, 185, 129, 0.15) !important;
+    color: #059669 !important;
+}
+.user-dropdown-plan-badge.badge-plus {
+    background: rgba(59, 130, 246, 0.15) !important;
+    color: #2563eb !important;
+}
+.user-dropdown-plan-badge.badge-pro {
+    background: rgba(245, 158, 11, 0.15) !important;
+    color: #d97706 !important;
+}
+.user-dropdown-divider {
+    height: 1px !important;
+    background: var(--border-color, #e2e8f0) !important;
+    margin: 4px 0 !important;
+}
+[data-theme="dark"] .user-dropdown-divider,
+.dark-theme .user-dropdown-divider {
+    background: #2d313e !important;
+}
+.user-dropdown-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 8px 10px !important;
+    border-radius: 8px !important;
+    color: var(--text-main, #0f172a) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    transition: all 0.15s ease !important;
+}
+.user-dropdown-item:hover {
+    background: rgba(79, 213, 128, 0.1) !important;
+    color: #15803d !important;
+}
+[data-theme="dark"] .user-dropdown-item:hover,
+.dark-theme .user-dropdown-item:hover {
+    background: rgba(79, 213, 128, 0.15) !important;
+    color: #4FD580 !important;
+}
+.user-dropdown-item.text-danger {
+    color: #ef4444 !important;
+}
+.user-dropdown-item.text-danger:hover {
+    background: rgba(239, 68, 68, 0.1) !important;
+    color: #dc2626 !important;
+}
+
+/* --- Layout Limite 1140px e Ações Utilitárias Externas --- */
+.nav-menu-link {
+    white-space: nowrap !important;
+}
+.navbar-wrapper {
+    position: relative !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+}
+.navbar .nav-content {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 1140px !important;
+    margin: 0 auto !important;
+    padding: 0 24px !important;
+    box-sizing: border-box !important;
+}
+.header-left-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 24px !important;
+    flex-shrink: 0 !important;
+}
+.header-user-wrapper {
+    display: inline-flex !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+}
+.navbar-utility-actions {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-shrink: 0 !important;
+    z-index: 60 !important;
+}
+
+@media (min-width: 1480px) {
+    .navbar-utility-actions {
+        position: absolute !important;
+        left: calc(50% + 570px + 14px) !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+    }
+}
+
+@media (max-width: 1479px) and (min-width: 1025px) {
+    .navbar-utility-actions {
+        position: absolute !important;
+        right: 20px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+    }
+    .navbar .nav-content {
+        padding-right: 155px !important;
+    }
+}
+
+@media (max-width: 1024px) {
+    .navbar-wrapper {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+    .navbar-utility-actions {
+        position: static !important;
+        transform: none !important;
+        justify-content: flex-end !important;
+        width: 100% !important;
+        max-width: 1140px !important;
+        margin: 0 auto !important;
+        padding: 0 16px !important;
+        box-sizing: border-box !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar-wrapper {
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        padding: 0 12px !important;
+        flex-wrap: wrap !important;
+    }
+    .navbar .nav-content {
+        padding: 0 !important;
+        width: auto !important;
+        flex: 1 !important;
+    }
+    .navbar-utility-actions {
+        width: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+}
+
+</style>
+
     <!-- Header com Navegação e Logo Oficial ValidAí (Componente Unificado) -->
-    <header class="navbar">
-        <div class="container nav-content">
+        <header class="navbar">
+        <div class="navbar-wrapper">
+            <!-- Limite Oficial de 1140px: Inicia na Logo e Termina na Div do Usuário -->
+            <div class="container nav-content">
             <div class="header-left-group">
                 <a href="/" class="header-brand-link" title="ValidAí - Início" aria-label="ValidAí - Página Inicial">
                     <img src="/static/images/logo.png?v=3" alt="ValidAí Logo" width="144" height="42" fetchpriority="high" decoding="async" class="brand-logo brand-logo-light">
@@ -152,78 +546,120 @@
                             </a>
                         </div>
                     </div>
+
+                    <!-- Guia / Como usar -->
+                    <a href="/como-usar" class="nav-menu-link{{ ' active' if curr_path == '/como-usar' else '' }}" title="Guia e Ajuda">
+                        <svg class="nav-menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                        <span data-i18n="nav_how_to_use">Como usar?</span>
+                    </a>
                 </nav>
             </div>
 
-            <div class="header-right-actions">
-                <a href="/como-usar" class="nav-menu-link{{ ' active' if curr_path == '/como-usar' else '' }}" title="Guia e Ajuda">
-                    <svg class="nav-menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                        <line x1="12" y1="17" x2="12.01" y2="17"/>
-                    </svg>
-                    <span data-i18n="nav_how_to_use">Como usar?</span>
-                </a>
-
-                <!-- Dropdown de Idiomas (PT / ES / EN) -->
-                <div class="lang-dropdown-wrapper" id="lang-dropdown-wrapper">
-                    <button type="button" class="lang-toggle-btn" id="lang-toggle-btn" aria-haspopup="true" aria-expanded="false" aria-label="Selecionar idioma" title="Idioma / Language">
-                        <svg class="lang-globe-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <circle cx="12" cy="12" r="10"/>
-                            <line x1="2" y1="12" x2="22" y2="12"/>
-                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                        </svg>
-                        <span class="lang-current-code" id="lang-current-code">PT</span>
-                        <svg class="lang-arrow-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <polyline points="6 9 12 15 18 9"/>
-                        </svg>
-                    </button>
-                    <div class="lang-dropdown-menu" id="lang-dropdown-menu" role="menu" aria-label="Opções de idioma">
-                        <button type="button" class="lang-option active" data-lang="pt" role="menuitem">
-                            <span class="lang-flag">🇧🇷</span>
-                            <span class="lang-name">Português</span>
-                            <span class="lang-badge">PT</span>
+            <!-- Div do Usuário / Login (Final do limite de 1140px) -->
+            <div class="header-user-wrapper">
+                {% if user_summary is defined and user_summary.is_logged_in %}
+                    <div class="user-profile-menu-wrapper" id="user-profile-wrapper">
+                        <button type="button" class="header-user-btn" id="user-profile-btn" aria-haspopup="true" aria-expanded="false" title="{{ user_summary.email }}">
+                            <span class="user-avatar-circle avatar-{{ user_summary.plan }}">
+                                {{ (user_summary.email|default('U'))[0]|upper }}
+                            </span>
+                            <span class="header-user-name">{{ user_summary.email.split('@')[0] }}</span>
+                            <svg class="user-badge-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                         </button>
-                        <button type="button" class="lang-option" data-lang="es" role="menuitem">
-                            <span class="lang-flag">🇪🇸</span>
-                            <span class="lang-name">Español</span>
-                            <span class="lang-badge">ES</span>
-                        </button>
-                        <button type="button" class="lang-option" data-lang="en" role="menuitem">
-                            <span class="lang-flag">🇺🇸</span>
-                            <span class="lang-name">English</span>
-                            <span class="lang-badge">EN</span>
-                        </button>
+                        <div class="user-profile-dropdown" id="user-profile-dropdown" role="menu">
+                            <div class="user-dropdown-header">
+                                <div class="user-dropdown-email">{{ user_summary.email }}</div>
+                                <span class="user-dropdown-plan-badge badge-{{ user_summary.plan }}">Plano {{ user_summary.plan_name }}</span>
+                            </div>
+                            <div class="user-dropdown-divider"></div>
+                            <a href="/planos" class="user-dropdown-item" role="menuitem">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="6 3 18 3 22 9 12 22 2 9 6 3"/></svg>
+                                <span>Planos e Upgrade</span>
+                            </a>
+                            <a href="/logout" class="user-dropdown-item text-danger" role="menuitem">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                                <span>Sair</span>
+                            </a>
+                        </div>
                     </div>
-                </div>
-
-                <button type="button" class="theme-toggle-btn" id="theme-toggle-btn" title="Alternar tema claro/escuro" aria-label="Alternar tema claro ou escuro" data-i18n-title="nav_toggle_theme">
-                    <svg class="theme-icon-svg" width="19" height="19" viewBox="0 0 24 24">
-                        <defs>
-                            <linearGradient id="theme-grad-orange" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" stop-color="#6AE099"/>
-                                <stop offset="100%" stop-color="#4FD580"/>
-                            </linearGradient>
-                        </defs>
-                        <g class="sun-icon">
-                            <circle cx="12" cy="12" r="4.5"/>
-                            <line x1="12" y1="2" x2="12" y2="4"/>
-                            <line x1="12" y1="20" x2="12" y2="22"/>
-                            <line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/>
-                            <line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/>
-                            <line x1="2" y1="12" x2="4" y2="12"/>
-                            <line x1="20" y1="12" x2="22" y2="12"/>
-                            <line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/>
-                            <line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/>
-                        </g>
-                        <path class="moon-icon-path" d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646z"/>
-                    </svg>
-                </button>
+                {% else %}
+                    <button type="button" class="header-login-btn btn-open-login" onclick="if(window.ValidAiAuth) window.ValidAiAuth.show('login'); else window.location.href='/login';" title="Entrar na sua conta ou criar cadastro">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        <span>Entrar</span>
+                    </button>
+                {% endif %}
             </div>
         </div>
-    </header>
 
-    <!-- Script Centralizado e Unificado de Tema Claro / Escuro (Header Oficial) -->
+        <!-- Controles Fora do Limite de 1140px (Idioma e Modo Escuro) -->
+        <div class="navbar-utility-actions">
+            <!-- Dropdown de Idiomas (PT / ES / EN) -->
+            <div class="lang-dropdown-wrapper" id="lang-dropdown-wrapper">
+                <button type="button" class="lang-toggle-btn" id="lang-toggle-btn" aria-haspopup="true" aria-expanded="false" aria-label="Selecionar idioma" title="Idioma / Language">
+                    <svg class="lang-globe-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="2" y1="12" x2="22" y2="12"/>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                    </svg>
+                    <span class="lang-current-code" id="lang-current-code">PT</span>
+                    <svg class="lang-arrow-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </button>
+                <div class="lang-dropdown-menu" id="lang-dropdown-menu" role="menu" aria-label="Opções de idioma">
+                    <button type="button" class="lang-option active" data-lang="pt" role="menuitem">
+                        <span class="lang-flag">🇧🇷</span>
+                        <span class="lang-name">Português</span>
+                        <span class="lang-badge">PT</span>
+                    </button>
+                    <button type="button" class="lang-option" data-lang="es" role="menuitem">
+                        <span class="lang-flag">🇪🇸</span>
+                        <span class="lang-name">Español</span>
+                        <span class="lang-badge">ES</span>
+                    </button>
+                    <button type="button" class="lang-option" data-lang="en" role="menuitem">
+                        <span class="lang-flag">🇺🇸</span>
+                        <span class="lang-name">English</span>
+                        <span class="lang-badge">EN</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Alternador de Tema Claro / Escuro -->
+            <button type="button" class="theme-toggle-btn" id="theme-toggle-btn" title="Alternar tema claro/escuro" aria-label="Alternar tema claro ou escuro" data-i18n-title="nav_toggle_theme">
+                <svg class="theme-icon-svg" width="18" height="18" viewBox="0 0 24 24">
+                    <defs>
+                        <linearGradient id="theme-grad-orange" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#6AE099"/>
+                            <stop offset="100%" stop-color="#4FD580"/>
+                        </linearGradient>
+                    </defs>
+                    <g class="sun-icon">
+                        <circle cx="12" cy="12" r="4.5"/>
+                        <line x1="12" y1="2" x2="12" y2="4"/>
+                        <line x1="12" y1="20" x2="12" y2="22"/>
+                        <line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/>
+                        <line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/>
+                        <line x1="2" y1="12" x2="4" y2="12"/>
+                        <line x1="20" y1="12" x2="22" y2="12"/>
+                        <line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/>
+                        <line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/>
+                    </g>
+                    <path class="moon-icon-path" d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</header>
+
+    <!-- Script Centralizado e Unificado (Header Oficial) -->
     <script>
         (function() {
             var THEME_KEY = 'splitc_theme';
@@ -298,8 +734,7 @@
                 }
             }
 
-            // Intercepta cliques no botão na fase de CAPTURA global (document level).
-            // Isso garante que NENHUM listener residual em cache possa cancelar ou reverter o tema.
+            // Intercepta cliques no botão de tema na fase de CAPTURA global (document level).
             document.addEventListener('click', handleThemeClick, true);
 
             function initThemeState() {
@@ -312,6 +747,41 @@
                 document.addEventListener('DOMContentLoaded', initThemeState);
             }
             window.addEventListener('pageshow', initThemeState);
+
+            // Gerenciador do Dropdown do Usuário Logado
+            function initUserDropdown() {
+                var wrapper = document.getElementById('user-profile-wrapper');
+                var btn = document.getElementById('user-profile-btn');
+                var dropdown = document.getElementById('user-profile-dropdown');
+                if (!wrapper || !btn || !dropdown) return;
+
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var isOpen = dropdown.classList.toggle('show');
+                    btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!wrapper.contains(e.target)) {
+                        dropdown.classList.remove('show');
+                        btn.setAttribute('aria-expanded', 'false');
+                    }
+                });
+
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && dropdown.classList.contains('show')) {
+                        dropdown.classList.remove('show');
+                        btn.setAttribute('aria-expanded', 'false');
+                        btn.focus();
+                    }
+                });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initUserDropdown);
+            } else {
+                initUserDropdown();
+            }
         })();
     </script>
-

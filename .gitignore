@@ -4,3 +4,4 @@ uploads/*
 reports/*
 !uploads/.gitkeep
 !reports/.gitkeep
+.env

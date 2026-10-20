@@ -2,11 +2,18 @@ import os
 import uuid
 import json
 import gzip
+import logging
+import gc
+from dotenv import load_dotenv
+
+# Carrega variáveis de ambiente do .env
+load_dotenv()
+
 try:
     import brotli
 except ImportError:
     brotli = None
-from flask import Flask, render_template, request, jsonify, send_file, Response
+from flask import Flask, render_template, request, jsonify, send_file, Response, session, redirect, url_for
 import comparator
 import single_auditor
 import text_comparator
@@ -15,9 +22,34 @@ import xml_reconciler
 import ofx_reconciler
 import rh_auditor
 
+# Serviços do Sistema de Planos, Supabase e Pagamentos
+from services.supabase_service import SupabaseService
+from services.plan_manager import (
+    PLANS,
+    get_user_summary_for_ui,
+    check_validation_permission,
+    record_validation_usage
+)
+from services.mercadopago_service import MercadoPagoService
+from werkzeug.exceptions import HTTPException, RequestEntityTooLarge
+
+logger = logging.getLogger(__name__)
+
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # Suporta até 100MB de arquivo
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'validai_fallback_secret_key_2026')
+app.config['MAX_CONTENT_LENGTH'] = 12 * 1024 * 1024  # Proteção de RAM (Render Free 512MB) - Limite 12MB
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000    # Cache estático de 1 ano (31536000s)
+
+
+@app.errorhandler(413)
+@app.errorhandler(RequestEntityTooLarge)
+def request_entity_too_large(error):
+    if request.is_json or request.path.startswith('/api/'):
+        return jsonify({
+            'error': 'O arquivo enviado excede o limite máximo permitido de 12 MB. '
+                     'Para garantir a estabilidade do servidor em nuvem, comprima o arquivo ou divida em lotes menores.'
+        }), 413
+    return render_template('index.html', upload_error='Arquivo excede o limite de 12 MB.'), 413
 
 COMPRESSIBLE_MIMETYPES = {
     'text/html',
@@ -151,6 +183,12 @@ SEO_METADATA = {
         'robots': 'index, follow',
         'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
     },
+    '/planos': {
+        'title': 'Planos e Preços | ValidAí',
+        'description': 'Conheça os planos do ValidAí: Standard gratuito, Plus (R$ 4,99/mês) e Pro (R$ 9,99/mês). Validações ilimitadas sem anúncios.',
+        'robots': 'index, follow',
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+    },
     '/validador-json': {
         'title': 'Comparador de JSON / APIs - Em Breve | ValidAí',
         'description': 'Identifique diferenças estruturais, chaves ausentes e divergências de tipagem entre payloads JSON e retornos de APIs.',
@@ -185,12 +223,17 @@ ADSENSE_SLOTS_ENABLED = os.environ.get('ADSENSE_SLOTS_ENABLED', 'false').lower()
 def inject_ads_context():
     adsense_id = os.environ.get('ADSENSE_CLIENT_ID', 'ca-pub-3178662755020611').strip()
     slots_enabled = os.environ.get('ADSENSE_SLOTS_ENABLED', 'false').lower() == 'true'
-    # show_ads: True por padrão para visitantes e plano Standard; False no futuro para assinantes Plus/Pro
-    show_ads = True
+    user_summary = get_user_summary_for_ui()
+    # show_ads: True para visitantes anônimos e plano Standard; False para assinantes Plus e Pro
+    show_ads = user_summary.get('show_ads', True)
     return {
         'show_ads': show_ads,
         'adsense_client_id': adsense_id,
-        'adsense_slots_enabled': slots_enabled
+        'adsense_slots_enabled': slots_enabled,
+        'user_summary': user_summary,
+        'plans_config': PLANS,
+        'supabase_url': os.environ.get('SUPABASE_URL', '').strip(),
+        'supabase_key': os.environ.get('SUPABASE_KEY', '').strip()
     }
 
 
@@ -241,6 +284,309 @@ def sobre():
     return render_template('sobre.html')
 
 
+@app.route('/planos')
+def planos():
+    return render_template('planos.html', plans=PLANS)
+
+
+@app.route('/checkout/<plan_name>')
+def checkout(plan_name):
+    plan_key = (plan_name or '').lower().strip()
+    if plan_key not in ['plus', 'pro']:
+        return redirect('/planos')
+
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(f"/login?next=/checkout/{plan_key}&info=auth_required")
+
+    user_email = session.get('user_email')
+    if not user_email:
+        user = SupabaseService.get_user_by_id(user_id)
+        if user:
+            user_email = user.get('email')
+            session['user_email'] = user_email
+
+    init_url, err = MercadoPagoService.create_plan_preference(
+        plan_name=plan_key,
+        user_email=user_email or 'cliente@validai.app.br',
+        user_id=user_id
+    )
+
+    if err or not init_url:
+        return render_template('planos.html', plans=PLANS, checkout_error=err or "Não foi possível iniciar o checkout.")
+
+    return redirect(init_url)
+
+
+@app.route('/webhook/mercadopago', methods=['POST', 'GET'])
+def webhook_mercadopago():
+    try:
+        data = request.json or {}
+        payment_id = request.args.get('id') or data.get('data', {}).get('id') or data.get('id')
+
+        if not payment_id:
+            return jsonify({'status': 'ignored', 'reason': 'no payment id'}), 200
+
+        payment = MercadoPagoService.get_payment_details(payment_id)
+        if not payment:
+            return jsonify({'status': 'error', 'message': 'Payment details not found'}), 200
+
+        status = payment.get('status')
+        external_ref_raw = payment.get('external_reference')
+
+        if status == 'approved' and external_ref_raw:
+            try:
+                ext_data = json.loads(external_ref_raw)
+                user_id = ext_data.get('user_id')
+                email = ext_data.get('email')
+                plan = ext_data.get('plan')
+            except Exception:
+                user_id = external_ref_raw
+                email = None
+                plan = 'pro'
+
+            target = user_id or email
+            if target and plan:
+                SupabaseService.update_user_plan(
+                    user_id_or_email=target,
+                    plan=plan,
+                    days=30,
+                    payment_id=str(payment_id)
+                )
+                logger.info(f"Plano {plan} aprovado com sucesso para {target} via MP #{payment_id}")
+
+        return jsonify({'status': 'received'}), 200
+
+    except Exception as e:
+        logger.error(f"Erro no processamento do webhook Mercado Pago: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 200
+
+
+# ========================================================
+# ROTAS DE AUTENTICAÇÃO (SESSÃO / SUPABASE)
+# ========================================================
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if session.get('user_id'):
+        next_url = request.args.get('next') or request.form.get('next') or '/'
+        return redirect(next_url)
+
+    if request.method == 'POST':
+        email = (request.form.get('email') or '').strip().lower()
+        password = (request.form.get('password') or '').strip()
+        next_url = request.form.get('next') or '/'
+
+        if not email or not password:
+            return render_template('login.html', error_msg='E-mail e senha são obrigatórios.')
+
+        user, err = SupabaseService.authenticate_user(email, password)
+        if err or not user:
+            return render_template('login.html', error_msg=err or 'E-mail ou senha inválidos.')
+
+        session['user_id'] = user['id']
+        session['user_email'] = user['email']
+        session.permanent = True
+
+        return redirect(next_url)
+
+    info_msg = None
+    if request.args.get('info') == 'auth_required':
+        info_msg = 'Por favor, identifique-se ou crie sua conta para concluir a contratação do plano.'
+
+    return render_template('login.html', info_msg=info_msg)
+
+
+@app.route('/cadastro', methods=['GET', 'POST'])
+def cadastro():
+    if session.get('user_id'):
+        next_url = request.args.get('next') or request.form.get('next') or '/'
+        return redirect(next_url)
+
+    if request.method == 'POST':
+        email = (request.form.get('email') or '').strip().lower()
+        password = (request.form.get('password') or '').strip()
+        password_confirm = (request.form.get('password_confirm') or '').strip()
+        terms_accepted = bool(request.form.get('terms'))
+        next_url = request.form.get('next') or '/'
+
+        if not email or not password:
+            return render_template('cadastro.html', error_msg='E-mail e senha são obrigatórios.')
+        if len(password) < 6:
+            return render_template('cadastro.html', error_msg='A senha deve conter ao menos 6 caracteres.')
+        if not password_confirm or password != password_confirm:
+            return render_template('cadastro.html', error_msg='As senhas não coincidem. Repita a senha criada com atenção.')
+        if not terms_accepted:
+            return render_template('cadastro.html', error_msg='Você deve aceitar os Termos de Uso e a Política de Privacidade para criar uma conta.')
+
+        user, err = SupabaseService.create_user(email, password, plan='standard')
+        if err or not user:
+            return render_template('cadastro.html', error_msg=err or 'Não foi possível criar sua conta.')
+
+        session['user_id'] = user['id']
+        session['user_email'] = user['email']
+        session.permanent = True
+
+        return redirect(next_url)
+
+    return render_template('cadastro.html')
+
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    session.pop('user_email', None)
+    return redirect('/')
+
+
+@app.route('/auth/callback', methods=['GET'])
+def auth_callback():
+    error = request.args.get('error')
+    error_desc = request.args.get('error_description')
+    if error:
+        return redirect(f"/login?error={error_desc or error}")
+
+    code = request.args.get('code')
+    if code:
+        client = SupabaseService.get_client()
+        if client:
+            try:
+                auth_res = client.auth.exchange_code_for_session({'auth_code': code})
+                if auth_res and auth_res.user:
+                    user_id = auth_res.user.id
+                    email = auth_res.user.email
+                    profile, err = SupabaseService.get_or_create_oauth_user(user_id=user_id, email=email)
+                    if profile:
+                        session['user_id'] = profile['id']
+                        session['user_email'] = profile['email']
+                        session.permanent = True
+                        return redirect('/')
+            except Exception as e:
+                logger.warning(f"Erro ao trocar código OAuth no servidor: {e}")
+
+    return render_template('auth_callback.html',
+                           supabase_url=os.environ.get('SUPABASE_URL', '').strip(),
+                           supabase_key=os.environ.get('SUPABASE_KEY', '').strip())
+
+
+@app.route('/api/auth/oauth-callback', methods=['POST'])
+def api_auth_oauth_callback():
+    data = request.json or {}
+    email = (data.get('email') or '').strip().lower()
+    user_id = data.get('user_id')
+    access_token = data.get('access_token')
+
+    if not email:
+        return jsonify({'success': False, 'error': 'E-mail não fornecido pelo provedor OAuth.'}), 400
+
+    client = SupabaseService.get_client()
+    if client and access_token:
+        try:
+            user_check = client.auth.get_user(access_token)
+            if user_check and user_check.user:
+                email = user_check.user.email or email
+                user_id = user_check.user.id or user_id
+        except Exception as e:
+            logger.warning(f"Aviso ao validar token OAuth no Supabase: {e}")
+
+    profile, err = SupabaseService.get_or_create_oauth_user(user_id=user_id, email=email)
+    if err or not profile:
+        return jsonify({'success': False, 'error': err or 'Falha ao sincronizar perfil do usuário.'}), 400
+
+    session['user_id'] = profile['id']
+    session['user_email'] = profile['email']
+    session.permanent = True
+
+    return jsonify({
+        'success': True,
+        'redirect': '/',
+        'user': {
+            'id': profile['id'],
+            'email': profile['email'],
+            'plan': profile.get('plan', 'standard')
+        }
+    })
+
+
+@app.route('/api/auth/recuperar-senha', methods=['POST'])
+def api_auth_recuperar_senha():
+    data = request.json or {}
+    email = (data.get('email') or '').strip().lower()
+    if not email or '@' not in email:
+        return jsonify({'success': False, 'error': 'Informe um e-mail válido.'}), 400
+
+    ok, msg = SupabaseService.reset_password(email, redirect_url=f"{SITE_DOMAIN}/login?info=senha_reset")
+    return jsonify({'success': ok, 'message': msg})
+
+
+@app.route('/api/auth/login', methods=['POST'])
+def api_auth_login():
+    data = request.json or {}
+    email = (data.get('email') or '').strip().lower()
+    password = (data.get('password') or '').strip()
+
+    if not email or not password:
+        return jsonify({'success': False, 'error': 'E-mail e senha são obrigatórios.'}), 400
+
+    user, err = SupabaseService.authenticate_user(email, password)
+    if err or not user:
+        return jsonify({'success': False, 'error': err or 'Credenciais inválidas.'}), 401
+
+    session['user_id'] = user['id']
+    session['user_email'] = user['email']
+    session.permanent = True
+
+    return jsonify({
+        'success': True,
+        'user': {
+            'id': user['id'],
+            'email': user['email'],
+            'plan': user.get('plan', 'standard')
+        }
+    })
+
+
+@app.route('/api/auth/cadastro', methods=['POST'])
+def api_auth_cadastro():
+    data = request.json or {}
+    email = (data.get('email') or '').strip().lower()
+    password = (data.get('password') or '').strip()
+    password_confirm = (data.get('password_confirm') or '').strip()
+    terms = data.get('terms')
+
+    if not email or not password:
+        return jsonify({'success': False, 'error': 'E-mail e senha são obrigatórios.'}), 400
+    if len(password) < 6:
+        return jsonify({'success': False, 'error': 'A senha deve ter no mínimo 6 caracteres.'}), 400
+    if not password_confirm or password != password_confirm:
+        return jsonify({'success': False, 'error': 'As senhas não coincidem. Repita a senha criada com atenção.'}), 400
+    if not terms:
+        return jsonify({'success': False, 'error': 'Você deve aceitar os Termos de Uso e a Política de Privacidade.'}), 400
+
+    user, err = SupabaseService.create_user(email, password, plan='standard')
+    if err or not user:
+        return jsonify({'success': False, 'error': err or 'Não foi possível cadastrar usuário.'}), 400
+
+    session['user_id'] = user['id']
+    session['user_email'] = user['email']
+    session.permanent = True
+
+    return jsonify({
+        'success': True,
+        'user': {
+            'id': user['id'],
+            'email': user['email'],
+            'plan': user.get('plan', 'standard')
+        }
+    })
+
+
+@app.route('/api/auth/me', methods=['GET'])
+def api_auth_me():
+    summary = get_user_summary_for_ui()
+    return jsonify({'success': True, 'summary': summary})
+
+
 
 @app.route('/health', methods=['GET', 'HEAD'])
 def health_check():
@@ -285,6 +631,7 @@ def sitemap_xml():
         ('/auditoria-rh', '0.9', 'weekly'),
         ('/como-usar', '0.8', 'monthly'),
         ('/sobre', '0.7', 'monthly'),
+        ('/planos', '0.8', 'monthly'),
         ('/privacidade', '0.6', 'monthly'),
         ('/termos', '0.6', 'monthly'),
     ]
@@ -383,6 +730,8 @@ def upload_headers():
             'column_mapping': mapping
         })
 
+    except HTTPException:
+        raise
     except Exception as e:
         return jsonify({'error': f'Falha ao processar arquivos: {str(e)}'}), 500
 
@@ -415,6 +764,7 @@ def sheets_load_example():
             suggested_keys.append({'col_a': 'ID_Pedido', 'score': 10})
 
         SESSIONS[session_id] = {
+            'is_sample': True,
             'path_a': path_a,
             'path_b': path_b,
             'filename_a': filename_a,
@@ -479,6 +829,21 @@ def compare():
         df_a = comparator.read_tabular_file(sess['path_a'], sess['filename_a'])
         df_b = comparator.read_tabular_file(sess['path_b'], sess['filename_b'])
 
+        # Validação de planos, cotas e limites de volume
+        is_sample = bool(sess.get('is_sample') or data.get('is_sample'))
+        row_count = max(len(df_a), len(df_b))
+        col_count = max(len(df_a.columns), len(df_b.columns))
+        allowed, err_resp, status_code = check_validation_permission(
+            tool_type='basic',
+            row_count=row_count,
+            col_count=col_count,
+            is_sample=is_sample
+        )
+        if not allowed:
+            del df_a, df_b
+            gc.collect()
+            return jsonify(err_resp), status_code
+
         summary, diff_records, df_a_idx, df_b_idx, valid_cols_a, final_mapping, only_a, only_b = comparator.compare_datasets(
             df_a, df_b,
             primary_key_a=primary_key_a,
@@ -513,6 +878,11 @@ def compare():
             'path': report_path,
             'filename': report_filename
         }
+
+        # Registra consumo de cota e coleta de lixo
+        record_validation_usage(tool_type='basic', is_sample=is_sample)
+        del df_a, df_b
+        gc.collect()
 
         # Formata resposta com resumo e amostra de diferenças para tabela dinâmica
         return jsonify({
@@ -592,6 +962,8 @@ def single_upload_headers():
             'sample_data': sample_rows
         })
 
+    except HTTPException:
+        raise
     except Exception as e:
         return jsonify({'error': f'Falha ao carregar arquivo: {str(e)}'}), 500
 
@@ -610,6 +982,20 @@ def single_audit():
 
         sess = SESSIONS[session_id]
         df = comparator.read_tabular_file(sess['path'], sess['filename'])
+
+        is_sample = bool(sess.get('is_sample') or data.get('is_sample'))
+        row_count = len(df)
+        col_count = len(df.columns)
+        allowed, err_resp, status_code = check_validation_permission(
+            tool_type='basic',
+            row_count=row_count,
+            col_count=col_count,
+            is_sample=is_sample
+        )
+        if not allowed:
+            del df
+            gc.collect()
+            return jsonify(err_resp), status_code
 
         summary, preview_rows, invalid_cells_by_row, cols = single_auditor.audit_single_dataset(
             df, rules, max_preview_rows=300
@@ -632,6 +1018,10 @@ def single_audit():
             'path': report_path,
             'filename': report_filename
         }
+
+        record_validation_usage(tool_type='basic', is_sample=is_sample)
+        del df
+        gc.collect()
 
         return jsonify({
             'success': True,
@@ -716,6 +1106,19 @@ def text_compare():
             ignore_empty_lines = request.form.get('ignore_empty_lines', 'false').lower() == 'true'
             diff_granularity = request.form.get('diff_granularity', 'word')
 
+        # Validação de planos para textos/documentos
+        is_sample = bool(data.get('is_sample') if request.is_json else request.form.get('is_sample', 'false').lower() == 'true')
+        lines_count = max(len(text_a.splitlines()), len(text_b.splitlines()))
+        allowed, err_resp, status_code = check_validation_permission(
+            tool_type='basic',
+            row_count=lines_count,
+            col_count=1,
+            is_sample=is_sample
+        )
+        if not allowed:
+            gc.collect()
+            return jsonify(err_resp), status_code
+
         result = text_comparator.compare_texts(
             text_a=text_a,
             text_b=text_b,
@@ -743,6 +1146,9 @@ def text_compare():
             'mimetype': 'application/pdf'
         }
 
+        record_validation_usage(tool_type='basic', is_sample=is_sample)
+        gc.collect()
+
         return jsonify({
             'success': True,
             'report_id': report_id,
@@ -753,6 +1159,8 @@ def text_compare():
             'stats_comparison': result['stats_comparison']
         })
 
+    except HTTPException:
+        raise
     except Exception as e:
         return jsonify({'error': f'Erro ao comparar documentos: {str(e)}'}), 500
 
@@ -850,6 +1258,8 @@ def cadastros_upload_headers():
             'sample_data': sample_rows
         })
 
+    except HTTPException:
+        raise
     except Exception as e:
         return jsonify({'error': f'Falha ao carregar base de cadastros: {str(e)}'}), 500
 
@@ -905,6 +1315,7 @@ def cadastros_load_example():
             sample_rows.append(row_dict)
 
         SESSIONS[session_id] = {
+            'is_sample': True,
             'mode': 'cadastros',
             'path': filepath,
             'filename': filename,
@@ -936,6 +1347,20 @@ def cadastros_process():
 
         sess = SESSIONS[session_id]
         df = comparator.read_tabular_file(sess['path'], sess['filename'])
+
+        is_sample = bool(sess.get('is_sample') or data.get('is_sample'))
+        row_count = len(df)
+        col_count = len(df.columns)
+        allowed, err_resp, status_code = check_validation_permission(
+            tool_type='special',
+            row_count=row_count,
+            col_count=col_count,
+            is_sample=is_sample
+        )
+        if not allowed:
+            del df
+            gc.collect()
+            return jsonify(err_resp), status_code
 
         options = {
             'col_doc': data.get('col_doc'),
@@ -979,6 +1404,10 @@ def cadastros_process():
             'path': audit_path,
             'filename': audit_filename
         }
+
+        record_validation_usage(tool_type='special', is_sample=is_sample)
+        del df
+        gc.collect()
 
         return jsonify({
             'success': True,
@@ -1092,6 +1521,8 @@ def xml_upload():
             'suggested': suggested
         })
 
+    except HTTPException:
+        raise
     except Exception as e:
         return jsonify({'error': f'Erro ao processar arquivos: {str(e)}'}), 500
 
@@ -1111,6 +1542,7 @@ def xml_load_example():
         xml_total_val = round(sum(inv['vNF'] for inv in invoices), 2)
 
         SESSIONS[session_id] = {
+            'is_sample': True,
             'mode': 'xml',
             'invoices': invoices,
             'parse_errors': parse_errors,
@@ -1151,6 +1583,21 @@ def xml_reconcile():
         df_sheet = comparator.read_tabular_file(sess['sheet_path'], sess['sheet_filename'])
         invoices = sess['invoices']
 
+        # Validação de planos para conciliação XML (Especial)
+        is_sample = bool(sess.get('is_sample') or data.get('is_sample'))
+        row_count = max(len(df_sheet), len(invoices))
+        col_count = len(df_sheet.columns)
+        allowed, err_resp, status_code = check_validation_permission(
+            tool_type='special',
+            row_count=row_count,
+            col_count=col_count,
+            is_sample=is_sample
+        )
+        if not allowed:
+            del df_sheet
+            gc.collect()
+            return jsonify(err_resp), status_code
+
         options = {
             'col_nf': data.get('col_nf'),
             'col_val': data.get('col_val'),
@@ -1184,6 +1631,10 @@ def xml_reconcile():
             'path': mirror_path,
             'filename': mirror_filename
         }
+
+        record_validation_usage(tool_type='special', is_sample=is_sample)
+        del df_sheet
+        gc.collect()
 
         return jsonify({
             'success': True,
@@ -1296,6 +1747,8 @@ def ofx_upload():
             'suggested': suggested
         })
 
+    except HTTPException:
+        raise
     except Exception as e:
         return jsonify({'error': f'Erro ao processar arquivos OFX e planilha: {str(e)}'}), 500
 
@@ -1314,6 +1767,7 @@ def ofx_load_example():
         suggested = ofx_reconciler.suggest_sheet_columns(cols)
 
         SESSIONS[session_id] = {
+            'is_sample': True,
             'mode': 'ofx',
             'transactions': transactions,
             'parse_errors': parse_errors,
@@ -1351,6 +1805,21 @@ def ofx_reconcile():
         sess = SESSIONS[session_id]
         df_sales = comparator.read_tabular_file(sess['sheet_path'], sess['sheet_filename'])
         transactions = sess['transactions']
+
+        # Validação de planos para conciliação bancária OFX (Especial)
+        is_sample = bool(sess.get('is_sample') or data.get('is_sample'))
+        row_count = max(len(df_sales), len(transactions))
+        col_count = len(df_sales.columns)
+        allowed, err_resp, status_code = check_validation_permission(
+            tool_type='special',
+            row_count=row_count,
+            col_count=col_count,
+            is_sample=is_sample
+        )
+        if not allowed:
+            del df_sales
+            gc.collect()
+            return jsonify(err_resp), status_code
 
         col_id = data.get('col_id')
         col_gross_val = data.get('col_gross_val')
@@ -1396,6 +1865,10 @@ def ofx_reconcile():
 
         sess['last_result'] = res
         sess['last_report_id'] = report_id
+
+        record_validation_usage(tool_type='special', is_sample=is_sample)
+        del df_sales
+        gc.collect()
 
         return jsonify({
             'success': True,
@@ -1506,6 +1979,8 @@ def rh_upload_headers():
             'name_col_audit': name_audit
         })
 
+    except HTTPException:
+        raise
     except Exception as e:
         return jsonify({'error': f'Falha ao ler arquivos de RH: {str(e)}'}), 500
 
@@ -1535,6 +2010,7 @@ def rh_load_example():
         name_audit = rh_auditor.find_name_column(cols_audit)
 
         SESSIONS[session_id] = {
+            'is_sample': True,
             'mode': mode,
             'path_ref': path_ref,
             'path_audit': path_audit,
@@ -1581,6 +2057,21 @@ def rh_execute_audit():
         df_ref = comparator.read_tabular_file(sess['path_ref'], sess['filename_ref'])
         df_audit = comparator.read_tabular_file(sess['path_audit'], sess['filename_audit'])
 
+        # Validação de planos para auditoria de RH (Especial)
+        is_sample = bool(sess.get('is_sample') or data.get('is_sample'))
+        row_count = max(len(df_ref), len(df_audit))
+        col_count = max(len(df_ref.columns), len(df_audit.columns))
+        allowed, err_resp, status_code = check_validation_permission(
+            tool_type='special',
+            row_count=row_count,
+            col_count=col_count,
+            is_sample=is_sample
+        )
+        if not allowed:
+            del df_ref, df_audit
+            gc.collect()
+            return jsonify(err_resp), status_code
+
         options = {
             'mode': data.get('mode', sess.get('mode', 'folha')),
             'key_ref': data.get('key_ref'),
@@ -1614,6 +2105,10 @@ def rh_execute_audit():
 
         sess['last_result'] = res
         sess['last_report_id'] = report_id
+
+        record_validation_usage(tool_type='special', is_sample=is_sample)
+        del df_ref, df_audit
+        gc.collect()
 
         return jsonify({
             'success': True,

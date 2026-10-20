@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conectando... | ValidAí</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/png" href="/static/images/favicon.png?v=3">
+    <link rel="stylesheet" href="/static/css/style.css?v=48">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .auth-callback-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-body, #f8fafc);
+            font-family: 'Outfit', 'Montserrat', -apple-system, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        .auth-callback-card {
+            background: var(--bg-card, #ffffff);
+            border: 1px solid var(--border-color, #e2e8f0);
+            border-radius: 16px;
+            padding: 40px 32px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+        .spinner {
+            width: 46px;
+            height: 46px;
+            border: 3.5px solid rgba(79, 213, 128, 0.2);
+            border-top-color: #4FD580;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-callback-container">
+        <div class="auth-callback-card">
+            <div class="spinner"></div>
+            <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 8px;">Conectando com o Google...</h2>
+            <p style="color: #64748b; font-size: 14px;" id="status-msg">Validando suas credenciais com segurança.</p>
+        </div>
+    </div>
+
+    <script>
+        (async function() {
+            var statusEl = document.getElementById('status-msg');
+            var supabaseUrl = '{{ supabase_url }}';
+            var supabaseKey = '{{ supabase_key }}';
+            
+            try {
+                var client = (window.supabase && supabaseUrl && supabaseKey) 
+                    ? window.supabase.createClient(supabaseUrl, supabaseKey) 
+                    : null;
+
+                var session = null;
+                if (client && client.auth) {
+                    var sessionRes = await client.auth.getSession();
+                    session = sessionRes.data && sessionRes.data.session;
+                }
+
+                if (!session && window.location.hash) {
+                    var params = new URLSearchParams(window.location.hash.substring(1));
+                    var accessToken = params.get('access_token');
+                    if (accessToken && client && client.auth) {
+                        var userRes = await client.auth.getUser(accessToken);
+                        if (userRes.data && userRes.data.user) {
+                            session = { user: userRes.data.user, access_token: accessToken };
+                        }
+                    }
+                }
+
+                if (session && session.user) {
+                    if (statusEl) statusEl.textContent = 'Iniciando sua sessão...';
+                    var resp = await fetch('/api/auth/oauth-callback', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            user_id: session.user.id,
+                            email: session.user.email,
+                            access_token: session.access_token
+                        })
+                    });
+                    var data = await resp.json();
+                    if (data.success) {
+                        window.location.href = data.redirect || '/';
+                        return;
+                    }
+                }
+                
+                window.location.href = '/login?error=oauth_failed';
+            } catch(e) {
+                console.error('Erro no callback OAuth:', e);
+                window.location.href = '/login?error=oauth_error';
+            }
+        })();
+    </script>
+</body>
+</html>

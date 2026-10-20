@@ -7,3 +7,7 @@ python-docx
 reportlab
 Pillow
 ofxparse
+python-dotenv
+supabase
+mercadopago
+requests

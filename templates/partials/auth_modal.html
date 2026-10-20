@@ -1,0 +1,487 @@
+<!-- Modal Unificado de Autenticação (Login / Cadastro) -->
+<style>
+/* Estilos elegantes e robustos de Autenticação (Google, Divisor e Senha) */
+.btn-google-auth {
+    width: 100% !important;
+    height: 46px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    background: #ffffff !important;
+    color: #1f2937 !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    padding: 0 18px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    font-family: inherit !important;
+    cursor: pointer !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    margin-bottom: 6px !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+    user-select: none !important;
+}
+
+.btn-google-auth:hover {
+    background: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-google-auth:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.btn-google-auth .google-icon {
+    width: 20px !important;
+    height: 20px !important;
+    flex-shrink: 0 !important;
+}
+
+[data-theme="dark"] .btn-google-auth,
+.dark-theme .btn-google-auth {
+    background: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25) !important;
+}
+
+[data-theme="dark"] .btn-google-auth:hover,
+.dark-theme .btn-google-auth:hover {
+    background: #273549 !important;
+    border-color: #475569 !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
+}
+
+.auth-divider {
+    display: flex !important;
+    align-items: center !important;
+    text-align: center !important;
+    margin: 18px 0 16px 0 !important;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '' !important;
+    flex: 1 !important;
+    border-bottom: 1px solid var(--border-color, #e2e8f0) !important;
+}
+
+.auth-divider span {
+    padding: 0 14px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: var(--text-muted, #64748b) !important;
+    letter-spacing: 0.02em !important;
+}
+
+[data-theme="dark"] .auth-divider::before,
+[data-theme="dark"] .auth-divider::after,
+.dark-theme .auth-divider::before,
+.dark-theme .auth-divider::after {
+    border-bottom-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] .auth-divider span,
+.dark-theme .auth-divider span {
+    color: #94a3b8 !important;
+}
+
+.auth-forgot-row {
+    display: flex !important;
+    justify-content: flex-end !important;
+    margin-top: 6px !important;
+}
+
+.auth-forgot-link {
+    background: transparent !important;
+    border: none !important;
+    padding: 2px 0 !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: var(--primary, #10b981) !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    font-family: inherit !important;
+    transition: opacity 0.15s ease, text-decoration 0.15s ease !important;
+    outline: none !important;
+}
+
+.auth-forgot-link:hover {
+    text-decoration: underline !important;
+    opacity: 0.85 !important;
+}
+
+.auth-checkbox-group {
+    margin: 14px 0 18px 0 !important;
+    text-align: left !important;
+}
+
+.auth-checkbox-label {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    font-size: 12px !important;
+    color: var(--text-muted, #64748b) !important;
+    cursor: pointer !important;
+    line-height: 1.45 !important;
+}
+
+.auth-checkbox-label input[type="checkbox"] {
+    margin-top: 2px !important;
+    width: 16px !important;
+    height: 16px !important;
+    accent-color: var(--primary, #10b981) !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+}
+
+.auth-checkbox-label a {
+    color: var(--primary, #10b981) !important;
+    text-decoration: underline !important;
+}
+
+.auth-checkbox-label a:hover {
+    opacity: 0.85 !important;
+}
+</style>
+
+<div id="validai-auth-modal" class="validai-modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+    <div class="validai-modal-card auth-modal-card">
+        <button type="button" class="validai-modal-close" id="btn-close-auth" aria-label="Fechar modal">✕</button>
+
+        <div class="auth-tabs-nav">
+            <button type="button" class="auth-tab-btn active" id="auth-tab-login" data-target="form-login">Entrar</button>
+            <button type="button" class="auth-tab-btn" id="auth-tab-signup" data-target="form-signup">Criar Conta</button>
+        </div>
+
+        <!-- Alerta de Status / Erro de Autenticação -->
+        <div id="auth-alert-box" class="auth-alert-box" style="display: none;">
+            <span id="auth-alert-msg"></span>
+        </div>
+
+        <!-- Formulário de Login -->
+        <form id="form-login" class="auth-form-panel active" autocomplete="on">
+            <div id="auth-modal-title" class="auth-form-title" role="heading" aria-level="2">Acesse sua conta ValidAí</div>
+            <p class="auth-form-sub">Sincronize suas validações e aproveite seu plano.</p>
+
+            <!-- 1. Botão Google no Topo -->
+            <button type="button" class="btn-google-auth" onclick="if(window.ValidAiAuth) window.ValidAiAuth.googleLogin();" aria-label="Continuar com o Google">
+                <svg class="google-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                <span>Continuar com o Google</span>
+            </button>
+
+            <!-- Linha Divisória Elegante -->
+            <div class="auth-divider">
+                <span>ou continue com e-mail</span>
+            </div>
+
+            <div class="auth-input-group">
+                <label for="login-email">E-mail corporativo ou pessoal</label>
+                <input type="email" id="login-email" name="email" required placeholder="seu@email.com" autocomplete="email">
+            </div>
+
+            <div class="auth-input-group">
+                <label for="login-password">Senha de acesso</label>
+                <input type="password" id="login-password" name="password" required placeholder="••••••••" autocomplete="current-password">
+                <div class="auth-forgot-row">
+                    <button type="button" class="auth-forgot-link" onclick="if(window.ValidAiAuth) window.ValidAiAuth.forgotPassword();">Esqueci minha senha</button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-pill-gradient auth-btn-submit" id="btn-submit-login">
+                <span>Entrar na Plataforma</span>
+            </button>
+        </form>
+
+        <!-- Formulário de Cadastro -->
+        <form id="form-signup" class="auth-form-panel" style="display: none;" autocomplete="on">
+            <div class="auth-form-title" role="heading" aria-level="2">Crie sua conta gratuita</div>
+            <p class="auth-form-sub">Comece agora no plano Standard gratuito ou assine o Plus/Pro.</p>
+
+            <!-- 1. Botão Google no Topo -->
+            <button type="button" class="btn-google-auth" onclick="if(window.ValidAiAuth) window.ValidAiAuth.googleLogin();" aria-label="Continuar com o Google">
+                <svg class="google-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                <span>Continuar com o Google</span>
+            </button>
+
+            <!-- Linha Divisória Elegante -->
+            <div class="auth-divider">
+                <span>ou continue com e-mail</span>
+            </div>
+
+            <div class="auth-input-group">
+                <label for="signup-email">Seu e-mail</label>
+                <input type="email" id="signup-email" name="email" required placeholder="seu@email.com" autocomplete="email">
+            </div>
+
+            <div class="auth-input-group">
+                <label for="signup-password">Crie uma senha (mínimo 6 caracteres)</label>
+                <input type="password" id="signup-password" name="password" required minlength="6" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+            </div>
+
+            <!-- Campo Confirme sua senha -->
+            <div class="auth-input-group">
+                <label for="signup-password-confirm">Confirme sua senha</label>
+                <input type="password" id="signup-password-confirm" name="password_confirm" required minlength="6" placeholder="Repita a senha criada" autocomplete="new-password">
+            </div>
+
+            <!-- Checkbox Obrigatório: Termos de Uso e Política de Privacidade -->
+            <div class="auth-checkbox-group">
+                <label class="auth-checkbox-label" for="signup-terms">
+                    <input type="checkbox" id="signup-terms" name="terms" required>
+                    <span>Li e aceito os <a href="/termos" target="_blank" rel="noopener">Termos de Uso</a> e a <a href="/privacidade" target="_blank" rel="noopener">Política de Privacidade</a>.</span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-pill-gradient auth-btn-submit" id="btn-submit-signup">
+                <span>Criar Conta Gratuita</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    (function() {
+        var modal = document.getElementById('validai-auth-modal');
+        var btnClose = document.getElementById('btn-close-auth');
+        var tabLogin = document.getElementById('auth-tab-login');
+        var tabSignup = document.getElementById('auth-tab-signup');
+        var formLogin = document.getElementById('form-login');
+        var formSignup = document.getElementById('form-signup');
+        var alertBox = document.getElementById('auth-alert-box');
+        var alertMsg = document.getElementById('auth-alert-msg');
+
+        var supabaseUrl = '{{ supabase_url }}';
+        var supabaseKey = '{{ supabase_key }}';
+        var supabaseClient = (window.supabase && supabaseUrl && supabaseKey) 
+            ? window.supabase.createClient(supabaseUrl, supabaseKey) 
+            : null;
+
+        function showAlert(msg, type) {
+            if (alertBox && alertMsg) {
+                alertMsg.textContent = msg;
+                alertBox.className = 'auth-alert-box' + (type === 'success' ? ' alert-success' : '');
+                alertBox.style.display = 'block';
+            }
+        }
+        function hideAlert() {
+            if (alertBox) alertBox.style.display = 'none';
+        }
+
+        function setTab(tabName) {
+            hideAlert();
+            if (tabName === 'signup') {
+                if (tabLogin) tabLogin.classList.remove('active');
+                if (tabSignup) tabSignup.classList.add('active');
+                if (formLogin) formLogin.style.display = 'none';
+                if (formSignup) formSignup.style.display = 'block';
+            } else {
+                if (tabSignup) tabSignup.classList.remove('active');
+                if (tabLogin) tabLogin.classList.add('active');
+                if (formSignup) formSignup.style.display = 'none';
+                if (formLogin) formLogin.style.display = 'block';
+            }
+        }
+
+        function openAuthModal(initialTab) {
+            if (!modal) return;
+            setTab(initialTab || 'login');
+            modal.style.display = 'flex';
+            document.body.classList.add('modal-open');
+        }
+
+        function closeAuthModal() {
+            if (!modal) return;
+            modal.style.display = 'none';
+            document.body.classList.remove('modal-open');
+        }
+
+        function googleLogin() {
+            hideAlert();
+            var redirectUri = window.location.origin + '/auth/callback';
+            if (supabaseClient && supabaseClient.auth) {
+                supabaseClient.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: redirectUri
+                    }
+                }).then(function(res) {
+                    if (res.data && res.data.url) {
+                        window.location.href = res.data.url;
+                    } else if (res.error) {
+                        showAlert(res.error.message || 'Erro ao conectar com o Google.');
+                    }
+                }).catch(function(err) {
+                    console.error('OAuth erro:', err);
+                    if (supabaseUrl) {
+                        window.location.href = supabaseUrl + '/auth/v1/authorize?provider=google&redirect_to=' + encodeURIComponent(redirectUri);
+                    }
+                });
+            } else if (supabaseUrl) {
+                window.location.href = supabaseUrl + '/auth/v1/authorize?provider=google&redirect_to=' + encodeURIComponent(redirectUri);
+            } else {
+                showAlert('Autenticação com Google indisponível no momento.');
+            }
+        }
+
+        function forgotPassword() {
+            hideAlert();
+            var emailInput = document.getElementById('login-email');
+            var email = emailInput ? emailInput.value.trim() : '';
+            if (!email || email.indexOf('@') === -1) {
+                showAlert('Por favor, informe seu e-mail no campo acima para redefinir a senha.');
+                if (emailInput) emailInput.focus();
+                return;
+            }
+
+            fetch('/api/auth/recuperar-senha', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(res) {
+                if (res.success) {
+                    showAlert(res.message || 'Instruções de redefinição enviadas para seu e-mail.', 'success');
+                } else {
+                    showAlert(res.error || 'Erro ao solicitar redefinição.');
+                }
+            })
+            .catch(function() {
+                showAlert('Erro de comunicação. Tente novamente.');
+            });
+        }
+
+        if (tabLogin) tabLogin.addEventListener('click', function() { setTab('login'); });
+        if (tabSignup) tabSignup.addEventListener('click', function() { setTab('signup'); });
+        if (btnClose) btnClose.addEventListener('click', closeAuthModal);
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) closeAuthModal();
+            });
+        }
+
+        // Submissão Login
+        if (formLogin) {
+            formLogin.addEventListener('submit', function(e) {
+                e.preventDefault();
+                hideAlert();
+                var email = document.getElementById('login-email').value;
+                var password = document.getElementById('login-password').value;
+                var btn = document.getElementById('btn-submit-login');
+                if (btn) btn.disabled = true;
+
+                fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, password: password })
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (btn) btn.disabled = false;
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        showAlert(data.error || data.message || 'E-mail ou senha incorretos.');
+                    }
+                })
+                .catch(function() {
+                    if (btn) btn.disabled = false;
+                    showAlert('Erro de comunicação. Tente novamente.');
+                });
+            });
+        }
+
+        // Submissão Cadastro com Validação de Senha e Termos
+        if (formSignup) {
+            formSignup.addEventListener('submit', function(e) {
+                e.preventDefault();
+                hideAlert();
+                var email = document.getElementById('signup-email').value.trim();
+                var password = document.getElementById('signup-password').value;
+                var passwordConfirm = document.getElementById('signup-password-confirm').value;
+                var termsCheckbox = document.getElementById('signup-terms');
+
+                if (password !== passwordConfirm) {
+                    showAlert('As senhas não coincidem. Repita a mesma senha criada.');
+                    document.getElementById('signup-password-confirm').focus();
+                    return;
+                }
+
+                if (!termsCheckbox || !termsCheckbox.checked) {
+                    showAlert('Você precisa aceitar os Termos de Uso e a Política de Privacidade para criar sua conta.');
+                    if (termsCheckbox) termsCheckbox.focus();
+                    return;
+                }
+
+                var btn = document.getElementById('btn-submit-signup');
+                if (btn) btn.disabled = true;
+
+                fetch('/api/auth/cadastro', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password,
+                        password_confirm: passwordConfirm,
+                        terms: true
+                    })
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (btn) btn.disabled = false;
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        showAlert(data.error || data.message || 'Não foi possível criar sua conta.');
+                    }
+                })
+                .catch(function() {
+                    if (btn) btn.disabled = false;
+                    showAlert('Erro de comunicação. Tente novamente.');
+                });
+            });
+        }
+
+        window.ValidAiAuth = {
+            show: openAuthModal,
+            hide: closeAuthModal,
+            googleLogin: googleLogin,
+            forgotPassword: forgotPassword
+        };
+
+        // Escuta gatilhos globais de abertura
+        document.addEventListener('click', function(e) {
+            var target = e.target;
+            if (target && target.closest) {
+                var loginTrigger = target.closest('#btn-open-login, .btn-open-login');
+                if (loginTrigger) {
+                    e.preventDefault();
+                    openAuthModal('login');
+                }
+                var signupTrigger = target.closest('.btn-open-signup');
+                if (signupTrigger) {
+                    e.preventDefault();
+                    openAuthModal('signup');
+                }
+            }
+        });
+    })();
+</script>
