@@ -13,6 +13,7 @@ import text_comparator
 import cadastros_cleaner
 import xml_reconciler
 import ofx_reconciler
+import rh_auditor
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # Suporta até 100MB de arquivo
@@ -125,9 +126,9 @@ SEO_METADATA = {
     },
     # Rotas "Em Breve" protegidas contra desperdício de Crawl Budget e Soft 404
     '/auditoria-rh': {
-        'title': 'Auditoria de Folha e RH - Em Breve | ValidAí',
-        'description': 'Batimento automatizado de folha de pagamento, encargos trabalhistas, férias e benefícios.',
-        'robots': 'noindex, follow',
+        'title': 'Auditoria de Folha e RH | ValidAí',
+        'description': 'Batimento automatizado de folha de pagamento (mês anterior vs. atual) e conciliação de ativos do RH contra faturas de benefícios corporativos.',
+        'robots': 'index, follow',
         'og_image': f'{SITE_DOMAIN}/static/images/logo.png',
         'module_name': 'Auditoria de Folha e RH',
         'module_sub': 'Batimento de folha de pagamento, proventos, descontos e benefícios corporativos.'
@@ -186,6 +187,9 @@ def conciliador_taxas():
     return render_template('validador_ofx.html')
 
 @app.route('/auditoria-rh')
+def auditoria_rh():
+    return render_template('validador_rh.html')
+
 @app.route('/validador-json')
 def upcoming_module():
     return render_template('em_breve.html')
@@ -221,6 +225,7 @@ def sitemap_xml():
         ('/validador-cadastros', '0.9', 'weekly'),
         ('/validador-xml', '0.9', 'weekly'),
         ('/conciliador-taxas', '0.9', 'weekly'),
+        ('/auditoria-rh', '0.9', 'weekly'),
         ('/como-usar', '0.8', 'monthly'),
     ]
     xml_lines = [
@@ -1369,6 +1374,215 @@ def ofx_download_mirror(report_id):
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
     return jsonify({'error': 'Espelho do extrato OFX expirado ou não encontrado.'}), 404
+
+
+
+# ========================================================
+# ROTAS DA AUDITORIA DE FOLHA E RH (/auditoria-rh)
+# ========================================================
+
+@app.route('/api/rh/upload-headers', methods=['POST'])
+def rh_upload_headers():
+    try:
+        file_ref = request.files.get('file_ref')
+        file_audit = request.files.get('file_audit')
+        mode = request.form.get('mode', 'folha')
+
+        if not file_ref or not file_audit:
+            return jsonify({'error': 'Envie ambos os arquivos (Base de Referência e Base Auditada).'}), 400
+
+        session_id = str(uuid.uuid4())
+        session_folder = os.path.join(UPLOAD_DIR, session_id)
+        os.makedirs(session_folder, exist_ok=True)
+
+        filename_ref = file_ref.filename
+        filename_audit = file_audit.filename
+
+        path_ref = os.path.join(session_folder, 'ref_' + filename_ref)
+        path_audit = os.path.join(session_folder, 'audit_' + filename_audit)
+
+        file_ref.save(path_ref)
+        file_audit.save(path_audit)
+
+        df_ref = comparator.read_tabular_file(path_ref, filename_ref)
+        df_audit = comparator.read_tabular_file(path_audit, filename_audit)
+
+        cols_ref = list(df_ref.columns)
+        cols_audit = list(df_audit.columns)
+
+        mapping = comparator.suggest_column_mappings(cols_ref, cols_audit)
+        key_suggestion = rh_auditor.suggest_employee_keys(cols_ref, cols_audit)
+
+        name_ref = rh_auditor.find_name_column(cols_ref)
+        name_audit = rh_auditor.find_name_column(cols_audit)
+
+        SESSIONS[session_id] = {
+            'mode': mode,
+            'path_ref': path_ref,
+            'path_audit': path_audit,
+            'filename_ref': filename_ref,
+            'filename_audit': filename_audit,
+            'cols_ref': cols_ref,
+            'cols_audit': cols_audit,
+            'mapping': mapping,
+            'rows_ref_count': len(df_ref),
+            'rows_audit_count': len(df_audit)
+        }
+
+        return jsonify({
+            'session_id': session_id,
+            'mode': mode,
+            'filename_ref': filename_ref,
+            'filename_audit': filename_audit,
+            'rows_ref_count': len(df_ref),
+            'rows_audit_count': len(df_audit),
+            'cols_ref': cols_ref,
+            'cols_audit': cols_audit,
+            'column_mapping': mapping,
+            'suggested_key_ref': key_suggestion['primary_ref'],
+            'suggested_key_audit': key_suggestion['primary_audit'],
+            'is_cpf': key_suggestion['is_cpf'],
+            'name_col_ref': name_ref,
+            'name_col_audit': name_audit
+        })
+
+    except Exception as e:
+        return jsonify({'error': f'Falha ao ler arquivos de RH: {str(e)}'}), 500
+
+
+@app.route('/api/rh/load-example', methods=['POST'])
+def rh_load_example():
+    try:
+        data = request.json or {}
+        mode = data.get('mode', 'folha')
+
+        session_id = str(uuid.uuid4())
+        session_folder = os.path.join(UPLOAD_DIR, session_id)
+        os.makedirs(session_folder, exist_ok=True)
+
+        path_ref, filename_ref, path_audit, filename_audit = rh_auditor.create_demo_files(session_folder, mode=mode)
+
+        df_ref = comparator.read_tabular_file(path_ref, filename_ref)
+        df_audit = comparator.read_tabular_file(path_audit, filename_audit)
+
+        cols_ref = list(df_ref.columns)
+        cols_audit = list(df_audit.columns)
+
+        mapping = comparator.suggest_column_mappings(cols_ref, cols_audit)
+        key_suggestion = rh_auditor.suggest_employee_keys(cols_ref, cols_audit)
+
+        name_ref = rh_auditor.find_name_column(cols_ref)
+        name_audit = rh_auditor.find_name_column(cols_audit)
+
+        SESSIONS[session_id] = {
+            'mode': mode,
+            'path_ref': path_ref,
+            'path_audit': path_audit,
+            'filename_ref': filename_ref,
+            'filename_audit': filename_audit,
+            'cols_ref': cols_ref,
+            'cols_audit': cols_audit,
+            'mapping': mapping,
+            'rows_ref_count': len(df_ref),
+            'rows_audit_count': len(df_audit)
+        }
+
+        return jsonify({
+            'session_id': session_id,
+            'mode': mode,
+            'filename_ref': filename_ref,
+            'filename_audit': filename_audit,
+            'rows_ref_count': len(df_ref),
+            'rows_audit_count': len(df_audit),
+            'cols_ref': cols_ref,
+            'cols_audit': cols_audit,
+            'column_mapping': mapping,
+            'suggested_key_ref': key_suggestion['primary_ref'],
+            'suggested_key_audit': key_suggestion['primary_audit'],
+            'is_cpf': key_suggestion['is_cpf'],
+            'name_col_ref': name_ref,
+            'name_col_audit': name_audit
+        })
+
+    except Exception as e:
+        return jsonify({'error': f'Falha ao carregar bases demonstrativas de RH: {str(e)}'}), 500
+
+
+@app.route('/api/rh/audit', methods=['POST'])
+def rh_execute_audit():
+    try:
+        data = request.json or {}
+        session_id = data.get('session_id')
+
+        if not session_id or session_id not in SESSIONS:
+            return jsonify({'error': 'Sessão inválida ou expirada. Faça o envio das bases novamente.'}), 400
+
+        sess = SESSIONS[session_id]
+        df_ref = comparator.read_tabular_file(sess['path_ref'], sess['filename_ref'])
+        df_audit = comparator.read_tabular_file(sess['path_audit'], sess['filename_audit'])
+
+        options = {
+            'mode': data.get('mode', sess.get('mode', 'folha')),
+            'key_ref': data.get('key_ref'),
+            'key_audit': data.get('key_audit'),
+            'sec_key_ref': data.get('sec_key_ref'),
+            'sec_key_audit': data.get('sec_key_audit'),
+            'name_col_ref': data.get('name_col_ref'),
+            'name_col_audit': data.get('name_col_audit'),
+            'normalize_cpf': bool(data.get('normalize_cpf', True)),
+            'ignore_accents': bool(data.get('ignore_accents', True)),
+            'variation_threshold': float(data.get('variation_threshold', 10.0)),
+            'column_mapping': data.get('column_mapping', {})
+        }
+
+        res = rh_auditor.audit_rh_bases(df_ref, df_audit, options)
+
+        report_id = str(uuid.uuid4())
+        audit_filename = f"Relatorio_Auditoria_RH_{report_id[:8]}.xlsx"
+        audit_path = os.path.join(REPORT_DIR, audit_filename)
+
+        logo_path = os.path.join(app.root_path, 'static', 'images', 'logo.png')
+        if not os.path.exists(logo_path):
+            logo_path = None
+
+        rh_auditor.generate_rh_audit_excel(res, audit_path, logo_path=logo_path)
+
+        REPORTS[f"rh_audit_{report_id}"] = {
+            'path': audit_path,
+            'filename': audit_filename
+        }
+
+        sess['last_result'] = res
+        sess['last_report_id'] = report_id
+
+        return jsonify({
+            'success': True,
+            'report_id': report_id,
+            'kpis': res['kpis'],
+            'financial_summary': res['financial_summary'],
+            'divergences': res['divergences'],
+            'critical_variations': res['critical_variations'],
+            'exclusive_ref': res['exclusive_ref'],
+            'exclusive_audit': res['exclusive_audit']
+        })
+
+    except ValueError as ve:
+        return jsonify({'error': str(ve)}), 400
+    except Exception as e:
+        return jsonify({'error': f'Erro ao executar auditoria de RH: {str(e)}'}), 500
+
+
+@app.route('/api/rh/download-report/<report_id>', methods=['GET'])
+def rh_download_report(report_id):
+    key = f"rh_audit_{report_id}"
+    if key in REPORTS and os.path.exists(REPORTS[key]['path']):
+        return send_file(
+            REPORTS[key]['path'],
+            as_attachment=True,
+            download_name=REPORTS[key]['filename'],
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+    return jsonify({'error': 'Relatório de auditoria de RH expirado ou não encontrado.'}), 404
 
 
 if __name__ == '__main__':

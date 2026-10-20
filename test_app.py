@@ -683,6 +683,131 @@ def test_full_pipeline():
     print("[OK] Espelho Tabulado do Extrato OFX gerado e validado com sucesso!")
 
     # =========================================================================
+    
+    # =========================================================================
+    # 16. TESTE COMPLETO DO MÓDULO DE AUDITORIA DE FOLHA E RH (/auditoria-rh)
+    # =========================================================================
+    print("\n--- Testando Módulo Completo de Auditoria de Folha e RH (/auditoria-rh) ---")
+    import rh_auditor
+
+    # A. Renderização da página /auditoria-rh e elementos de UI padronizados
+    res_rh_page = client.get('/auditoria-rh')
+    assert res_rh_page.status_code == 200, f"Falha GET /auditoria-rh: {res_rh_page.status_code}"
+    html_rh = res_rh_page.data.decode('utf-8')
+    assert 'drop-ref-file' in html_rh, "Dropzone da Base Referência ausente"
+    assert 'drop-audit-file' in html_rh, "Dropzone da Base Auditada ausente"
+    assert 'step-config-rh' in html_rh, "Passo 2 de configuração de RH ausente"
+    assert 'step-results-rh' in html_rh, "Passo 3 de resultados de RH ausente"
+    assert 'btn-rh-upload' in html_rh, "Botão Ler Bases ausente"
+    assert 'btn-rh-try-example' in html_rh, "Botão Testar Exemplo ausente"
+    assert 'btn-rh-download-audit' in html_rh, "Botão download auditoria RH ausente"
+    assert 'v3.3' in html_rh, "Tag de versão v3.3 ausente no rodapé"
+    print("[OK] Página /auditoria-rh renderizada com layout de 3 passos, dropzones e v3.3!")
+
+    # B. Teste de Exemplo - Modo Folha (Mês Anterior vs. Atual)
+    res_ex_folha = client.post('/api/rh/load-example', json={'mode': 'folha'})
+    assert res_ex_folha.status_code == 200, f"Falha POST /api/rh/load-example (folha): {res_ex_folha.status_code}"
+    ex_folha_json = res_ex_folha.get_json()
+    assert 'session_id' in ex_folha_json
+    assert ex_folha_json['rows_ref_count'] == 8
+    assert ex_folha_json['rows_audit_count'] == 8
+    assert ex_folha_json['suggested_key_ref'] == 'CPF'
+    assert ex_folha_json['suggested_key_audit'] == 'CPF'
+    sess_folha = ex_folha_json['session_id']
+    print(f"[OK] Exemplo de Folha carregado: {ex_folha_json['rows_ref_count']} colaboradores no mês anterior e {ex_folha_json['rows_audit_count']} no mês atual.")
+
+    # C. Execução da Auditoria de Folha
+    res_audit_folha = client.post('/api/rh/audit', json={
+        'session_id': sess_folha,
+        'mode': 'folha',
+        'key_ref': 'CPF',
+        'key_audit': 'CPF',
+        'normalize_cpf': True,
+        'ignore_accents': True,
+        'variation_threshold': 10.0,
+        'column_mapping': ex_folha_json['column_mapping']
+    })
+    assert res_audit_folha.status_code == 200, f"Falha POST /api/rh/audit (folha): {res_audit_folha.status_code}"
+    audit_folha_json = res_audit_folha.get_json()
+    assert audit_folha_json['success'] is True
+    kpis_f = audit_folha_json['kpis']
+    assert kpis_f['total_audited'] == 7, f"Esperado 7 auditados em comum, obteve {kpis_f['total_audited']}"
+    assert kpis_f['exclusive_ref_count'] == 1, f"Esperado 1 desligado (Lucas Pereira), obteve {kpis_f['exclusive_ref_count']}"
+    assert kpis_f['exclusive_audit_count'] == 1, f"Esperado 1 admitido (Gabriel Mendes), obteve {kpis_f['exclusive_audit_count']}"
+    assert kpis_f['critical_variations_count'] >= 1, "Deveria identificar variações atípicas > 10%"
+    assert kpis_f['financial_impact'] > 0, "Impacto financeiro deveria refletir aumento líquido da folha"
+    assert len(audit_folha_json['financial_summary']) >= 4, "Deveria conter sumarização financeira de todas as colunas monetárias"
+    print(f"[OK] Auditoria de Folha executada: {kpis_f['total_audited']} cruzados, {kpis_f['exclusive_ref_count']} desligado, {kpis_f['exclusive_audit_count']} admitido, {kpis_f['critical_variations_count']} variações atípicas.")
+
+    # D. Download do Relatório Excel em 5 Abas Formatadas
+    rep_rh_id = audit_folha_json['report_id']
+    res_dl_rh = client.get(f'/api/rh/download-report/{rep_rh_id}')
+    assert res_dl_rh.status_code == 200, f"Falha GET /api/rh/download-report: {res_dl_rh.status_code}"
+    assert len(res_dl_rh.data) > 3000, "Arquivo Excel muito pequeno"
+    wb_rh = openpyxl.load_workbook(io.BytesIO(res_dl_rh.data))
+    expected_rh_sheets = [
+        'Resumo_RH',
+        'Divergencias_Detalhadas',
+        'Variacoes_Acima_Limite',
+        'Desligados_Apenas_Base1',
+        'Admitidos_Ou_Indevidos_Base2'
+    ]
+    for sheet_name in expected_rh_sheets:
+        assert sheet_name in wb_rh.sheetnames, f"Aba obrigatória {sheet_name} ausente no Excel de RH!"
+    assert len(wb_rh['Resumo_RH']._images) >= 1, "Logo ValidAí ausente no Resumo_RH!"
+    print(f"[OK] Relatório Excel de Auditoria de RH validado com 5 abas ({', '.join(expected_rh_sheets)}) e Logo ValidAí!")
+
+    # E. Teste de Exemplo - Modo Benefícios (Ativos RH vs. Fatura Plano de Saúde)
+    res_ex_ben = client.post('/api/rh/load-example', json={'mode': 'beneficios'})
+    assert res_ex_ben.status_code == 200, f"Falha POST /api/rh/load-example (beneficios): {res_ex_ben.status_code}"
+    ex_ben_json = res_ex_ben.get_json()
+    assert ex_ben_json['rows_ref_count'] == 8
+    assert ex_ben_json['rows_audit_count'] == 8
+    sess_ben = ex_ben_json['session_id']
+
+    # F. Execução da Auditoria de Benefícios (Detecção de "Funcionários Fantasmas")
+    res_audit_ben = client.post('/api/rh/audit', json={
+        'session_id': sess_ben,
+        'mode': 'beneficios',
+        'key_ref': 'CPF',
+        'key_audit': 'CPF_Titular',
+        'normalize_cpf': True,
+        'ignore_accents': True,
+        'variation_threshold': 10.0,
+        'column_mapping': {
+            'Nome_Colaborador': 'Nome_Segurado',
+            'Plano': 'Plano_Saude'
+        }
+    })
+    assert res_audit_ben.status_code == 200, f"Falha POST /api/rh/audit (beneficios): {res_audit_ben.status_code}"
+    audit_ben_json = res_audit_ben.get_json()
+    kpis_b = audit_ben_json['kpis']
+    assert kpis_b['exclusive_audit_count'] == 2, f"Esperado 2 funcionários fantasmas sendo cobrados na fatura, obteve {kpis_b['exclusive_audit_count']}"
+    assert kpis_b['exclusive_ref_count'] == 2, f"Esperado 2 ativos no RH sem fatura de benefício, obteve {kpis_b['exclusive_ref_count']}"
+    assert kpis_b['total_audited'] == 6, f"Esperado 6 colaboradores auditados em comum, obteve {kpis_b['total_audited']}"
+    print(f"[OK] Auditoria de Benefícios validada: {kpis_b['exclusive_audit_count']} funcionários fantasmas identificados e {kpis_b['exclusive_ref_count']} ativos sem benefício!")
+
+    # G. Teste de Upload via multipart/form-data (/api/rh/upload-headers) com normalização inteligente de CPF
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        pref, nref, paud, naud = rh_auditor.create_demo_files(tmp_dir, mode='folha')
+        with open(pref, 'rb') as f1, open(paud, 'rb') as f2:
+            res_up_rh = client.post(
+                '/api/rh/upload-headers',
+                data={
+                    'file_ref': (io.BytesIO(f1.read()), nref),
+                    'file_audit': (io.BytesIO(f2.read()), naud),
+                    'mode': 'folha'
+                },
+                content_type='multipart/form-data'
+            )
+    assert res_up_rh.status_code == 200, f"Falha POST /api/rh/upload-headers: {res_up_rh.status_code}"
+    up_rh_json = res_up_rh.get_json()
+    assert up_rh_json['suggested_key_ref'] == 'CPF'
+    assert up_rh_json['suggested_key_audit'] == 'CPF'
+    assert up_rh_json['is_cpf'] is True
+    print("[OK] Upload multipart/form-data de bases de RH validado com sucesso e identificação automática de CPF!")
+
     # 17. TESTE COMPLETO DE SEO TÉCNICO E SEMÂNTICO (META TAGS, OG, H1, FAQ, JSON-LD, ROBOTS E SITEMAP)
     # =========================================================================
     print("\n--- Testando Otimização de SEO Técnico e Semântico (ValidAí) ---")
@@ -714,6 +839,11 @@ def test_full_pipeline():
             'title': 'Conciliador de Taxas e Extratos (.OFX vs Vendas) | ValidAí',
             'description': 'Audite taxas de maquininhas (Stone, Cielo, Rede) e repasses de marketplaces contra extratos bancários .OFX.',
             'h1': 'Conciliação de Taxas e Extratos (.OFX vs Vendas)',
+        },
+                '/auditoria-rh': {
+            'title': 'Auditoria de Folha e RH | ValidAí',
+            'description': 'Batimento automatizado de folha de pagamento (mês anterior vs. atual) e conciliação de ativos do RH contra faturas de benefícios corporativos.',
+            'h1': 'Auditoria de Folha de Pagamento e Benefícios de RH',
         },
         '/como-usar': {
             'title': 'Como Usar o ValidAí | Guia Completo de Validação e Auditoria de Dados',
@@ -766,7 +896,7 @@ def test_full_pipeline():
             parsed_ld = json_mod.loads(raw_ld)
             assert parsed_ld['@context'] == 'https://schema.org'
 
-    print("[OK] Todas as 5 rotas ativas possuem Meta Tags dinâmicas, Canonical, Open Graph, Twitter Cards, <h1> único, JSON-LD válido e <img> com width/height!")
+    print("[OK] Todas as 6 rotas ativas possuem Meta Tags dinâmicas, Canonical, Open Graph, Twitter Cards, <h1> único, JSON-LD válido e <img> com width/height!")
 
     # Verificar FAQ semântico e Schema FAQPage na Home (/)
     home_html = client.get('/').data.decode('utf-8')
@@ -785,14 +915,14 @@ def test_full_pipeline():
     print("[OK] Seção de Perguntas Frequentes (<details>/<summary>) e Schema FAQPage + WebApplication validados na Home!")
 
     # Verificar rotas "Em Breve" com proteção de Crawl Budget (noindex, follow)
-    upcoming_routes = ['/auditoria-rh', '/validador-json']
+    upcoming_routes = ['/validador-json']
     for up_route in upcoming_routes:
         res_up = client.get(up_route)
         assert res_up.status_code == 200, f"Rota Em Breve {up_route} retornou {res_up.status_code}"
         up_html = res_up.data.decode('utf-8')
         assert '<meta name="robots" content="noindex, follow">' in up_html, f"Falta noindex, follow em {up_route}"
         assert f'<link rel="canonical" href="https://validai.app.br{up_route}">' in up_html
-    print("[OK] Proteção de Crawl Budget (<meta name=\"robots\" content=\"noindex, follow\">) validada em /auditoria-rh e /validador-json!")
+    print("[OK] Proteção de Crawl Budget (<meta name=\"robots\" content=\"noindex, follow\">) validada em /validador-json!")
 
     # Verificar /robots.txt, /sitemap.xml e /health
     res_robots = client.get('/robots.txt')
@@ -809,11 +939,11 @@ def test_full_pipeline():
     assert res_sitemap.status_code == 200
     assert 'xml' in res_sitemap.mimetype
     sitemap_xml = res_sitemap.data.decode('utf-8')
-    for active_url in ['https://validai.app.br/', 'https://validai.app.br/validador-texto', 'https://validai.app.br/validador-cadastros', 'https://validai.app.br/validador-xml', 'https://validai.app.br/conciliador-taxas', 'https://validai.app.br/como-usar']:
+    for active_url in ['https://validai.app.br/', 'https://validai.app.br/validador-texto', 'https://validai.app.br/validador-cadastros', 'https://validai.app.br/validador-xml', 'https://validai.app.br/conciliador-taxas', 'https://validai.app.br/auditoria-rh', 'https://validai.app.br/como-usar']:
         assert f'<loc>{active_url}</loc>' in sitemap_xml, f"URL {active_url} ausente no sitemap.xml"
-    for excluded_url in ['/auditoria-rh', '/validador-json', '/health']:
+    for excluded_url in ['/validador-json', '/health']:
         assert excluded_url not in sitemap_xml, f"Rota {excluded_url} não deveria estar no sitemap.xml"
-    print("[OK] /sitemap.xml servido corretamente com todas as 6 URLs canônicas ativas e sem /health!")
+    print("[OK] /sitemap.xml servido corretamente com todas as 7 URLs canônicas ativas e sem /health!")
 
     res_health_get = client.get('/health')
     assert res_health_get.status_code == 200
@@ -843,7 +973,7 @@ def test_full_pipeline():
 
     # 14. Teste de Acessibilidade (WCAG AA): Hierarquia de Cabeçalhos (sem pulo h2 -> h4) e display=swap
     import re
-    all_routes = ['/', '/validador-texto', '/validador-cadastros', '/validador-xml', '/como-usar', '/conciliador-taxas']
+    all_routes = ['/', '/validador-texto', '/validador-cadastros', '/validador-xml', '/como-usar', '/conciliador-taxas', '/auditoria-rh']
     for r in all_routes:
         resp_r = client.get(r)
         html_r = resp_r.data.decode('utf-8')
