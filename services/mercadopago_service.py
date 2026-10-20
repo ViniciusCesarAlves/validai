@@ -77,13 +77,10 @@ class MercadoPagoService:
             preference_response = sdk.preference().create(preference_data)
             pref = preference_response.get("response", {})
             
-            # Detecta se é token de teste (sandbox) ou produção
-            token = os.environ.get('MERCADOPAGO_ACCESS_TOKEN', '')
-            is_sandbox = token.startswith('TEST-')
-            init_url = pref.get("sandbox_init_point") if is_sandbox else pref.get("init_point")
-            
+            # Garante o redirecionamento para a URL oficial de produção (init_point)
+            init_url = pref.get("init_point")
             if not init_url:
-                init_url = pref.get("init_point") or pref.get("sandbox_init_point")
+                init_url = pref.get("sandbox_init_point")
 
             if init_url:
                 return init_url, None
