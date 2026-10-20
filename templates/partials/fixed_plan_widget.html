@@ -20,14 +20,11 @@ body.has-cookie-banner .fixed-bottom-left-stack {
     bottom: 96px !important;
 }
 
-@media (max-width: 768px) {
+/* No Mobile (<= 900px), o widget flutuante fica estritamente oculto para não cobrir botões de ação e tabelas.
+   As informações e atalhos de planos agora ficam organizados no Menu Mobile (Header). */
+@media (max-width: 900px) {
     .fixed-bottom-left-stack {
-        bottom: 16px !important;
-        left: 16px !important;
-        gap: 8px !important;
-    }
-    body.has-cookie-banner .fixed-bottom-left-stack {
-        bottom: 130px !important;
+        display: none !important;
     }
 }
 

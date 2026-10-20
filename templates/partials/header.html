@@ -354,7 +354,7 @@
     }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1024px) and (min-width: 901px) {
     .navbar-wrapper {
         flex-direction: column !important;
         gap: 8px !important;
@@ -371,23 +371,615 @@
     }
 }
 
-@media (max-width: 768px) {
+/* ========================================================
+   DESKTOP ISOLATION (> 900px):
+   Todos os controles e o menu mobile permanecem 100% ocultos
+   ======================================================== */
+@media (min-width: 901px) {
+    .mobile-menu-toggle-btn,
+    .mobile-nav-backdrop,
+    .mobile-nav-drawer {
+        display: none !important;
+    }
+}
+
+/* ========================================================
+   MOBILE NAVBAR & HAMBURGER DRAWER (<= 900px)
+   ======================================================== */
+@media (max-width: 900px) {
+    .navbar {
+        height: 60px !important;
+        padding: 0 !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1100 !important;
+    }
     .navbar-wrapper {
+        height: 60px !important;
+        display: flex !important;
         flex-direction: row !important;
         justify-content: space-between !important;
-        padding: 0 12px !important;
-        flex-wrap: wrap !important;
+        align-items: center !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 16px !important;
+        box-sizing: border-box !important;
+        gap: 0 !important;
     }
     .navbar .nav-content {
-        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
         width: auto !important;
-        flex: 1 !important;
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    .header-left-group {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0 !important;
+    }
+    .header-brand-link {
+        display: inline-flex !important;
+        align-items: center !important;
+    }
+    .brand-logo {
+        width: 122px !important;
+        height: auto !important;
+    }
+    .nav-menu,
+    .header-user-wrapper,
+    .lang-dropdown-wrapper {
+        display: none !important;
     }
     .navbar-utility-actions {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        position: static !important;
+        transform: none !important;
         width: auto !important;
         padding: 0 !important;
         margin: 0 !important;
     }
+    .theme-toggle-btn {
+        display: inline-flex !important;
+        width: 38px !important;
+        height: 38px !important;
+        padding: 0 !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 9999px !important;
+    }
+    .mobile-menu-toggle-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 38px !important;
+        height: 38px !important;
+        border-radius: 9999px !important;
+        background: #ffffff !important;
+        border: 1.5px solid var(--border-color, #e2e8f0) !important;
+        color: var(--text-main, #0f172a) !important;
+        cursor: pointer !important;
+        padding: 0 !important;
+        outline: none !important;
+        transition: all 0.2s ease !important;
+    }
+    [data-theme="dark"] .mobile-menu-toggle-btn,
+    .dark-theme .mobile-menu-toggle-btn {
+        background: #17181f !important;
+        border-color: #2d313e !important;
+        color: #f1f5f9 !important;
+    }
+    .mobile-menu-toggle-btn:hover,
+    .mobile-menu-toggle-btn.is-open {
+        border-color: #4FD580 !important;
+        color: #15803d !important;
+    }
+    [data-theme="dark"] .mobile-menu-toggle-btn:hover,
+    [data-theme="dark"] .mobile-menu-toggle-btn.is-open,
+    .dark-theme .mobile-menu-toggle-btn:hover,
+    .dark-theme .mobile-menu-toggle-btn.is-open {
+        color: #4FD580 !important;
+    }
+    .mobile-menu-toggle-btn .hamburger-icon-close {
+        display: none !important;
+    }
+    .mobile-menu-toggle-btn.is-open .hamburger-icon-open {
+        display: none !important;
+    }
+    .mobile-menu-toggle-btn.is-open .hamburger-icon-close {
+        display: block !important;
+    }
+}
+
+/* ========================================================
+   ESTILOS DO DRAWER MOBILE E COMPONENTES
+   ======================================================== */
+.mobile-nav-backdrop {
+    display: none;
+    position: fixed !important;
+    top: 60px !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(15, 23, 42, 0.5) !important;
+    backdrop-filter: blur(2px) !important;
+    -webkit-backdrop-filter: blur(2px) !important;
+    z-index: 1050 !important;
+    opacity: 0;
+    transition: opacity 0.22s ease;
+}
+
+.mobile-nav-backdrop.is-open {
+    display: block !important;
+    opacity: 1 !important;
+}
+
+.mobile-nav-drawer {
+    display: none;
+    position: fixed !important;
+    top: 60px !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    max-height: calc(100vh - 60px) !important;
+    background: #ffffff !important;
+    border-top: 1px solid var(--border-color, #e2e8f0) !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12) !important;
+    z-index: 1060 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 16px 16px 40px 16px !important;
+    box-sizing: border-box !important;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 0.22s ease, transform 0.22s ease !important;
+}
+
+.mobile-nav-drawer.is-open {
+    display: block !important;
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+[data-theme="dark"] .mobile-nav-drawer,
+.dark-theme .mobile-nav-drawer {
+    background: #14151b !important;
+    border-top-color: #242632 !important;
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.6) !important;
+}
+
+.mobile-drawer-account-section {
+    background: linear-gradient(135deg, rgba(79, 213, 128, 0.1) 0%, rgba(16, 185, 129, 0.04) 100%) !important;
+    border: 1px solid rgba(79, 213, 128, 0.35) !important;
+    border-radius: 14px !important;
+    padding: 14px !important;
+    margin-bottom: 20px !important;
+}
+
+[data-theme="dark"] .mobile-drawer-account-section,
+.dark-theme .mobile-drawer-account-section {
+    background: linear-gradient(135deg, rgba(79, 213, 128, 0.08) 0%, rgba(20, 21, 27, 0.95) 100%) !important;
+    border-color: rgba(79, 213, 128, 0.25) !important;
+}
+
+.mobile-drawer-user-info {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+.mobile-drawer-user-details {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
+.mobile-drawer-user-email {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: var(--text-main, #0f172a) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+[data-theme="dark"] .mobile-drawer-user-email,
+.dark-theme .mobile-drawer-user-email {
+    color: #f1f5f9 !important;
+}
+
+.mobile-drawer-plan-pill {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    align-self: flex-start !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    padding: 2px 8px !important;
+    border-radius: 9999px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+}
+
+.mobile-drawer-plan-pill.badge-standard {
+    background: rgba(16, 185, 129, 0.15) !important;
+    color: #059669 !important;
+}
+
+.mobile-drawer-plan-pill.badge-plus {
+    background: rgba(59, 130, 246, 0.15) !important;
+    color: #2563eb !important;
+}
+
+.mobile-drawer-plan-pill.badge-pro {
+    background: rgba(245, 158, 11, 0.15) !important;
+    color: #d97706 !important;
+}
+
+.mobile-drawer-account-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin-top: 12px !important;
+    padding-top: 10px !important;
+    border-top: 1px solid rgba(79, 213, 128, 0.2) !important;
+}
+
+.mobile-drawer-btn-planos {
+    flex: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    height: 38px !important;
+    padding: 0 14px !important;
+    border-radius: 9999px !important;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: #ffffff !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25) !important;
+}
+
+.mobile-drawer-btn-logout {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    height: 38px !important;
+    padding: 0 12px !important;
+    border-radius: 9999px !important;
+    background: rgba(239, 68, 68, 0.1) !important;
+    color: #dc2626 !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+    border: 1px solid rgba(239, 68, 68, 0.2) !important;
+}
+
+.mobile-drawer-guest-box {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+}
+
+.mobile-drawer-guest-top {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    flex-wrap: wrap !important;
+}
+
+.mobile-drawer-guest-status {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+}
+
+.mobile-guest-badge {
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    color: #059669 !important;
+}
+
+[data-theme="dark"] .mobile-guest-badge,
+.dark-theme .mobile-guest-badge {
+    color: #4FD580 !important;
+}
+
+.mobile-guest-quota {
+    font-size: 11.5px !important;
+    color: var(--text-muted, #64748b) !important;
+    font-weight: 600 !important;
+}
+
+.mobile-drawer-btn-login {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    height: 36px !important;
+    padding: 0 14px !important;
+    border-radius: 9999px !important;
+    background: #ffffff !important;
+    border: 1.5px solid var(--border-color, #e2e8f0) !important;
+    color: var(--text-main, #0f172a) !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+}
+
+[data-theme="dark"] .mobile-drawer-btn-login,
+.dark-theme .mobile-drawer-btn-login {
+    background: #17181f !important;
+    border-color: #2d313e !important;
+    color: #f1f5f9 !important;
+}
+
+.mobile-drawer-section-title {
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.07em !important;
+    color: var(--text-muted, #64748b) !important;
+    margin: 18px 0 8px 4px !important;
+}
+
+.mobile-nav-link {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 12px 14px !important;
+    border-radius: 10px !important;
+    background: var(--bg-card, #ffffff) !important;
+    border: 1px solid var(--border-color, #e2e8f0) !important;
+    margin-bottom: 8px !important;
+    text-decoration: none !important;
+    color: var(--text-main, #0f172a) !important;
+    transition: all 0.15s ease !important;
+}
+
+[data-theme="dark"] .mobile-nav-link,
+.dark-theme .mobile-nav-link {
+    background: #17181f !important;
+    border-color: #272a36 !important;
+    color: #f1f5f9 !important;
+}
+
+.mobile-nav-link.active {
+    border-color: #4FD580 !important;
+    background: rgba(79, 213, 128, 0.08) !important;
+    box-shadow: 0 0 0 1px #4FD580 !important;
+}
+
+.mobile-nav-link-icon {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+    background: rgba(79, 213, 128, 0.12) !important;
+    color: #15803d !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+}
+
+[data-theme="dark"] .mobile-nav-link-icon,
+.dark-theme .mobile-nav-link-icon {
+    color: #4FD580 !important;
+    background: rgba(79, 213, 128, 0.18) !important;
+}
+
+.mobile-nav-link-text {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
+.mobile-nav-link-title {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: var(--text-main, #0f172a) !important;
+}
+
+[data-theme="dark"] .mobile-nav-link-title,
+.dark-theme .mobile-nav-link-title {
+    color: #f1f5f9 !important;
+}
+
+.mobile-nav-link-desc {
+    font-size: 11.5px !important;
+    color: var(--text-muted, #64748b) !important;
+    line-height: 1.3 !important;
+}
+
+.mobile-nav-link-arrow {
+    opacity: 0.45 !important;
+    flex-shrink: 0 !important;
+}
+
+.mobile-drawer-tools-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+
+.mobile-tool-card {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 10px 12px !important;
+    border-radius: 10px !important;
+    background: var(--bg-card, #ffffff) !important;
+    border: 1px solid var(--border-color, #e2e8f0) !important;
+    text-decoration: none !important;
+    color: var(--text-main, #0f172a) !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+[data-theme="dark"] .mobile-tool-card,
+.dark-theme .mobile-tool-card {
+    background: #17181f !important;
+    border-color: #272a36 !important;
+    color: #f1f5f9 !important;
+}
+
+.mobile-tool-card.active {
+    border-color: #4FD580 !important;
+    background: rgba(79, 213, 128, 0.08) !important;
+}
+
+.mobile-tool-icon {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+    background: #f1f5f9 !important;
+    color: var(--text-main, #0f172a) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+}
+
+[data-theme="dark"] .mobile-tool-icon,
+.dark-theme .mobile-tool-icon {
+    background: #272a36 !important;
+    color: #f1f5f9 !important;
+}
+
+.mobile-tool-content {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
+.mobile-tool-title-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 6px !important;
+}
+
+.mobile-tool-title {
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    color: var(--text-main, #0f172a) !important;
+}
+
+[data-theme="dark"] .mobile-tool-title,
+.dark-theme .mobile-tool-title {
+    color: #f1f5f9 !important;
+}
+
+.mobile-tool-badge {
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    padding: 1px 6px !important;
+    border-radius: 9999px !important;
+    letter-spacing: 0.02em !important;
+}
+
+.mobile-tool-badge.badge-new {
+    background: rgba(16, 185, 129, 0.15) !important;
+    color: #059669 !important;
+}
+
+.mobile-tool-badge.badge-active {
+    background: #4FD580 !important;
+    color: #052e16 !important;
+}
+
+.mobile-tool-badge.badge-soon {
+    background: rgba(148, 163, 184, 0.2) !important;
+    color: #64748b !important;
+}
+
+.mobile-tool-desc {
+    font-size: 11.5px !important;
+    color: var(--text-muted, #64748b) !important;
+    line-height: 1.3 !important;
+}
+
+.mobile-drawer-lang-block {
+    margin-top: 18px !important;
+    padding-top: 16px !important;
+    border-top: 1px solid var(--border-color, #e2e8f0) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+}
+
+[data-theme="dark"] .mobile-drawer-lang-block,
+.dark-theme .mobile-drawer-lang-block {
+    border-top-color: #272a36 !important;
+}
+
+.mobile-lang-label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: var(--text-muted, #64748b) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+.mobile-lang-pills {
+    display: flex !important;
+    gap: 8px !important;
+    width: 100% !important;
+}
+
+.mobile-lang-pill {
+    flex: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    height: 36px !important;
+    border-radius: 9999px !important;
+    font-family: inherit !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    background: var(--bg-card, #ffffff) !important;
+    border: 1.5px solid var(--border-color, #e2e8f0) !important;
+    color: var(--text-main, #0f172a) !important;
+    cursor: pointer !important;
+    outline: none !important;
+    transition: all 0.2s ease !important;
+}
+
+[data-theme="dark"] .mobile-lang-pill,
+.dark-theme .mobile-lang-pill {
+    background: #17181f !important;
+    border-color: #2d313e !important;
+    color: #f1f5f9 !important;
+}
+
+.mobile-lang-pill.active {
+    border-color: #4FD580 !important;
+    background: rgba(79, 213, 128, 0.12) !important;
+    color: #15803d !important;
+    box-shadow: 0 0 0 1px #4FD580 !important;
+}
+
+[data-theme="dark"] .mobile-lang-pill.active,
+.dark-theme .mobile-lang-pill.active {
+    color: #4FD580 !important;
 }
 
 </style>
@@ -655,6 +1247,220 @@
                     <path class="moon-icon-path" d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646z"/>
                 </svg>
             </button>
+
+            <!-- Botão Hambúrguer Mobile (Apenas Mobile <= 900px, display: none no Desktop) -->
+            <button type="button" class="mobile-menu-toggle-btn" id="mobile-menu-toggle-btn" aria-label="Abrir menu de navegação" aria-expanded="false" aria-controls="mobile-nav-drawer">
+                <svg class="hamburger-icon-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+                <svg class="hamburger-icon-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Backdrop do Menu Mobile (dimming de tela, fecha ao tocar) -->
+    <div class="mobile-nav-backdrop" id="mobile-nav-backdrop" aria-hidden="true"></div>
+
+    <!-- Drawer / Painel Vertical do Menu Mobile (100% largura) -->
+    <div class="mobile-nav-drawer" id="mobile-nav-drawer" role="dialog" aria-modal="true" aria-label="Menu Principal Mobile">
+        <!-- 1. Header do Drawer: Conta Logada / Login + Status do Plano e Atalho -->
+        <div class="mobile-drawer-account-section">
+            {% if user_summary is defined and user_summary.is_logged_in %}
+                <div class="mobile-drawer-user-info">
+                    <span class="user-avatar-circle avatar-{{ user_summary.plan }}">
+                        {{ (user_summary.email|default('U'))[0]|upper }}
+                    </span>
+                    <div class="mobile-drawer-user-details">
+                        <span class="mobile-drawer-user-email">{{ user_summary.email }}</span>
+                        <span class="mobile-drawer-plan-pill badge-{{ user_summary.plan }}">
+                            Plano {{ user_summary.plan_name }}
+                            {% if user_summary.plan == 'standard' %}
+                                {% set remaining_basic = [0, 3 - (user_summary.daily_basic|default(0))]|max %}
+                                • {{ remaining_basic }}/3 hoje
+                            {% else %}
+                                • Ilimitado
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="mobile-drawer-account-actions">
+                    <a href="/planos" class="mobile-drawer-btn-planos">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="6 3 18 3 22 9 12 22 2 9 6 3"/></svg>
+                        <span>💎 Ver Planos e Benefícios</span>
+                    </a>
+                    <a href="/logout" class="mobile-drawer-btn-logout">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        <span>Sair</span>
+                    </a>
+                </div>
+            {% else %}
+                <div class="mobile-drawer-guest-box">
+                    <div class="mobile-drawer-guest-top">
+                        <div class="mobile-drawer-guest-status">
+                            <span class="mobile-guest-badge">⚡ Plano Standard Gratuito</span>
+                            {% set remaining_basic = [0, 3 - (user_summary.daily_basic|default(0))]|max if user_summary is defined else 3 %}
+                            <span class="mobile-guest-quota">{{ remaining_basic }}/3 validações gratuitas hoje</span>
+                        </div>
+                        <button type="button" class="mobile-drawer-btn-login" onclick="if(window.ValidAiAuth) window.ValidAiAuth.show('login'); else window.location.href='/login';">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            <span>Entrar / Criar Conta</span>
+                        </button>
+                    </div>
+                    <a href="/planos" class="mobile-drawer-btn-planos">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="6 3 18 3 22 9 12 22 2 9 6 3"/></svg>
+                        <span>💎 Conhecer Planos e Preços</span>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- 2. Validadores Principais -->
+        <div class="mobile-drawer-nav-section">
+            <div class="mobile-drawer-section-title">Validadores Principais</div>
+            
+            <a href="/" class="mobile-nav-link{{ ' active' if curr_path == '/' else '' }}">
+                <div class="mobile-nav-link-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="3" y1="9" x2="21" y2="9"/>
+                        <line x1="9" y1="21" x2="9" y2="9"/>
+                    </svg>
+                </div>
+                <div class="mobile-nav-link-text">
+                    <span class="mobile-nav-link-title" data-i18n="nav_sheets">Validador de Planilhas</span>
+                    <span class="mobile-nav-link-desc">Comparador Excel e CSV célula por célula</span>
+                </div>
+                <svg class="mobile-nav-link-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+
+            <a href="/validador-texto" class="mobile-nav-link{{ ' active' if curr_path == '/validador-texto' else '' }}">
+                <div class="mobile-nav-link-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                </div>
+                <div class="mobile-nav-link-text">
+                    <span class="mobile-nav-link-title" data-i18n="nav_text">Validador de Texto</span>
+                    <span class="mobile-nav-link-desc">Comparação de PDF, Word e textos colados</span>
+                </div>
+                <svg class="mobile-nav-link-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+        </div>
+
+        <!-- 3. Seção "Mais Validadores" (100% de largura interna, sem cortes) -->
+        <div class="mobile-drawer-nav-section">
+            <div class="mobile-drawer-section-title">Mais Módulos e Auditorias</div>
+            <div class="mobile-drawer-tools-grid">
+                <!-- Higienizador de Cadastros -->
+                <a href="/validador-cadastros" class="mobile-tool-card{{ ' active' if curr_path == '/validador-cadastros' else '' }}">
+                    <div class="mobile-tool-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+                    </div>
+                    <div class="mobile-tool-content">
+                        <div class="mobile-tool-title-row">
+                            <span class="mobile-tool-title" data-i18n="module_cadastros_title">Higienizador de Cadastros</span>
+                            <span class="mobile-tool-badge badge-active" data-i18n="badge_active">Ativo</span>
+                        </div>
+                        <span class="mobile-tool-desc" data-i18n="module_cadastros_sub">Validação de CPF/CNPJ, e-mails e duplicados</span>
+                    </div>
+                </a>
+
+                <!-- Conciliador de Notas Fiscais (XML) -->
+                <a href="/validador-xml" class="mobile-tool-card{{ ' active' if curr_path == '/validador-xml' else '' }}">
+                    <div class="mobile-tool-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 7 13 9 11"/><polyline points="15 15 17 13 15 11"/></svg>
+                    </div>
+                    <div class="mobile-tool-content">
+                        <div class="mobile-tool-title-row">
+                            <span class="mobile-tool-title" data-i18n="module_xml_title">Conciliador de Notas Fiscais (XML)</span>
+                            <span class="mobile-tool-badge badge-new" data-i18n="badge_new">Novo</span>
+                        </div>
+                        <span class="mobile-tool-desc" data-i18n="module_xml_sub">Cruzamento de XMLs (NFe/NFSe) vs. Excel</span>
+                    </div>
+                </a>
+
+                <!-- Conciliação de Taxas e Extratos (.OFX) -->
+                <a href="/conciliador-taxas" class="mobile-tool-card{{ ' active' if curr_path == '/conciliador-taxas' else '' }}">
+                    <div class="mobile-tool-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><circle cx="7" cy="15" r="1.5"/><line x1="12" y1="15" x2="17" y2="15"/></svg>
+                    </div>
+                    <div class="mobile-tool-content">
+                        <div class="mobile-tool-title-row">
+                            <span class="mobile-tool-title" data-i18n="module_ofx_title">Conciliação de Taxas (.OFX)</span>
+                            <span class="mobile-tool-badge badge-new" data-i18n="badge_new">Novo</span>
+                        </div>
+                        <span class="mobile-tool-desc" data-i18n="module_ofx_sub">Auditoria de maquininhas, PIX e extratos</span>
+                    </div>
+                </a>
+
+                <!-- Auditoria de Folha e RH -->
+                <a href="/auditoria-rh" class="mobile-tool-card{{ ' active' if curr_path == '/auditoria-rh' else '' }}">
+                    <div class="mobile-tool-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><circle cx="12" cy="12" r="2"/></svg>
+                    </div>
+                    <div class="mobile-tool-content">
+                        <div class="mobile-tool-title-row">
+                            <span class="mobile-tool-title" data-i18n="module_rh_title">Auditoria de Folha e RH</span>
+                            <span class="mobile-tool-badge badge-new" data-i18n="badge_new">Novo</span>
+                        </div>
+                        <span class="mobile-tool-desc" data-i18n="module_rh_sub">Batimento de folha de pagamento e benefícios</span>
+                    </div>
+                </a>
+
+                <!-- Comparador de JSON / APIs -->
+                <a href="/validador-json" class="mobile-tool-card">
+                    <div class="mobile-tool-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="14" y1="4" x2="10" y2="20"/></svg>
+                    </div>
+                    <div class="mobile-tool-content">
+                        <div class="mobile-tool-title-row">
+                            <span class="mobile-tool-title" data-i18n="module_json_title">Comparador de JSON / APIs</span>
+                            <span class="mobile-tool-badge badge-soon" data-i18n="badge_coming_soon">Em breve</span>
+                        </div>
+                        <span class="mobile-tool-desc" data-i18n="module_json_sub">Diferenças estruturais entre payloads e APIs</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- 4. Rodapé do Menu: Como usar? e Seletor de Idioma -->
+        <div class="mobile-drawer-footer-section">
+            <a href="/como-usar" class="mobile-nav-link{{ ' active' if curr_path == '/como-usar' else '' }}">
+                <div class="mobile-nav-link-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <div class="mobile-nav-link-text">
+                    <span class="mobile-nav-link-title" data-i18n="nav_how_to_use">Como usar? (Guia Completo)</span>
+                    <span class="mobile-nav-link-desc">Tutoriais passo a passo de cada módulo</span>
+                </div>
+                <svg class="mobile-nav-link-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+
+            <div class="mobile-drawer-lang-block">
+                <span class="mobile-lang-label">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    <span>Idioma / Language:</span>
+                </span>
+                <div class="mobile-lang-pills">
+                    <button type="button" class="lang-option mobile-lang-pill" data-lang="pt">
+                        <span>🇧🇷</span> Português
+                    </button>
+                    <button type="button" class="lang-option mobile-lang-pill" data-lang="es">
+                        <span>🇪🇸</span> Español
+                    </button>
+                    <button type="button" class="lang-option mobile-lang-pill" data-lang="en">
+                        <span>🇺🇸</span> English
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </header>
@@ -778,10 +1584,76 @@
                 });
             }
 
+            // Gerenciador do Menu Hambúrguer Mobile
+            function initMobileMenu() {
+                var toggleBtn = document.getElementById('mobile-menu-toggle-btn');
+                var drawer = document.getElementById('mobile-nav-drawer');
+                var backdrop = document.getElementById('mobile-nav-backdrop');
+
+                if (!toggleBtn || !drawer || !backdrop) return;
+
+                function openMenu() {
+                    toggleBtn.classList.add('is-open');
+                    toggleBtn.setAttribute('aria-expanded', 'true');
+                    drawer.classList.add('is-open');
+                    backdrop.classList.add('is-open');
+                    document.body.classList.add('mobile-drawer-locked');
+                }
+
+                function closeMenu() {
+                    toggleBtn.classList.remove('is-open');
+                    toggleBtn.setAttribute('aria-expanded', 'false');
+                    drawer.classList.remove('is-open');
+                    backdrop.classList.remove('is-open');
+                    document.body.classList.remove('mobile-drawer-locked');
+                }
+
+                function toggleMenu(e) {
+                    if (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                    if (drawer.classList.contains('is-open')) {
+                        closeMenu();
+                    } else {
+                        openMenu();
+                    }
+                }
+
+                toggleBtn.addEventListener('click', toggleMenu);
+                backdrop.addEventListener('click', closeMenu);
+
+                // Fecha ao clicar em qualquer link interno
+                drawer.querySelectorAll('a').forEach(function(link) {
+                    link.addEventListener('click', function() {
+                        closeMenu();
+                    });
+                });
+
+                // Fecha ao pressionar Escape
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && drawer.classList.contains('is-open')) {
+                        closeMenu();
+                        toggleBtn.focus();
+                    }
+                });
+
+                // Fecha se redimensionar para Desktop (> 900px)
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth > 900 && drawer.classList.contains('is-open')) {
+                        closeMenu();
+                    }
+                });
+            }
+
             if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initUserDropdown);
+                document.addEventListener('DOMContentLoaded', function() {
+                    initUserDropdown();
+                    initMobileMenu();
+                });
             } else {
                 initUserDropdown();
+                initMobileMenu();
             }
         })();
     </script>
