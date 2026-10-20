@@ -939,11 +939,11 @@ def test_full_pipeline():
     assert res_sitemap.status_code == 200
     assert 'xml' in res_sitemap.mimetype
     sitemap_xml = res_sitemap.data.decode('utf-8')
-    for active_url in ['https://validai.app.br/', 'https://validai.app.br/validador-texto', 'https://validai.app.br/validador-cadastros', 'https://validai.app.br/validador-xml', 'https://validai.app.br/conciliador-taxas', 'https://validai.app.br/auditoria-rh', 'https://validai.app.br/como-usar']:
+    for active_url in ['https://validai.app.br/', 'https://validai.app.br/validador-texto', 'https://validai.app.br/validador-cadastros', 'https://validai.app.br/validador-xml', 'https://validai.app.br/conciliador-taxas', 'https://validai.app.br/auditoria-rh', 'https://validai.app.br/como-usar', 'https://validai.app.br/sobre', 'https://validai.app.br/privacidade', 'https://validai.app.br/termos']:
         assert f'<loc>{active_url}</loc>' in sitemap_xml, f"URL {active_url} ausente no sitemap.xml"
     for excluded_url in ['/validador-json', '/health']:
         assert excluded_url not in sitemap_xml, f"Rota {excluded_url} não deveria estar no sitemap.xml"
-    print("[OK] /sitemap.xml servido corretamente com todas as 7 URLs canônicas ativas e sem /health!")
+    print("[OK] /sitemap.xml servido corretamente com todas as 10 URLs canônicas ativas e sem /health!")
 
     res_health_get = client.get('/health')
     assert res_health_get.status_code == 200
@@ -986,6 +986,80 @@ def test_full_pipeline():
                 f"Pulo de cabeçalho inválido em {r}: h{headings[idx_h - 1]} -> h{headings[idx_h]}"
             )
     print("[OK] Hierarquia semântica estrita (h1 -> h2 -> h3), ARIA roles e Google Fonts display=swap validados em todas as rotas!")
+
+    # 18. TESTE DE CONFORMIDADE GOOGLE ADSENSE, LGPD E PÁGINAS INSTITUCIONAIS
+    # =========================================================================
+    print("\n--- Testando Conformidade Google AdSense, LGPD & Institucional (ValidAí) ---")
+    
+    # 18.1 Rota /privacidade
+    res_priv = client.get('/privacidade')
+    assert res_priv.status_code == 200, f"Falha GET /privacidade: {res_priv.status_code}"
+    priv_html = res_priv.data.decode('utf-8')
+    assert "Política de Privacidade" in priv_html
+    assert "memória volátil" in priv_html.lower() or "memória efêmera" in priv_html.lower()
+    assert "Google AdSense" in priv_html
+    assert "DART" in priv_html or "DoubleClick" in priv_html
+    assert "adssettings.google.com" in priv_html
+    assert "aboutads.info" in priv_html
+    assert "LGPD" in priv_html and "13.709" in priv_html
+    assert "privacidade@validai.app.br" in priv_html
+    print("[OK] /privacidade validada com conformidade LGPD, DPO e cláusulas obrigatórias Google AdSense (cookie DART)!")
+
+    # 18.2 Rota /termos
+    res_termos = client.get('/termos')
+    assert res_termos.status_code == 200, f"Falha GET /termos: {res_termos.status_code}"
+    termos_html = res_termos.data.decode('utf-8')
+    assert "Termos e Condições de Uso" in termos_html
+    assert "Isenção" in termos_html or "isenção" in termos_html
+    assert "v3.3" in termos_html
+    print("[OK] /termos validada com regras de uso, isenção fiscal/operacional e versão v3.3!")
+
+    # 18.3 Rota /sobre
+    res_sobre = client.get('/sobre')
+    assert res_sobre.status_code == 200, f"Falha GET /sobre: {res_sobre.status_code}"
+    sobre_html = res_sobre.data.decode('utf-8')
+    assert "Sobre o ValidAí" in sobre_html
+    assert "PROCV" in sobre_html or "fórmulas" in sobre_html
+    print("[OK] /sobre validada com narrativa de missão institucional e soluções!")
+
+    # 18.4 Banner de Consentimento de Cookies (LGPD) no Footer
+    for check_route in ['/', '/como-usar', '/auditoria-rh', '/privacidade']:
+        res_chk = client.get(check_route)
+        chk_html = res_chk.data.decode('utf-8')
+        assert 'id="validai-cookie-banner"' in chk_html, f"Cookie banner ausente em {check_route}"
+        assert 'id="btn-accept-cookies"' in chk_html, f"Botão aceitar cookies ausente em {check_route}"
+        assert 'href="/privacidade"' in chk_html, f"Link /privacidade ausente no banner em {check_route}"
+        assert 'href="/termos"' in chk_html, f"Link /termos ausente no footer em {check_route}"
+        assert 'href="/sobre"' in chk_html, f"Link /sobre ausente no footer em {check_route}"
+    print("[OK] Banner de Cookies LGPD e links institucionais validados no footer de todas as páginas!")
+
+    # 18.5 Proteção de CLS e Condicionalidade de Anúncios AdSense
+    # Cenário A: Sem variável de ambiente ADSENSE_CLIENT_ID (Padrão de Segurança / Homologação)
+    if 'ADSENSE_CLIENT_ID' in os.environ:
+        del os.environ['ADSENSE_CLIENT_ID']
+    res_no_ads = client.get('/')
+    no_ads_html = res_no_ads.data.decode('utf-8')
+    assert '<ins class="adsbygoogle' not in no_ads_html, "Anúncio não deve ser renderizado quando ADSENSE_CLIENT_ID estiver vazio!"
+    assert 'pagead2.googlesyndication.com' not in no_ads_html, "Script AdSense não deve carregar sem ADSENSE_CLIENT_ID!"
+    print("[OK] Regra Crítica Validada: Sem ADSENSE_CLIENT_ID, os blocos ficam 100% ocultos/não renderizados!")
+
+    # Cenário B: Com variável de ambiente ADSENSE_CLIENT_ID ativa
+    test_pub_id = 'ca-pub-1234567890123456'
+    os.environ['ADSENSE_CLIENT_ID'] = test_pub_id
+    try:
+        res_with_ads = client.get('/')
+        with_ads_html = res_with_ads.data.decode('utf-8')
+        assert '<ins class="adsbygoogle' in with_ads_html, "Anúncio deve ser renderizado quando ADSENSE_CLIENT_ID estiver ativo!"
+        assert test_pub_id in with_ads_html, "Client ID do AdSense deve constar no bloco!"
+        assert 'pagead2.googlesyndication.com' in with_ads_html, "Script AdSense deve carregar quando ADSENSE_CLIENT_ID estiver ativo!"
+        
+        # Testar também em /como-usar
+        res_guide_ads = client.get('/como-usar')
+        guide_ads_html = res_guide_ads.data.decode('utf-8')
+        assert '<ins class="adsbygoogle' in guide_ads_html, "Anúncio deve constar em /como-usar antes do banner final!"
+        print(f"[OK] Containers de anúncios ({test_pub_id}) validados com proteção contra CLS e inserção precisa!")
+    finally:
+        del os.environ['ADSENSE_CLIENT_ID']
 
     print("\nTODOS OS TESTES PASSARAM COM 100% DE SUCESSO!")
 

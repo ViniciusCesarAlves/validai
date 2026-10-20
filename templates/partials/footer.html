@@ -50,15 +50,19 @@
                         <li><a href="/como-usar#modo-unico" class="footer-link">Auditoria em Base Única</a></li>
                         <li><a href="/como-usar#normalizacao" class="footer-link">Regras de Normalização</a></li>
                         <li><a href="/#faq-section-heading" class="footer-link">Dúvidas Frequentes (FAQ)</a></li>
-                        <li><a href="/health" class="footer-link" target="_blank" rel="noopener">Status da API</a></li>
                     </ul>
                 </div>
 
-                <!-- Coluna 4: Segurança e Sigilo -->
+                <!-- Coluna 4: Institucional & Segurança -->
                 <div class="footer-col">
-                    <h3 class="footer-col-title">Segurança & Sigilo</h3>
-                    <p class="footer-col-text">
-                        Seus dados não são armazenados em bancos permanentes nem compartilhados com terceiros. As planilhas são processadas em memória e descartadas ao término da sessão.
+                    <h3 class="footer-col-title">Institucional & Segurança</h3>
+                    <ul class="footer-links-list">
+                        <li><a href="/sobre" class="footer-link">Sobre o ValidAí</a></li>
+                        <li><a href="/privacidade" class="footer-link">Política de Privacidade (LGPD)</a></li>
+                        <li><a href="/termos" class="footer-link">Termos de Uso</a></li>
+                    </ul>
+                    <p class="footer-col-text" style="margin-top: 10px;">
+                        Processamento volátil em memória com descarte ao fim da sessão. Sem retenção de arquivos nem venda de dados.
                     </p>
                     <div class="footer-security-highlight">
                         <div class="security-status-indicator">
@@ -75,7 +79,12 @@
                     <p data-i18n="footer_copyright">&copy; 2026 ValidAí. Todos os direitos reservados.</p>
                 </div>
                 <div class="footer-bottom-center">
-                    <span class="footer-disclaimer">Processamento temporário em memória • Em conformidade com a LGPD</span>
+                    <span class="footer-disclaimer">
+                        Processamento temporário em memória • 
+                        <a href="/privacidade" class="footer-sublink">Privacidade (LGPD)</a> • 
+                        <a href="/termos" class="footer-sublink">Termos</a> • 
+                        <a href="/sobre" class="footer-sublink">Sobre</a>
+                    </span>
                 </div>
                 <div class="footer-bottom-right">
                     <span class="version-tag" aria-hidden="true">v3.3</span>
@@ -84,3 +93,61 @@
         </div>
     </footer>
 
+    <!-- Banner de Consentimento de Cookies (LGPD) -->
+    <div id="validai-cookie-banner" class="cookie-banner" role="dialog" aria-live="polite" aria-label="Consentimento de Cookies e Privacidade" style="display: none;">
+        <div class="cookie-banner-content container">
+            <div class="cookie-banner-text-wrap">
+                <div class="cookie-banner-icon" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4FD580" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        <path d="M9 12l2 2 4-4"/>
+                    </svg>
+                </div>
+                <p class="cookie-banner-text">
+                    Utilizamos cookies essenciais para o funcionamento do sistema e tecnologias de publicidade (Google AdSense) para manter o serviço gratuito. Ao continuar, você concorda com nossos <a href="/termos" class="cookie-banner-link">Termos de Uso</a> e nossa <a href="/privacidade" class="cookie-banner-link">Política de Privacidade (LGPD)</a>.
+                </p>
+            </div>
+            <div class="cookie-banner-actions">
+                <a href="/privacidade" class="btn-cookie-settings">Saiba mais</a>
+                <button type="button" id="btn-accept-cookies" class="btn-cookie-accept">
+                    <span>Aceitar e Fechar</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function() {
+            var STORAGE_KEY = 'validai_cookie_consent';
+            function checkCookieConsent() {
+                var banner = document.getElementById('validai-cookie-banner');
+                var btn = document.getElementById('btn-accept-cookies');
+                if (!banner || !btn) return;
+
+                try {
+                    var consent = localStorage.getItem(STORAGE_KEY);
+                    if (!consent) {
+                        banner.style.display = 'block';
+                        setTimeout(function() {
+                            banner.classList.add('cookie-banner-visible');
+                        }, 50);
+                    }
+                } catch(e) {}
+
+                btn.addEventListener('click', function() {
+                    try {
+                        localStorage.setItem(STORAGE_KEY, 'accepted_' + new Date().toISOString());
+                    } catch(e) {}
+                    banner.classList.remove('cookie-banner-visible');
+                    setTimeout(function() {
+                        banner.style.display = 'none';
+                    }, 300);
+                });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', checkCookieConsent);
+            } else {
+                checkCookieConsent();
+            }
+        })();
+    </script>

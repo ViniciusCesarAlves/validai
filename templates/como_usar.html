@@ -28,7 +28,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=36">
+    <link rel="stylesheet" href="/static/css/style.css?v=37">
+    {% include 'partials/ads_head.html' %}
     <link rel="stylesheet" href="/static/css/guide.css?v=18">
 
     <!-- Dados Estruturados (Schema.org em JSON-LD) -->
@@ -1907,6 +1908,9 @@
                     </div>
                 </section>
 
+                <!-- Espaço de Anúncio Otimizado (Standard / Visitantes) -->
+                {% include 'partials/ad_banner.html' %}
+
                 <!-- CTA FINAL XML -->
                 <section class="guide-cta-card">
                     <h3 data-i18n="guide_cta_xml_title">Pronto para conciliar suas Notas Fiscais em segundos?</h3>
@@ -1930,46 +1934,7 @@
     <!-- Script de Alternância de Tema Claro/Escuro e Toggle entre as 4 Ferramentas -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var themeToggleBtn = document.getElementById('theme-toggle-btn');
-            var THEME_STORAGE_KEY = 'splitc_theme';
-
-            function applyTheme(theme) {
-                if (theme === 'dark') {
-                    document.documentElement.setAttribute('data-theme', 'dark');
-                    document.documentElement.classList.add('dark-theme');
-                    document.body.classList.add('dark-theme');
-                    if (themeToggleBtn) {
-                        themeToggleBtn.setAttribute('title', 'Mudar para tema claro');
-                    }
-                } else {
-                    document.documentElement.removeAttribute('data-theme');
-                    document.documentElement.classList.remove('dark-theme');
-                    document.body.classList.remove('dark-theme');
-                    if (themeToggleBtn) {
-                        themeToggleBtn.setAttribute('title', 'Mudar para tema escuro');
-                    }
-                }
-            }
-
-            var savedTheme = (function() {
-                try {
-                    return localStorage.getItem(THEME_STORAGE_KEY) || 'light';
-                } catch(e) {
-                    return 'light';
-                }
-            })();
-            applyTheme(savedTheme);
-
-            if (themeToggleBtn) {
-                themeToggleBtn.addEventListener('click', function() {
-                    var isDark = document.body.classList.contains('dark-theme') || document.documentElement.getAttribute('data-theme') === 'dark';
-                    var nextTheme = isDark ? 'light' : 'dark';
-                    applyTheme(nextTheme);
-                    try {
-                        localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
-                    } catch(e) {}
-                });
-            }
+            // Tema gerenciado centralmente por header.html
 
             // Alternância entre as 4 Ferramentas (Planilhas | Texto | Cadastros | XML)
             var GUIDE_MODES = ['planilhas', 'texto', 'cadastros', 'xml'];

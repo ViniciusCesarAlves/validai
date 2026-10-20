@@ -20,51 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         colsDisplayB: []
     };
 
-    // ----------------------------------------------------
-    // GERENCIAMENTO DO TEMA (CLARO / ESCURO)
-    // ----------------------------------------------------
-    const themeToggleBtn = document.getElementById('theme-toggle-btn');
-    const THEME_STORAGE_KEY = 'splitc_theme';
-
-    function applyTheme(theme) {
-        if (theme === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            document.documentElement.classList.add('dark-theme');
-            document.body.classList.add('dark-theme');
-            if (themeToggleBtn) {
-                themeToggleBtn.setAttribute('title', 'Mudar para tema claro');
-                themeToggleBtn.setAttribute('aria-pressed', 'true');
-            }
-        } else {
-            document.documentElement.removeAttribute('data-theme');
-            document.documentElement.classList.remove('dark-theme');
-            document.body.classList.remove('dark-theme');
-            if (themeToggleBtn) {
-                themeToggleBtn.setAttribute('title', 'Mudar para tema escuro');
-                themeToggleBtn.setAttribute('aria-pressed', 'false');
-            }
-        }
-    }
-
-    const savedTheme = (function() {
-        try {
-            return localStorage.getItem(THEME_STORAGE_KEY) || 'light';
-        } catch(e) {
-            return 'light';
-        }
-    })();
-    applyTheme(savedTheme);
-
-    if (themeToggleBtn) {
-        themeToggleBtn.addEventListener('click', () => {
-            const isDark = document.body.classList.contains('dark-theme');
-            const newTheme = isDark ? 'light' : 'dark';
-            applyTheme(newTheme);
-            try {
-                localStorage.setItem(THEME_STORAGE_KEY, newTheme);
-            } catch (e) {}
-        });
-    }
+    // Tema gerenciado centralmente por header.html
 
     // Elementos DOM - Passo 1
     const fileInputA = document.getElementById('file-a');

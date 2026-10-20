@@ -66,26 +66,7 @@
     const tbodyPreview = document.getElementById('tbody-preview');
     const btnRestart = document.getElementById('btn-restart-cadastros');
 
-    // Alternador de Tema Local
-    const themeToggleBtn = document.getElementById('theme-toggle-btn');
-    if (themeToggleBtn) {
-        themeToggleBtn.addEventListener('click', () => {
-            const html = document.documentElement;
-            const current = html.getAttribute('data-theme');
-            const target = current === 'dark' ? 'light' : 'dark';
-            if (target === 'dark') {
-                html.setAttribute('data-theme', 'dark');
-                html.classList.add('dark-theme');
-                if (document.body) document.body.classList.add('dark-theme');
-                localStorage.setItem('splitc_theme', 'dark');
-            } else {
-                html.removeAttribute('data-theme');
-                html.classList.remove('dark-theme');
-                if (document.body) document.body.classList.remove('dark-theme');
-                localStorage.setItem('splitc_theme', 'light');
-            }
-        });
-    }
+    // Tema gerenciado centralmente por header.html
 
     // =========================================================================
     // PASSO 1: SELEÇÃO E DRAG & DROP DO ARQUIVO

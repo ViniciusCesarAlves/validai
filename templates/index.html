@@ -28,7 +28,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=36">
+    <link rel="stylesheet" href="/static/css/style.css?v=37">
+    {% include 'partials/ads_head.html' %}
     <script>
         (function() {
             try {
@@ -1366,6 +1367,9 @@
             </section>
 
         </div> <!-- fim mode-single-container -->
+
+        <!-- Espaço de Anúncio Otimizado (Standard / Visitantes) -->
+        {% include 'partials/ad_banner.html' %}
 
         <!-- ======================================================== -->
         <!-- SEÇÃO SEMÂNTICA DE PERGUNTAS FREQUENTES (FAQ SEO ON-PAGE) -->

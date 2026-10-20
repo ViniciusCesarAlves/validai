@@ -4,25 +4,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // --- 1. Controle de Tema Claro / Escuro ---
-    const themeToggleBtn = document.getElementById('theme-toggle-btn');
-    if (themeToggleBtn) {
-        themeToggleBtn.addEventListener('click', () => {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
-                           document.body.classList.contains('dark-theme');
-            if (isDark) {
-                document.documentElement.removeAttribute('data-theme');
-                document.documentElement.classList.remove('dark-theme');
-                document.body.classList.remove('dark-theme');
-                try { localStorage.setItem('splitc_theme', 'light'); } catch (e) {}
-            } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                document.documentElement.classList.add('dark-theme');
-                document.body.classList.add('dark-theme');
-                try { localStorage.setItem('splitc_theme', 'dark'); } catch (e) {}
-            }
-        });
-    }
+    // Tema gerenciado centralmente por header.html
 
     // --- 2. Estado da Aplicação ---
     let inputMode = 'files'; // 'files' | 'paste'

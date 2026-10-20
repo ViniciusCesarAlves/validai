@@ -95,27 +95,7 @@
 
     const btnRestart = document.getElementById('btn-restart-ofx');
 
-    // Alternador de Tema Local
-    const themeToggleBtn = document.getElementById('theme-toggle-btn');
-    if (themeToggleBtn) {
-        themeToggleBtn.addEventListener('click', () => {
-            const html = document.documentElement;
-            const current = html.getAttribute('data-theme');
-            const target = current === 'dark' ? 'light' : 'dark';
-            if (target === 'dark') {
-                html.setAttribute('data-theme', 'dark');
-                html.classList.add('dark-theme');
-                if (document.body) document.body.classList.add('dark-theme');
-            } else {
-                html.removeAttribute('data-theme');
-                html.classList.remove('dark-theme');
-                if (document.body) document.body.classList.remove('dark-theme');
-            }
-            try {
-                localStorage.setItem('splitc_theme', target);
-            } catch (e) {}
-        });
-    }
+    // Tema gerenciado centralmente por header.html
 
     // Dropdown de Soluções
     const navDropdownBtn = document.getElementById('nav-solutions-btn');

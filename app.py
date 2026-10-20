@@ -133,6 +133,24 @@ SEO_METADATA = {
         'module_name': 'Auditoria de Folha e RH',
         'module_sub': 'Batimento de folha de pagamento, proventos, descontos e benefícios corporativos.'
     },
+    '/privacidade': {
+        'title': 'Política de Privacidade e Proteção de Dados (LGPD) | ValidAí',
+        'description': 'Conheça nossa Política de Privacidade em conformidade com a LGPD (Lei 13.709/2018). Processamento volátil em memória, sem armazenamento permanente e transparência com cookies e Google AdSense.',
+        'robots': 'index, follow',
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+    },
+    '/termos': {
+        'title': 'Termos e Condições de Uso | ValidAí',
+        'description': 'Termos de Uso do ValidAí. Regras de utilização, isenção de responsabilidade sobre análises tributárias e contábeis, propriedade intelectual e uso justo.',
+        'robots': 'index, follow',
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+    },
+    '/sobre': {
+        'title': 'Sobre o ValidAí | Soluções em Auditoria e Conciliação de Dados',
+        'description': 'Conheça a missão do ValidAí: automatizar a validação e conciliação de planilhas, notas fiscais e folhas de pagamento sem fórmulas complexas.',
+        'robots': 'index, follow',
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+    },
     '/validador-json': {
         'title': 'Comparador de JSON / APIs - Em Breve | ValidAí',
         'description': 'Identifique diferenças estruturais, chaves ausentes e divergências de tipagem entre payloads JSON e retornos de APIs.',
@@ -159,6 +177,16 @@ def inject_seo_metadata():
             'module_name': meta.get('module_name', ''),
             'module_sub': meta.get('module_sub', '')
         }
+    }
+
+@app.context_processor
+def inject_ads_context():
+    adsense_id = os.environ.get('ADSENSE_CLIENT_ID', '').strip()
+    # show_ads: True por padrão para visitantes e plano Standard; False no futuro para assinantes Plus/Pro
+    show_ads = True
+    return {
+        'show_ads': show_ads,
+        'adsense_client_id': adsense_id
     }
 
 
@@ -194,6 +222,21 @@ def auditoria_rh():
 def upcoming_module():
     return render_template('em_breve.html')
 
+@app.route('/privacidade')
+def privacidade():
+    return render_template('privacidade.html')
+
+
+@app.route('/termos')
+def termos():
+    return render_template('termos.html')
+
+
+@app.route('/sobre')
+def sobre():
+    return render_template('sobre.html')
+
+
 
 @app.route('/health', methods=['GET', 'HEAD'])
 def health_check():
@@ -227,6 +270,9 @@ def sitemap_xml():
         ('/conciliador-taxas', '0.9', 'weekly'),
         ('/auditoria-rh', '0.9', 'weekly'),
         ('/como-usar', '0.8', 'monthly'),
+        ('/sobre', '0.7', 'monthly'),
+        ('/privacidade', '0.6', 'monthly'),
+        ('/termos', '0.6', 'monthly'),
     ]
     xml_lines = [
         '<?xml version="1.0" encoding="UTF-8"?>',

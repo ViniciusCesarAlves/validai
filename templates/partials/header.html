@@ -223,3 +223,76 @@
         </div>
     </header>
 
+    <!-- Script Centralizado e Unificado de Tema Claro / Escuro (Header Oficial) -->
+    <script>
+        (function() {
+            var THEME_KEY = 'splitc_theme';
+
+            function getSavedTheme() {
+                try {
+                    return localStorage.getItem(THEME_KEY) || 'light';
+                } catch(e) {
+                    return 'light';
+                }
+            }
+
+            function applyTheme(theme) {
+                var isDark = theme === 'dark';
+                var docEl = document.documentElement;
+                if (isDark) {
+                    docEl.setAttribute('data-theme', 'dark');
+                    docEl.classList.add('dark-theme');
+                    if (document.body) document.body.classList.add('dark-theme');
+                } else {
+                    docEl.removeAttribute('data-theme');
+                    docEl.classList.remove('dark-theme');
+                    if (document.body) document.body.classList.remove('dark-theme');
+                }
+                var btn = document.getElementById('theme-toggle-btn');
+                if (btn) {
+                    btn.setAttribute('title', isDark ? 'Mudar para tema claro' : 'Mudar para tema escuro');
+                    btn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+                }
+            }
+
+            function toggleTheme() {
+                var docEl = document.documentElement;
+                var isDark = docEl.getAttribute('data-theme') === 'dark' ||
+                             docEl.classList.contains('dark-theme') ||
+                             (document.body && document.body.classList.contains('dark-theme'));
+                var next = isDark ? 'light' : 'dark';
+                applyTheme(next);
+                try {
+                    localStorage.setItem(THEME_KEY, next);
+                } catch(e) {}
+            }
+
+            window.ValidAiTheme = {
+                apply: applyTheme,
+                toggle: toggleTheme,
+                get: getSavedTheme
+            };
+
+            function initThemeButton() {
+                var btn = document.getElementById('theme-toggle-btn');
+                if (!btn) return;
+                if (btn._themeBound) return;
+                btn._themeBound = true;
+
+                // Sincroniza estado visual inicial
+                applyTheme(getSavedTheme());
+
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    toggleTheme();
+                });
+            }
+
+            // Inicializa imediatamente se o botão já estiver no DOM
+            initThemeButton();
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initThemeButton);
+            }
+        })();
+    </script>
+

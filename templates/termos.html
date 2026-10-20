@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ seo.title }}</title>
+    <meta name="description" content="{{ seo.description }}">
+    <meta name="robots" content="{{ seo.robots }}">
+    <link rel="canonical" href="https://validai.app.br{{ request.path }}">
+
+    <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
+    <meta property="og:title" content="{{ seo.title }}">
+    <meta property="og:description" content="{{ seo.description }}">
+    <meta property="og:url" content="https://validai.app.br{{ request.path }}">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="{{ seo.og_image }}">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:site_name" content="ValidAí">
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ seo.title }}">
+    <meta name="twitter:description" content="{{ seo.description }}">
+    <meta name="twitter:image" content="{{ seo.og_image }}">
+
+    <link rel="icon" type="image/png" href="/static/images/logo.png?v=3">
+    <link rel="shortcut icon" href="/favicon.ico?v=3">
+    
+    <!-- Google Fonts: Outfit e Montserrat -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/static/css/style.css?v=37">
+
+    <script>
+        (function() {
+            try {
+                var lang = localStorage.getItem('validai_lang') || 'pt';
+                document.documentElement.setAttribute('lang', lang === 'pt' ? 'pt-BR' : (lang === 'es' ? 'es-ES' : 'en-US'));
+                var theme = localStorage.getItem('splitc_theme');
+                if (theme === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    document.documentElement.classList.add('dark-theme');
+                }
+            } catch(e) {}
+        })();
+    </script>
+    <script src="/static/js/i18n.js?v=6" defer></script>
+</head>
+<body>
+    {% include 'partials/header.html' %}
+
+    <main class="institutional-page-wrapper" role="main">
+        <div class="container institutional-container">
+            <!-- Breadcrumbs -->
+            <nav class="institutional-breadcrumbs" aria-label="Navegação estrutural">
+                <a href="/" class="crumb-link">Início</a>
+                <span class="crumb-separator" aria-hidden="true">/</span>
+                <span class="crumb-current" aria-current="page">Termos e Condições de Uso</span>
+            </nav>
+
+            <!-- Hero Header da Página -->
+            <header class="institutional-header">
+                <div class="institutional-badge">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                    <span>Condições Gerais e Diretrizes de Serviço</span>
+                </div>
+                <h1 class="institutional-title">Termos e Condições de Uso</h1>
+                <p class="institutional-subtitle">
+                    Leia atentamente as diretrizes que regem a utilização da plataforma ValidAí, nossos compromissos, responsabilidades do usuário e a isenção de responsabilidade sobre decisões baseadas em relatórios.
+                </p>
+                <div class="institutional-meta-row">
+                    <span class="meta-pill">Última atualização: 20 de Outubro de 2026</span>
+                    <span class="meta-pill">Versão do Sistema: v3.3</span>
+                    <span class="meta-pill status-pill">Vigência: Aplicável a todos os usuários</span>
+                </div>
+            </header>
+
+            <!-- Card Destaque: Isenção de Responsabilidade Legal/Fiscal -->
+            <div class="institutional-highlight-box warning-box">
+                <div class="highlight-box-icon warning-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                </div>
+                <div class="highlight-box-text">
+                    <h2 class="highlight-title">Natureza Consultiva dos Relatórios e Isenção de Responsabilidade</h2>
+                    <p class="highlight-desc">
+                        O <strong>ValidAí é um utilitário computacional de apoio operacional</strong> à auditoria, conciliação e conferência sintática de dados. O sistema <strong>não emite pareceres tributários, contábeis, jurídicos ou de auditoria fiscal oficial</strong>. Todas as decisões operacionais, financeiras ou trabalhistas tomadas com base nos relatórios gerados são de exclusiva responsabilidade do usuário e de sua organização.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Layout com Sumário e Artigos -->
+            <div class="institutional-content-layout">
+                <!-- Sumário Rápido Lateral -->
+                <aside class="institutional-toc-aside" aria-label="Sumário dos Termos">
+                    <div class="institutional-toc-card">
+                        <h3 class="toc-title">Tópicos do Termo</h3>
+                        <ul class="toc-list">
+                            <li><a href="#term-aceitacao">1. Aceitação e Escopo</a></li>
+                            <li><a href="#term-natureza">2. Natureza dos Serviços</a></li>
+                            <li><a href="#term-isencao">3. Isenção e Limitação de Responsabilidade</a></li>
+                            <li><a href="#term-uso-justo">4. Uso Justo e Condutas Vedadas</a></li>
+                            <li><a href="#term-propriedade">5. Propriedade Intelectual e Dados</a></li>
+                            <li><a href="#term-planos">6. Planos, Anúncios e Disponibilidade</a></li>
+                            <li><a href="#term-rescisao">7. Modificações e Cancelamento</a></li>
+                            <li><a href="#term-foro">8. Legislação Aplicável e Foro</a></li>
+                        </ul>
+                    </div>
+                </aside>
+
+                <!-- Artigos do Documento -->
+                <div class="institutional-articles">
+                    <!-- 1 -->
+                    <section id="term-aceitacao" class="institutional-section">
+                        <h2 class="section-title">1. Aceitação dos Termos</h2>
+                        <p>
+                            Ao acessar o site <code>validai.app.br</code>, navegar em suas páginas ou utilizar qualquer ferramenta disponibilizada, você expressa sua concordância integral e irrevogável com estes Termos de Uso e com a nossa <a href="/privacidade" class="institutional-link">Política de Privacidade</a>.
+                        </p>
+                        <p>
+                            Caso você esteja utilizando o ValidAí em nome de uma pessoa jurídica, declara possuir poderes suficientes para vincular a referida entidade aos presentes termos.
+                        </p>
+                    </section>
+
+                    <!-- 2 -->
+                    <section id="term-natureza" class="institutional-section">
+                        <h2 class="section-title">2. Natureza dos Serviços Oferecidos</h2>
+                        <p>
+                            O ValidAí disponibiliza ferramentas automatizadas de conferência de dados diretamente no navegador web, incluindo:
+                        </p>
+                        <ul class="institutional-bullets">
+                            <li>Comparação de duas bases tabulares (Excel e CSV) por chave primária e colunas complementares.</li>
+                            <li>Auditoria interna de base única para identificação de duplicidades e regras de consistência.</li>
+                            <li>Higienização cadastral (validação oficial do algoritmo Módulo 11 de CPF e CNPJ, restauração de zeros à esquerda, correção de typos em e-mails e Title Case).</li>
+                            <li>Conciliação de lotes de XMLs fiscais (NFe e NFSe) contra planilhas de controle financeiro.</li>
+                            <li>Conciliação de taxas e repasses de maquininhas e marketplaces contra extratos bancários <code>.OFX</code>.</li>
+                            <li>Auditoria de folha de pagamento e conciliação de faturas de benefícios corporativos de RH.</li>
+                            <li>Comparação redline e semântica de textos, minutas e contratos (TXT, DOCX e PDF).</li>
+                        </ul>
+                    </section>
+
+                    <!-- 3 -->
+                    <section id="term-isencao" class="institutional-section">
+                        <h2 class="section-title">3. Isenção e Limitação de Responsabilidade</h2>
+                        <p>
+                            Para a máxima clareza entre as partes:
+                        </p>
+                        <ul class="institutional-bullets">
+                            <li>
+                                <strong>Inexistência de Garantia de Infalibilidade de Dados de Origem:</strong> Os relatórios gerados dependem estritamente da fidedignidade, formatação e integridade dos arquivos enviados pelo usuário. O ValidAí não verifica a veracidade jurídica das informações contidas nas planilhas de origem.
+                            </li>
+                            <li>
+                                <strong>Exoneração de Responsabilidade Fiscal e Tributária:</strong> Em nenhuma hipótese o ValidAí, seus desenvolvedores ou mantenedores serão responsáveis por quaisquer penalidades administrativas, autuações fiscais, multas trabalhistas, recolhimentos incorretos de tributos ou perdas financeiras resultantes de interpretações, omissões ou decisões tomadas pelo usuário a partir das divergências apontadas pela plataforma.
+                            </li>
+                            <li>
+                                <strong>Limitação por Danos Indiretos:</strong> Sob nenhuma circunstância o ValidAí responderá por lucros cessantes, perda de receita, interrupção de negócios ou danos indiretos de qualquer natureza.
+                            </li>
+                        </ul>
+                    </section>
+
+                    <!-- 4 -->
+                    <section id="term-uso-justo" class="institutional-section">
+                        <h2 class="section-title">4. Uso Justo (Fair Use) e Condutas Proibidas</h2>
+                        <p>
+                            O usuário compromete-se a utilizar a plataforma de forma ética e em conformidade com as leis brasileiras vigentes. É expressamente proibido:
+                        </p>
+                        <div class="prohibited-grid">
+                            <div class="prohibited-item">
+                                <span class="prohibited-tag">Vedado</span>
+                                <p>Tentar violar a segurança, injetar malwares, vírus ou scripts maliciosos nos formulários de upload.</p>
+                            </div>
+                            <div class="prohibited-item">
+                                <span class="prohibited-tag">Vedado</span>
+                                <p>Realizar ataques de negação de serviço (DoS/DDoS) ou requisições automatizadas abusivas (scraping).</p>
+                            </div>
+                            <div class="prohibited-item">
+                                <span class="prohibited-tag">Vedado</span>
+                                <p>Praticar engenharia reversa, descompilação ou cópia indevida dos códigos de validação e layout.</p>
+                            </div>
+                            <div class="prohibited-item">
+                                <span class="prohibited-tag">Vedado</span>
+                                <p>Submeter arquivos que contenham conteúdo ilícito, fraudulento ou violador de direitos de terceiros.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 5 -->
+                    <section id="term-propriedade" class="institutional-section">
+                        <h2 class="section-title">5. Propriedade Intelectual e Dados do Usuário</h2>
+                        <p>
+                            A marca <strong>ValidAí</strong>, seus logotipos, algoritmos, interfaces visuais, textos institucionais e códigos de processamento são de propriedade exclusiva dos criadores da plataforma, protegidos pela legislação de direitos autorais e propriedade industrial.
+                        </p>
+                        <p>
+                            <strong>Propriedade dos Dados do Usuário:</strong> Todo o conteúdo, números, cadastros e registros presentes nas planilhas e arquivos submetidos pertencem unicamente ao usuário ou à sua organização contratante. O ValidAí não adquire nenhum direito de titularidade sobre as bases enviadas.
+                        </p>
+                    </section>
+
+                    <!-- 6 -->
+                    <section id="term-planos" class="institutional-section">
+                        <h2 class="section-title">6. Planos, Publicidade e Disponibilidade da Plataforma</h2>
+                        <p>
+                            O ValidAí opera sob um modelo sustentável transparente:
+                        </p>
+                        <ul class="institutional-bullets">
+                            <li>
+                                <strong>Plano Standard (Acesso Gratuito):</strong> Suportado por exibição de anúncios contextuais (Google AdSense), permitindo que profissionais e pequenas empresas utilizem os recursos essenciais sem qualquer cobrança.
+                            </li>
+                            <li>
+                                <strong>Planos Assinatura (Plus / Pro):</strong> Para usuários corporativos e intensivos, o ValidAí reserva-se o direito de disponibilizar planos pagos com remoção integral de anúncios publicitários, limites ampliados de linhas e recursos avançados dedicados.
+                            </li>
+                            <li>
+                                <strong>Disponibilidade (SLA):</strong> Embora busquemos manter disponibilidade ininterrupta superior a 99,5%, o serviço é fornecido "no estado em que se encontra" (<em>as is</em>), podendo passar por janelas pontuais de manutenção técnica e atualizações de segurança.
+                            </li>
+                        </ul>
+                    </section>
+
+                    <!-- 7 -->
+                    <section id="term-rescisao" class="institutional-section">
+                        <h2 class="section-title">7. Modificações e Cancelamento</h2>
+                        <p>
+                            Reservamo-nos o direito de alterar, suspender ou descontinuar qualquer recurso da plataforma a qualquer tempo, bem como atualizar estes Termos de Uso. O uso continuado da plataforma após a publicação de novos termos configurará aceitação tácita das alterações.
+                        </p>
+                    </section>
+
+                    <!-- 8 -->
+                    <section id="term-foro" class="institutional-section">
+                        <h2 class="section-title">8. Legislação Aplicável e Foro</h2>
+                        <p>
+                            Estes Termos de Uso são regidos e interpretados de acordo com a legislação da República Federativa do Brasil, em especial o Código Civil Brasileiro, o Marco Civil da Internet (Lei nº 12.965/2014) e a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).
+                        </p>
+                        <p>
+                            Fica eleito o Foro da Comarca de domicílio da sede operacional do ValidAí para dirimir eventuais litígios oriundos deste instrumento, renunciando-se a qualquer outro, por mais privilegiado que seja.
+                        </p>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    {% include 'partials/footer.html' %}
+</body>
+</html>
+
