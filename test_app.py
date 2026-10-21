@@ -20,7 +20,15 @@ def test_full_pipeline():
     res_fav = client.get('/favicon.ico')
     assert res_fav.status_code == 200, f"Falha GET /favicon.ico: {res_fav.status_code}"
     assert len(res_fav.data) > 0
-    print("[OK] GET /favicon.ico funcionando (HTTP 200, logo carregado)")
+    assert 'image/vnd.microsoft.icon' in res_fav.headers.get('Content-Type', '')
+    assert 'public' in res_fav.headers.get('Cache-Control', '')
+
+    for size in ['48x48', '96x96', '192x192']:
+        res_png = client.get(f'/static/images/favicon-{size}.png')
+        assert res_png.status_code == 200, f"Falha GET favicon-{size}.png"
+        assert 'image/png' in res_png.headers.get('Content-Type', '')
+
+    print("[OK] GET /favicon.ico e favicons múltiplos de 48px funcionando perfeitamente (HTTP 200)")
 
     # 2. Teste de Upload dos arquivos de teste
     with open('planilha_antiga.xlsx', 'rb') as fa, open('planilha_nova.xlsx', 'rb') as fb:

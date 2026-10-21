@@ -13,7 +13,7 @@ try:
     import brotli
 except ImportError:
     brotli = None
-from flask import Flask, render_template, request, jsonify, send_file, Response, session, redirect, url_for
+from flask import Flask, render_template, request, jsonify, send_file, send_from_directory, Response, session, redirect, url_for
 import comparator
 import single_auditor
 import text_comparator
@@ -790,10 +790,13 @@ def sheets_load_example():
 
 @app.route('/favicon.ico')
 def favicon():
-    ico_path = os.path.join(BASE_DIR, 'static', 'favicon.ico')
-    if os.path.exists(ico_path):
-        return send_file(ico_path, mimetype='image/x-icon')
-    return send_file(os.path.join(BASE_DIR, 'static', 'images', 'favicon.png'), mimetype='image/png')
+    response = send_from_directory(
+        os.path.join(BASE_DIR, 'static'),
+        'favicon.ico',
+        mimetype='image/vnd.microsoft.icon'
+    )
+    response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+    return response
 
 @app.route('/api/compare', methods=['POST'])
 def compare():
