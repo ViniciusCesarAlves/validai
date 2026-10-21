@@ -7,6 +7,9 @@
     <meta name="description" content="Compare, audite e valide duas planilhas Excel (.xlsx, .xls) ou CSV gratuitamente. Encontre divergências célula por célula e baixe o relatório pintado.">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://validai.app.br{{ request.path }}">
+    <meta http-equiv="content-language" content="pt-BR">
+    <link rel="alternate" hreflang="pt-br" href="https://validai.app.br{{ request.path }}">
+    <link rel="alternate" hreflang="x-default" href="https://validai.app.br{{ request.path }}">
 
     <!-- Open Graph / Facebook / LinkedIn / WhatsApp -->
     <meta property="og:type" content="website">
@@ -53,6 +56,38 @@
     </script>
     <script src="/static/js/i18n.js?v=10" defer></script>
 
+    <!-- Schema.org JSON-LD: WebSite & Organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://validai.app.br/#website",
+          "url": "https://validai.app.br/",
+          "name": "ValidAí",
+          "description": "Validador e comparador inteligente de planilhas Excel, CSV, cadastros e notas fiscais",
+          "inLanguage": "pt-BR",
+          "publisher": {
+            "@id": "https://validai.app.br/#organization"
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://validai.app.br/#organization",
+          "name": "ValidAí",
+          "url": "https://validai.app.br",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://validai.app.br/static/images/favicon-192x192.png",
+            "width": 192,
+            "height": 192
+          }
+        }
+      ]
+    }
+    </script>
+
     <!-- Schema.org JSON-LD: WebApplication / SoftwareApplication -->
     <script type="application/ld+json">
     {
@@ -65,9 +100,31 @@
       "inLanguage": "pt-BR",
       "description": "Compare, audite e valide duas planilhas Excel (.xlsx, .xls) ou CSV gratuitamente. Encontre divergências célula por célula e baixe o relatório pintado.",
       "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "BRL"
+        "@type": "AggregateOffer",
+        "priceCurrency": "BRL",
+        "lowPrice": "0.00",
+        "highPrice": "9.99",
+        "offerCount": "3",
+        "offers": [
+          {
+            "@type": "Offer",
+            "name": "Plano Standard Gratuito",
+            "price": "0.00",
+            "priceCurrency": "BRL"
+          },
+          {
+            "@type": "Offer",
+            "name": "Plano Plus",
+            "price": "4.99",
+            "priceCurrency": "BRL"
+          },
+          {
+            "@type": "Offer",
+            "name": "Plano Pro",
+            "price": "9.99",
+            "priceCurrency": "BRL"
+          }
+        ]
       },
       "featureList": [
         "Comparador e Validador de Planilhas Excel (.xlsx, .xls) e CSV",
@@ -90,7 +147,7 @@
           "name": "Como comparar duas planilhas Excel e achar diferenças automaticamente?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "No ValidAí, basta enviar a Base Antiga (Referência) e a Base Nova (Comparação) em formato .xlsx, .xls ou .csv no Passo 1, escolher a coluna identificadora única (Chave Primária, como ID, CPF ou Número da Nota) no Passo 2 e clicar em 'Rodar Validação Completa'. O sistema cruza todas as linhas e colunas em segundos e gera um relatório Excel com as células divergentes pintadas."
+            "text": "No ValidAí, basta enviar a Base Antiga (Referência) e a Base Nova (Comparação) em formato .xlsx, .xls ou .csv no Passo 1, escolher a coluna identificadora única (Chave Primária, como ID, CPF, CNPJ ou Número da Nota) no Passo 2 e clicar em 'Rodar Validação Completa'. O sistema cruza todas as linhas e colunas em segundos, permitindo validar CNPJ no Excel e gerando um relatório com as células divergentes pintadas."
           }
         },
         {
@@ -114,7 +171,7 @@
           "name": "Como funciona a normalização automática para evitar falsos positivos?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "A normalização inteligente equipara automaticamente variações de formatação que representam o mesmo valor real: moedas e decimais ('R$ 15.650,00' e '15650.00'), formatos de data ('01/08/2026' e '2026-08-01'), diferenças entre letras maiúsculas e minúsculas, zeros à esquerda e espaços extras no início ou fim das células."
+            "text": "A normalização inteligente permite remover caracteres especiais online, entender como formatar CPF e equiparar automaticamente variações de formatação: moedas e decimais ('R$ 15.650,00' e '15650.00'), formatos de data ('01/08/2026' e '2026-08-01'), letras maiúsculas e minúsculas, zeros à esquerda e espaços extras."
           }
         },
         {
@@ -130,7 +187,7 @@
           "name": "É possível auditar apenas uma planilha isolada para achar duplicidades e erros internos?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Sim! Basta alternar para o modo 'Auditar 1 Base' no topo do Passo 1. Nele você pode aplicar 12 tipos de regras de consistência em uma única planilha, como busca de valores duplicados, campos vazios obrigatórios, validação de apenas números ou letras e comparação entre duas colunas do mesmo arquivo."
+            "text": "Sim! Basta alternar para o modo 'Auditar 1 Base' no topo do Passo 1. Nele você pode aplicar 12 tipos de regras de consistência em uma única planilha, como validar e-mail em lote, busca de valores duplicados, campos vazios obrigatórios, validação de apenas números ou letras e comparação entre colunas."
           }
         }
       ]
@@ -218,7 +275,7 @@
                             </svg>
                             <span data-i18n="doc_browse_file">Procurar arquivo</span>
                         </div>
-                        <div class="file-meta" id="file-meta-a" style="display: none;">
+                        <div class="file-meta" id="file-meta-a" style="display: none;" data-nosnippet>
                             <span class="filename" id="filename-a">arquivo.xlsx</span>
                             <span class="filesize" id="filesize-a">0 KB</span>
                         </div>
@@ -245,7 +302,7 @@
                             </svg>
                             <span data-i18n="doc_browse_file">Procurar arquivo</span>
                         </div>
-                        <div class="file-meta" id="file-meta-b" style="display: none;">
+                        <div class="file-meta" id="file-meta-b" style="display: none;" data-nosnippet>
                             <span class="filename" id="filename-b">arquivo.xlsx</span>
                             <span class="filesize" id="filesize-b">0 KB</span>
                         </div>
@@ -270,7 +327,7 @@
         </section>
 
         <!-- ETAPA 2: Configuração de Chaves e Tolerâncias (Oculto até ler arquivos) -->
-        <section class="card step-card" id="step-config" style="display: none;">
+        <section class="card step-card" id="step-config" style="display: none;" data-nosnippet>
             <div class="card-header">
                 <div class="step-indicator" data-i18n="sheets_step2_badge">Passo 2</div>
                 <div>
@@ -462,7 +519,7 @@
         </section>
 
         <!-- ETAPA 3: Resultado da Validação -->
-        <section class="card step-card" id="step-results" style="display: none;">
+        <section class="card step-card" id="step-results" style="display: none;" data-nosnippet>
             <div class="card-header">
                 <div class="step-indicator" data-i18n="sheets_step3_badge">Passo 3</div>
                 <div>
@@ -796,7 +853,7 @@
                                 </svg>
                                 <span data-i18n="doc_browse_file">Procurar arquivo</span>
                             </div>
-                            <div class="file-meta" id="single-file-meta" style="display: none;">
+                            <div class="file-meta" id="single-file-meta" style="display: none;" data-nosnippet>
                                 <span class="filename" id="single-filename">arquivo.xlsx</span>
                                 <span class="filesize" id="single-filesize">0 KB</span>
                             </div>
@@ -814,7 +871,7 @@
             </section>
 
             <!-- ETAPA 2 (SINGLE): Configuração de Regras de Auditoria Interna -->
-            <section class="card step-card" id="single-step-config" style="display: none;">
+            <section class="card step-card" id="single-step-config" style="display: none;" data-nosnippet>
                 <div class="card-header">
                     <div class="step-indicator">Passo 2</div>
                     <div>
@@ -1186,7 +1243,7 @@
             </section>
 
             <!-- ETAPA 3 (SINGLE): Resultados da Auditoria -->
-            <section class="card step-card" id="single-step-results" style="display: none;">
+            <section class="card step-card" id="single-step-results" style="display: none;" data-nosnippet>
                 <div class="card-header">
                     <div class="step-indicator">Passo 3</div>
                     <div>
@@ -1402,7 +1459,7 @@
                         <span>Como comparar duas planilhas Excel e achar diferenças automaticamente?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        Basta enviar a planilha de referência (Base A) e a planilha a validar (Base B) no Passo 1 do ValidAí, escolher a coluna de chave primária (como ID, CPF, CNPJ ou Código) no Passo 2 e clicar em Executar Validação. O sistema cruza todas as linhas e colunas instantaneamente, exibindo um dashboard interativo com as divergências e gerando um relatório Excel pintado célula por célula.
+                        Basta enviar a planilha de referência (Base A) e a planilha a validar (Base B) no Passo 1 do ValidAí, escolher a coluna de chave primária (como ID, CPF, CNPJ ou Código) no Passo 2 e clicar em Executar Validação. O sistema cruza todas as linhas e colunas instantaneamente, permitindo <strong>validar CNPJ no Excel</strong>, identificar divergências e gerar um relatório Excel pintado célula por célula.
                     </div>
                 </details>
 
@@ -1429,7 +1486,7 @@
                         <span>Como funciona a normalização automática para evitar falsos positivos?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        Antes de comparar os valores, o algoritmo de normalização inteligente do ValidAí pode ignorar diferenças irrelevantes entre sistemas, como letras maiúsculas/minúsculas, acentuação, espaços duplos, zeros à esquerda em códigos, formatos de datas (<code>DD/MM/AAAA</code> vs <code>AAAA-MM-DD</code>) e símbolos de moeda (<code>R$ 1.500,00</code> vs <code>1500.0</code>), destacando apenas divergências reais de conteúdo.
+                        Antes de comparar os valores, o algoritmo de normalização inteligente do ValidAí permite <strong>remover caracteres especiais online</strong> e compreender <strong>como formatar CPF</strong> sem falsos positivos, ignorando diferenças irrelevantes entre sistemas, como maiúsculas/minúsculas, acentuação, espaços duplos, zeros à esquerda e símbolos de moeda, destacando apenas divergências reais de conteúdo.
                     </div>
                 </details>
 
@@ -1447,7 +1504,7 @@
                         <span>É possível auditar apenas uma planilha isolada para achar duplicidades e erros internos?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        Sim! Basta alternar para o modo <strong>Auditar 1 Base</strong> no topo do Passo 1. Nele você pode aplicar 12 tipos de regras de consistência em uma única planilha, como busca de valores duplicados, campos vazios obrigatórios, validação de apenas números ou letras e comparação entre duas colunas do mesmo arquivo.
+                        Sim! Basta alternar para o modo <strong>Auditar 1 Base</strong> no topo do Passo 1. Nele você pode <strong>validar e-mail em lote</strong> e aplicar 12 tipos de regras de consistência em uma única planilha, como busca de valores duplicados, campos vazios obrigatórios, validação de apenas números ou letras e comparação entre duas colunas do mesmo arquivo.
                     </div>
                 </details>
             </div>

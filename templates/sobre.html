@@ -7,6 +7,9 @@
     <meta name="description" content="{{ seo.description }}">
     <meta name="robots" content="{{ seo.robots }}">
     <link rel="canonical" href="https://validai.app.br{{ request.path }}">
+    <meta http-equiv="content-language" content="pt-BR">
+    <link rel="alternate" hreflang="pt-br" href="https://validai.app.br{{ request.path }}">
+    <link rel="alternate" hreflang="x-default" href="https://validai.app.br{{ request.path }}">
 
     <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
     <meta property="og:title" content="{{ seo.title }}">
@@ -56,6 +59,39 @@
         })();
     </script>
     <script src="/static/js/i18n.js?v=10" defer></script>
+
+    <!-- Schema.org JSON-LD: BreadcrumbList & AboutPage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://validai.app.br/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Sobre o ValidAí",
+              "item": "https://validai.app.br/sobre"
+            }
+          ]
+        },
+        {
+          "@type": "AboutPage",
+          "name": "Sobre o ValidAí | Quem Somos e Nossa Missão",
+          "url": "https://validai.app.br/sobre",
+          "description": "Conheça a história e a missão do ValidAí: simplificar a validação e higienização de arquivos, planilhas e cadastros corporativos no Brasil.",
+          "inLanguage": "pt-BR"
+        }
+      ]
+    }
+    </script>
 </head>
 <body>
     {% include 'partials/header.html' %}

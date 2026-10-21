@@ -7,6 +7,9 @@
     <meta name="description" content="{{ seo.description }}">
     <meta name="robots" content="{{ seo.robots }}">
     <link rel="canonical" href="https://validai.app.br{{ request.path }}">
+    <meta http-equiv="content-language" content="pt-BR">
+    <link rel="alternate" hreflang="pt-br" href="https://validai.app.br{{ request.path }}">
+    <link rel="alternate" hreflang="x-default" href="https://validai.app.br{{ request.path }}">
 
     <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
     <meta property="og:title" content="{{ seo.title }}">
@@ -55,6 +58,86 @@
         "Comparador e Validador de Planilhas Excel (.xlsx, .xls) e CSV",
         "Higienizador de Cadastros (Validação de CPF, CNPJ, E-mail e Duplicados)",
         "Conciliador de Notas Fiscais (XML NFe/NFSe vs Planilha Financeira Excel)"
+      ]
+    }
+    </script>
+
+    <!-- Schema.org JSON-LD: BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://validai.app.br/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Comparador e Validador de Textos",
+          "item": "https://validai.app.br/validador-texto"
+        }
+      ]
+    }
+    </script>
+
+    <!-- Schema.org JSON-LD: FAQPage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Como comparar dois documentos ou blocos de texto e destacar alterações?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Você pode enviar dois arquivos (.pdf, .docx ou .txt) ou colar os textos diretamente nos campos Original e Novo para limpar texto para colar no Excel ou conferir minutas contratuais. Ao clicar em Encontrar Diferenças, o ValidAí exibe o índice de similaridade, destaca alterações e gera relatório em PDF."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Meus dados e planilhas estão seguros durante a validação?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sim. Todo o processamento de documentos e planilhas ocorre temporariamente em memória apenas durante a sua sessão de análise, sem armazenamento permanente em banco de dados e com total confidencialidade."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Quais formatos de arquivo o ValidAí aceita (.xlsx, .xls, .csv, .xml)?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No Validador de Texto são aceitos arquivos .pdf, .docx e .txt (além de texto colado). Nos demais módulos da plataforma, você também pode auditar planilhas .xlsx, .xls, .csv e notas fiscais eletrônicas em .xml ou .zip."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Como funciona a normalização automática para evitar falsos positivos?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Você pode ativar opções inteligentes para remover quebras de linha indesejadas, converter maiúsculas e minúsculas ou desconsiderar diferenças de caixa, ignorar espaços extras e pontuações, e pular linhas em branco."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Qual a diferença entre os modos de exibição Rich Text, Redline e Plain Text?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "O modo Rich Text exibe o documento original e o documento novo lado a lado com rolagem sincronizada. O modo Redline funde as duas versões marcando inserções em verde e exclusões em vermelho. O modo Plain Text compara linha a linha."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Posso baixar um relatório em PDF com todas as diferenças grifadas?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sim. Após executar a comparação, basta clicar em Baixar Relatório em PDF com Alterações Destacadas para gerar um documento executivo pronto para compartilhar com clientes e gestores."
+          }
+        }
       ]
     }
     </script>
@@ -155,7 +238,7 @@
                             </svg>
                             <span data-i18n="doc_browse_file">Procurar arquivo</span>
                         </div>
-                        <div class="file-meta" id="meta-doc-a" style="display: none;">
+                        <div class="file-meta" id="meta-doc-a" style="display: none;" data-nosnippet>
                             <span class="filename" id="filename-doc-a">documento_original.pdf</span>
                             <span class="filesize" id="filesize-doc-a">0 KB</span>
                         </div>
@@ -182,7 +265,7 @@
                             </svg>
                             <span data-i18n="doc_browse_file">Procurar arquivo</span>
                         </div>
-                        <div class="file-meta" id="meta-doc-b" style="display: none;">
+                        <div class="file-meta" id="meta-doc-b" style="display: none;" data-nosnippet>
                             <span class="filename" id="filename-doc-b">documento_novo.pdf</span>
                             <span class="filesize" id="filesize-doc-b">0 KB</span>
                         </div>
@@ -361,7 +444,7 @@
         </section>
 
         <!-- ETAPA 2: Resultados, Analytics e Exportação PDF -->
-        <section class="card step-card" id="text-step-results" style="display: none;">
+        <section class="card step-card" id="text-step-results" style="display: none;" data-nosnippet>
             <div class="card-header">
                 <div class="step-indicator" data-i18n="text_step2_badge">Resultado</div>
                 <div>
@@ -614,7 +697,7 @@
                         <span>Como comparar dois documentos ou blocos de texto e destacar alterações?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        Você pode enviar dois arquivos (<code>.pdf</code>, <code>.docx</code> ou <code>.txt</code>) ou colar os textos diretamente nos campos Original e Novo. Ao clicar em Encontrar Diferenças, o ValidAí exibe o índice de similaridade, destaca adições em verde e remoções em vermelho, e permite baixar um relatório em PDF formatado.
+                        Você pode enviar dois arquivos (<code>.pdf</code>, <code>.docx</code> ou <code>.txt</code>) ou colar os textos diretamente nos campos Original e Novo para <strong>limpar texto para colar no Excel</strong> e auditar minutas. Ao clicar em Encontrar Diferenças, o ValidAí exibe o índice de similaridade, destaca adições em verde e remoções em vermelho, e permite baixar um relatório em PDF formatado.
                     </div>
                 </details>
 
@@ -641,7 +724,7 @@
                         <span>Como funciona a normalização automática para evitar falsos positivos?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        Você pode ativar opções para ignorar espaços extras no final das linhas, desconsiderar diferenças entre maiúsculas e minúsculas, pular linhas em branco e escolher entre destaque por palavra inteira ou caractere a caractere.
+                        Você pode ativar opções inteligentes para <strong>remover quebras de linha indesejadas</strong>, <strong>converter maiúsculas e minúsculas</strong> ou desconsiderar diferenças de caixa, ignorar espaços extras e pontuações, pular linhas em branco e escolher entre destaque por palavra inteira ou caractere a caractere.
                     </div>
                 </details>
 

@@ -7,6 +7,9 @@
     <meta name="description" content="{{ seo.description }}">
     <meta name="robots" content="{{ seo.robots }}">
     <link rel="canonical" href="https://validai.app.br{{ request.path }}">
+    <meta http-equiv="content-language" content="pt-BR">
+    <link rel="alternate" hreflang="pt-br" href="https://validai.app.br{{ request.path }}">
+    <link rel="alternate" hreflang="x-default" href="https://validai.app.br{{ request.path }}">
 
     <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
     <meta property="og:title" content="{{ seo.title }}">
@@ -57,6 +60,86 @@
         "Comparador e Validador de Planilhas Excel (.xlsx, .xls) e CSV",
         "Comparador e Validador de Textos e Documentos Online (.docx, .pdf, .txt)",
         "Conciliador de Notas Fiscais (XML NFe/NFSe vs Planilha Financeira Excel)"
+      ]
+    }
+    </script>
+
+    <!-- Schema.org JSON-LD: BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://validai.app.br/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Higienizador de Cadastros",
+          "item": "https://validai.app.br/validador-cadastros"
+        }
+      ]
+    }
+    </script>
+
+    <!-- Schema.org JSON-LD: FAQPage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Como validar CPF, CNPJ, e-mails e remover duplicados de uma planilha?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Carregue sua planilha no Passo 1 do Higienizador de Cadastros para realizar uma completa higienização de base de dados, associe as colunas de CPF/CNPJ, Nome, E-mail e Telefone no Passo 2 e execute a auditoria. O sistema valida matematicamente o dígito verificador (Módulo 11), corrige erros de digitação e gera a base higienizada."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Meus dados e planilhas estão seguros durante a validação?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sim. O ValidAí processa sua planilha temporariamente em memória apenas durante a higienização ativa, sem armazenar dados sensíveis de clientes ou fornecedores em bancos de dados permanentes."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Quais formatos de arquivo o ValidAí aceita (.xlsx, .xls, .csv, .xml)?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "O Higienizador de Cadastros aceita planilhas Excel (.xlsx e .xls) e arquivos .csv. Os relatórios de saída são gerados em formato .xlsx com formatação executiva."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Como funciona a normalização automática para evitar falsos positivos?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "O sistema recupera automaticamente zeros à esquerda que o Excel costuma remover de CPFs e CNPJs, padroniza nomes próprios em Title Case e aplica máscaras oficiais ou mantém apenas números conforme sua preferência."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Como funciona a validação matemática de CPF e CNPJ pelo Módulo 11?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "O motor calcula os dois dígitos verificadores oficiais de cada documento para a validação de CPF e CNPJ da Receita, rejeitando sequências repetidas e apontando exatamente quais linhas possuem inconsistências."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Qual a diferença entre a Base Higienizada e o Relatório de Auditoria em Excel?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A Base 100% Higienizada entrega sua planilha limpa e padronizada, ideal para limpeza de mailing para CRM e importação em ERPs. Já o Relatório de Auditoria destaca visualmente com células pintadas cada CPF/CNPJ inválido, duplicidade ou contato suspeito."
+          }
+        }
       ]
     }
     </script>
@@ -135,7 +218,7 @@
                             </svg>
                             <span data-i18n="doc_browse_file">Procurar arquivo</span>
                         </div>
-                        <div class="file-meta" id="cadastros-file-meta" style="display: none;">
+                        <div class="file-meta" id="cadastros-file-meta" style="display: none;" data-nosnippet>
                             <span class="filename" id="cadastros-filename-display">arquivo.xlsx</span>
                             <span class="filesize" id="cadastros-filesize-display">0 KB</span>
                         </div>
@@ -168,7 +251,7 @@
         <!-- ======================================================== -->
         <!-- PASSO 2: MAPEAR COLUNAS E REGRAS DE LIMPEZA              -->
         <!-- ======================================================== -->
-        <section class="card step-card" id="step-config-cadastros" style="display: none;">
+        <section class="card step-card" id="step-config-cadastros" style="display: none;" data-nosnippet>
             <div class="card-header">
                 <div class="step-indicator" data-i18n="cadastros_step2_badge">Passo 2</div>
                 <div>
@@ -412,7 +495,7 @@
         <!-- ======================================================== -->
         <!-- PASSO 3: DASHBOARD DE RESULTADOS E DOWNLOADS             -->
         <!-- ======================================================== -->
-        <section class="card step-card" id="step-results-cadastros" style="display: none;">
+        <section class="card step-card" id="step-results-cadastros" style="display: none;" data-nosnippet>
             <div class="card-header">
                 <div class="step-indicator" data-i18n="cadastros_step3_badge">Passo 3</div>
                 <div>
@@ -661,7 +744,7 @@
                         <span>Como validar CPF, CNPJ, e-mails e remover duplicados de uma planilha?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        Carregue sua planilha no Passo 1 do Higienizador de Cadastros, associe as colunas de CPF/CNPJ, Nome, E-mail e Telefone no Passo 2 e execute a auditoria. O sistema valida matematicamente o dígito verificador (Módulo 11), corrige erros de digitação em domínios de e-mail e gera tanto a base 100% higienizada quanto o relatório de inconsistências.
+                        Carregue sua planilha no Passo 1 do Higienizador de Cadastros para realizar uma completa <strong>higienização de base de dados</strong>, associe as colunas de CPF/CNPJ, Nome, E-mail e Telefone no Passo 2 e execute a auditoria. O sistema valida matematicamente o dígito verificador (Módulo 11), corrige erros de digitação em domínios de e-mail e gera tanto a base 100% higienizada quanto o relatório de inconsistências.
                     </div>
                 </details>
 
@@ -697,7 +780,7 @@
                         <span>Como funciona a validação matemática de CPF e CNPJ pelo Módulo 11?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        O motor calcula os dois dígitos verificadores oficiais de cada CPF (11 dígitos) e CNPJ (14 dígitos) segundo o algoritmo da Receita Federal, rejeitando sequências repetidas (como <code>111.111.111-11</code>) e apontando exatamente quais linhas possuem documentos inválidos.
+                        O motor calcula os dois dígitos verificadores oficiais de cada CPF (11 dígitos) e CNPJ (14 dígitos) para a <strong>validação de CPF e CNPJ da Receita</strong>, rejeitando sequências repetidas (como <code>111.111.111-11</code>) e apontando exatamente quais linhas possuem documentos inválidos.
                     </div>
                 </details>
 
@@ -706,7 +789,7 @@
                         <span>Qual a diferença entre a Base Higienizada e o Relatório de Auditoria em Excel?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        A <strong>Base 100% Higienizada</strong> entrega sua planilha limpa, padronizada e pronta para importação em sistemas ERP ou CRM. Já o <strong>Relatório de Auditoria</strong> destaca visualmente com células pintadas em vermelho e amarelo cada CPF/CNPJ inválido, duplicidade ou contato suspeito para envio à equipe de correção.
+                        A <strong>Base 100% Higienizada</strong> entrega sua planilha limpa, padronizada e pronta para <strong>limpeza de mailing para CRM</strong>, campanhas e importação em ERPs. Já o <strong>Relatório de Auditoria</strong> destaca visualmente com células pintadas em vermelho e amarelo cada CPF/CNPJ inválido, duplicidade ou contato suspeito para envio à equipe de correção.
                     </div>
                 </details>
             </div>

@@ -7,6 +7,9 @@
     <meta name="description" content="{{ seo.description }}">
     <meta name="robots" content="{{ seo.robots }}">
     <link rel="canonical" href="https://validai.app.br{{ request.path }}">
+    <meta http-equiv="content-language" content="pt-BR">
+    <link rel="alternate" hreflang="pt-br" href="https://validai.app.br{{ request.path }}">
+    <link rel="alternate" hreflang="x-default" href="https://validai.app.br{{ request.path }}">
 
     <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
     <meta property="og:title" content="{{ seo.title }}">
@@ -57,6 +60,86 @@
         "Comparador e Validador de Planilhas Excel (.xlsx, .xls) e CSV",
         "Comparador e Validador de Textos e Documentos Online (.docx, .pdf, .txt)",
         "Higienizador de Cadastros (Validação de CPF, CNPJ, E-mail e Duplicados)"
+      ]
+    }
+    </script>
+
+    <!-- Schema.org JSON-LD: BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://validai.app.br/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Conciliador de Notas Fiscais (XML)",
+          "item": "https://validai.app.br/validador-xml"
+        }
+      ]
+    }
+    </script>
+
+    <!-- Schema.org JSON-LD: FAQPage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Como conciliar vários arquivos XML de Notas Fiscais com uma planilha Excel?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Envie uma pasta .zip ou múltiplos arquivos .xml de NFe, NFSe ou CTe de um lado e sua planilha financeira do outro. O sistema é ideal para validar NFe 4.0, conferir chave de acesso de 44 dígitos e apontar divergências de valores ou impostos."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Meus dados e planilhas estão seguros durante a validação?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sim. Os pacotes .zip, arquivos .xml e planilhas financeiras são lidos exclusivamente em memória temporária durante a sessão de conciliação, sem armazenamento permanente em banco de dados."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Quais formatos de arquivo o ValidAí aceita (.xlsx, .xls, .csv, .xml)?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "O Conciliador Fiscal aceita pastas compactadas .zip com subpastas ou múltiplos arquivos .xml (NFe 4.00, NFSe ABRASF/Nacional e CTe) combinados com planilhas .xlsx, .xls ou .csv."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Como funciona a normalização automática para evitar falsos positivos?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "O conciliador remove automaticamente zeros à esquerda e prefixos como 'NF-' do número da nota, normaliza máscaras de CNPJ e permite configurar tolerância de centavos para arredondamentos contábeis."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Posso enviar vários arquivos XML de uma vez ou uma pasta .ZIP com subpastas?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sim. Você pode selecionar dezenas de arquivos .xml diretamente ou subir um único arquivo compactado (.zip) contendo todas as notas fiscais do mês — inclusive organizadas em subpastas."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Quais relatórios em Excel posso baixar após a conciliação das Notas Fiscais?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "O ValidAí disponibiliza dois arquivos: o Relatório de Conciliação Pintado (.xlsx) e a Planilha Espelho dos XMLs (.xlsx), perfeita para extrair produtos de XML da nota fiscal sem ERP de forma ágil."
+          }
+        }
       ]
     }
     </script>
@@ -138,7 +221,7 @@
                             </svg>
                             <span data-i18n="doc_browse_file">Procurar arquivo</span>
                         </div>
-                        <div class="file-meta" id="file-meta-xml-pack" style="display: none;">
+                        <div class="file-meta" id="file-meta-xml-pack" style="display: none;" data-nosnippet>
                             <span class="filename" id="filename-xml-pack">notas_fiscais.zip</span>
                             <span class="filesize" id="filesize-xml-pack">0 KB</span>
                         </div>
@@ -164,7 +247,7 @@
                             </svg>
                             <span data-i18n="doc_browse_file">Procurar arquivo</span>
                         </div>
-                        <div class="file-meta" id="file-meta-xml-sheet" style="display: none;">
+                        <div class="file-meta" id="file-meta-xml-sheet" style="display: none;" data-nosnippet>
                             <span class="filename" id="filename-xml-sheet">financeiro.xlsx</span>
                             <span class="filesize" id="filesize-xml-sheet">0 KB</span>
                         </div>
@@ -208,7 +291,7 @@
         <!-- ======================================================== -->
         <!-- PASSO 2: MAPEAR COLUNAS E REGRAS DE CONCILIAÇÃO FISCAL    -->
         <!-- ======================================================== -->
-        <section class="card step-card" id="step-config-xml" style="display: none;">
+        <section class="card step-card" id="step-config-xml" style="display: none;" data-nosnippet>
             <div class="card-header">
                 <div class="step-indicator" data-i18n="xml_step2_badge">Passo 2</div>
                 <div>
@@ -436,7 +519,7 @@
         <!-- ======================================================== -->
         <!-- PASSO 3: DASHBOARD DE CONCILIAÇÃO FISCAL E DOWNLOADS      -->
         <!-- ======================================================== -->
-        <section class="card step-card" id="step-results-xml" style="display: none;">
+        <section class="card step-card" id="step-results-xml" style="display: none;" data-nosnippet>
             <div class="card-header">
                 <div class="step-indicator" data-i18n="xml_step3_badge">Passo 3</div>
                 <div>
@@ -703,7 +786,7 @@
                         <span>Como conciliar vários arquivos XML de Notas Fiscais com uma planilha Excel?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        Envie uma pasta <code>.zip</code> ou múltiplos arquivos <code>.xml</code> de NFe, NFSe ou CTe de um lado e sua planilha financeira (<code>.xlsx</code> ou <code>.csv</code>) do outro. O sistema lê automaticamente as tags oficiais (<code>&lt;nNF&gt;</code>, <code>&lt;CNPJ&gt;</code>, <code>&lt;vNF&gt;</code>) e aponta notas omitidas no financeiro, lançamentos sem XML e diferenças de valor ou impostos.
+                        Envie uma pasta <code>.zip</code> ou múltiplos arquivos <code>.xml</code> de NFe, NFSe ou CTe de um lado e sua planilha financeira (<code>.xlsx</code> ou <code>.csv</code>) do outro. A plataforma é ideal para <strong>validar NFe 4.0</strong>, lê automaticamente as tags oficiais (<code>&lt;nNF&gt;</code>, <code>&lt;CNPJ&gt;</code>, <code>&lt;vNF&gt;</code>) e permite <strong>conferir chave de acesso de 44 dígitos</strong>, apontando notas omitidas no financeiro, lançamentos sem XML e diferenças de valor ou impostos.
                     </div>
                 </details>
 
@@ -748,7 +831,7 @@
                         <span>Quais relatórios em Excel posso baixar após a conciliação das Notas Fiscais?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        O ValidAí disponibiliza dois arquivos: o <strong>Relatório de Conciliação Pintado (.xlsx)</strong>, que destaca em cores na sua planilha financeira as divergências de valor, impostos e notas omitidas, e a <strong>Planilha Espelho dos XMLs (.xlsx)</strong>, que converte todas as notas fiscais do lote XML em uma tabela Excel estruturada.
+                        O ValidAí disponibiliza dois arquivos: o <strong>Relatório de Conciliação Pintado (.xlsx)</strong>, que destaca em cores na sua planilha financeira as divergências de valor, impostos e notas omitidas, e a <strong>Planilha Espelho dos XMLs (.xlsx)</strong>, que permite <strong>extrair produtos de XML da nota fiscal sem ERP</strong> e converte todas as notas do lote em uma tabela Excel estruturada.
                     </div>
                 </details>
             </div>

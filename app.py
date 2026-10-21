@@ -71,6 +71,13 @@ def add_cache_and_compression(response):
     if request.path == '/health':
         return response
 
+    # Sinalização explícita de idioma nativo (pt-BR)
+    response.headers['Content-Language'] = 'pt-BR'
+
+    # Blindagem de indexação em rotas transacionais/privadas (noindex, nofollow)
+    if request.path.startswith(('/login', '/cadastro', '/checkout', '/auth/', '/webhook/')):
+        response.headers['X-Robots-Tag'] = 'noindex, nofollow'
+
     # Cache estático de longa duração (1 ano) para /static/ e /favicon.ico (Core Web Vitals / PageSpeed Mobile)
     if request.path.startswith('/static/') or request.path == '/favicon.ico':
         response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
@@ -166,27 +173,39 @@ SEO_METADATA = {
         'module_sub': 'Batimento de folha de pagamento, proventos, descontos e benefícios corporativos.'
     },
     '/privacidade': {
-        'title': 'Política de Privacidade e Proteção de Dados (LGPD) | ValidAí',
-        'description': 'Conheça nossa Política de Privacidade em conformidade com a LGPD (Lei 13.709/2018). Processamento volátil em memória, sem armazenamento permanente e transparência com cookies e Google AdSense.',
+        'title': 'Política de Privacidade | ValidAí',
+        'description': 'Entenda como o ValidAí trata e protege seus dados conforme a LGPD. Processamento seguro na memória e privacidade total de arquivos.',
         'robots': 'index, follow',
         'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
     },
     '/termos': {
-        'title': 'Termos e Condições de Uso | ValidAí',
-        'description': 'Termos de Uso do ValidAí. Regras de utilização, isenção de responsabilidade sobre análises tributárias e contábeis, propriedade intelectual e uso justo.',
+        'title': 'Termos de Uso | ValidAí',
+        'description': 'Termos e condições gerais de uso da plataforma ValidAí para validação de dados, arquivos e cadastros corporativos.',
         'robots': 'index, follow',
         'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
     },
     '/sobre': {
-        'title': 'Sobre o ValidAí | Soluções em Auditoria e Conciliação de Dados',
-        'description': 'Conheça a missão do ValidAí: automatizar a validação e conciliação de planilhas, notas fiscais e folhas de pagamento sem fórmulas complexas.',
+        'title': 'Sobre o ValidAí | Quem Somos e Nossa Missão',
+        'description': 'Conheça a história e a missão do ValidAí: simplificar a validação e higienização de arquivos, planilhas e cadastros corporativos no Brasil.',
         'robots': 'index, follow',
         'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
     },
     '/planos': {
-        'title': 'Planos e Preços | ValidAí',
-        'description': 'Conheça os planos do ValidAí: Standard gratuito, Plus (R$ 4,99/mês) e Pro (R$ 9,99/mês). Validações ilimitadas sem anúncios.',
+        'title': 'Planos e Preços | ValidAí - Validador de Arquivos e Dados',
+        'description': 'Conheça os planos do ValidAí. Validações gratuitas diárias ou planos Standard e Pro com arquivos ilimitados e suporte prioritário.',
         'robots': 'index, follow',
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+    },
+    '/login': {
+        'title': 'Entrar na Conta | ValidAí',
+        'description': 'Acesse sua conta no ValidAí para gerenciar seu plano e histórico de validações.',
+        'robots': 'noindex, nofollow',
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+    },
+    '/cadastro': {
+        'title': 'Criar Conta Gratuita | ValidAí',
+        'description': 'Crie sua conta no ValidAí para validar planilhas, cadastros e notas fiscais.',
+        'robots': 'noindex, nofollow',
         'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
     },
     '/validador-json': {
@@ -604,6 +623,12 @@ def robots_txt():
         "Allow: /ads.txt\n"
         "Disallow: /api/\n"
         "Disallow: /health\n"
+        "Disallow: /checkout/\n"
+        "Disallow: /webhook/\n"
+        "Disallow: /auth/\n"
+        "Disallow: /login\n"
+        "Disallow: /cadastro\n"
+        "Disallow: /logout\n"
         "\n"
         f"Sitemap: {SITE_DOMAIN}/sitemap.xml\n"
     )
@@ -621,19 +646,19 @@ def ads_txt():
 
 @app.route('/sitemap.xml')
 def sitemap_xml():
-    lastmod_date = "2026-10-18"
+    lastmod_date = "2026-10-21"
     urls = [
         ('/', '1.0', 'weekly'),
         ('/validador-texto', '0.9', 'weekly'),
         ('/validador-cadastros', '0.9', 'weekly'),
         ('/validador-xml', '0.9', 'weekly'),
-        ('/conciliador-taxas', '0.9', 'weekly'),
-        ('/auditoria-rh', '0.9', 'weekly'),
+        ('/conciliador-taxas', '0.8', 'weekly'),
+        ('/auditoria-rh', '0.8', 'weekly'),
         ('/como-usar', '0.8', 'monthly'),
-        ('/sobre', '0.7', 'monthly'),
         ('/planos', '0.8', 'monthly'),
-        ('/privacidade', '0.6', 'monthly'),
-        ('/termos', '0.6', 'monthly'),
+        ('/sobre', '0.6', 'monthly'),
+        ('/privacidade', '0.4', 'monthly'),
+        ('/termos', '0.4', 'monthly'),
     ]
     xml_lines = [
         '<?xml version="1.0" encoding="UTF-8"?>',

@@ -1152,7 +1152,7 @@
             </div>
 
             <!-- Div do Usuário / Login (Final do limite de 1140px) -->
-            <div class="header-user-wrapper">
+            <div class="header-user-wrapper" data-nosnippet>
                 {% if user_summary is defined and user_summary.is_logged_in %}
                     <div class="user-profile-menu-wrapper" id="user-profile-wrapper">
                         <button type="button" class="header-user-btn" id="user-profile-btn" aria-haspopup="true" aria-expanded="false" title="{{ user_summary.email }}">
@@ -1269,7 +1269,7 @@
     <!-- Drawer / Painel Vertical do Menu Mobile (100% largura) -->
     <div class="mobile-nav-drawer" id="mobile-nav-drawer" role="dialog" aria-modal="true" aria-label="Menu Principal Mobile">
         <!-- 1. Header do Drawer: Conta Logada / Login + Status do Plano e Atalho -->
-        <div class="mobile-drawer-account-section">
+        <div class="mobile-drawer-account-section" data-nosnippet>
             {% if user_summary is defined and user_summary.is_logged_in %}
                 <div class="mobile-drawer-user-info">
                     <span class="user-avatar-circle avatar-{{ user_summary.plan }}">

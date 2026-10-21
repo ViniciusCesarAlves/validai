@@ -7,6 +7,9 @@
     <meta name="description" content="{{ seo.description }}">
     <meta name="robots" content="{{ seo.robots }}">
     <link rel="canonical" href="https://validai.app.br{{ request.path }}">
+    <meta http-equiv="content-language" content="pt-BR">
+    <link rel="alternate" hreflang="pt-br" href="https://validai.app.br{{ request.path }}">
+    <link rel="alternate" hreflang="x-default" href="https://validai.app.br{{ request.path }}">
 
     <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
     <meta property="og:title" content="{{ seo.title }}">
@@ -56,6 +59,28 @@
         })();
     </script>
     <script src="/static/js/i18n.js?v=10" defer></script>
+
+    <!-- Schema.org JSON-LD: BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://validai.app.br/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Termos de Uso",
+          "item": "https://validai.app.br/termos"
+        }
+      ]
+    }
+    </script>
 </head>
 <body>
     {% include 'partials/header.html' %}

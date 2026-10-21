@@ -7,6 +7,9 @@
     <meta name="description" content="{{ seo.description }}">
     <meta name="robots" content="{{ seo.robots }}">
     <link rel="canonical" href="https://validai.app.br{{ request.path }}">
+    <meta http-equiv="content-language" content="pt-BR">
+    <link rel="alternate" hreflang="pt-br" href="https://validai.app.br{{ request.path }}">
+    <link rel="alternate" hreflang="x-default" href="https://validai.app.br{{ request.path }}">
 
     <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
     <meta property="og:title" content="{{ seo.title }}">
@@ -58,6 +61,28 @@
         "Auditoria de Vendas Não Repassadas e Pendências de Crédito",
         "Conciliador de Notas Fiscais (XML NFe/NFSe vs Planilha Financeira Excel)",
         "Higienizador de Cadastros (CPF, CNPJ, E-mail e Duplicados)"
+      ]
+    }
+    </script>
+
+    <!-- Schema.org JSON-LD: BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://validai.app.br/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Conciliador de Taxas e Extratos (.OFX)",
+          "item": "https://validai.app.br/conciliador-taxas"
+        }
       ]
     }
     </script>
@@ -139,7 +164,7 @@
                             </svg>
                             <span data-i18n="doc_browse_file">Procurar arquivo</span>
                         </div>
-                        <div class="file-meta" id="file-meta-ofx" style="display: none;">
+                        <div class="file-meta" id="file-meta-ofx" style="display: none;" data-nosnippet>
                             <span class="filename" id="filename-ofx">extrato.ofx</span>
                             <span class="filesize" id="filesize-ofx">0 KB</span>
                         </div>
@@ -165,7 +190,7 @@
                             </svg>
                             <span data-i18n="doc_browse_file">Procurar arquivo</span>
                         </div>
-                        <div class="file-meta" id="file-meta-sales" style="display: none;">
+                        <div class="file-meta" id="file-meta-sales" style="display: none;" data-nosnippet>
                             <span class="filename" id="filename-sales">vendas.xlsx</span>
                             <span class="filesize" id="filesize-sales">0 KB</span>
                         </div>
@@ -209,7 +234,7 @@
         <!-- ======================================================== -->
         <!-- PASSO 2: MAPEAR COLUNAS E CONFIGURAR TAXA ESPERADA (%)   -->
         <!-- ======================================================== -->
-        <section class="card step-card" id="step-config-ofx" style="display: none;">
+        <section class="card step-card" id="step-config-ofx" style="display: none;" data-nosnippet>
             <div class="card-header">
                 <div class="step-indicator" data-i18n="ofx_step2_badge">Passo 2</div>
                 <div>
@@ -447,7 +472,7 @@
         <!-- ======================================================== -->
         <!-- PASSO 3: DASHBOARD DE RESULTADOS E AUDITORIA DE TAXAS     -->
         <!-- ======================================================== -->
-        <section class="card step-card" id="step-results-ofx" style="display: none;">
+        <section class="card step-card" id="step-results-ofx" style="display: none;" data-nosnippet>
             <div class="card-header">
                 <div class="step-indicator" data-i18n="ofx_step3_badge">Passo 3</div>
                 <div>

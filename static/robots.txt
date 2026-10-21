@@ -1,7 +1,14 @@
 User-agent: *
 Allow: /
+Allow: /ads.txt
 Disallow: /api/
 Disallow: /health
+Disallow: /checkout/
+Disallow: /webhook/
+Disallow: /auth/
+Disallow: /login
+Disallow: /cadastro
+Disallow: /logout
 
 Sitemap: https://validai.app.br/sitemap.xml
 
