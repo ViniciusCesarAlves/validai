@@ -279,32 +279,6 @@
                             <span class="filename" id="filename-a">arquivo.xlsx</span>
                             <span class="filesize" id="filesize-a">0 KB</span>
                         </div>
-                        <!-- Configurações Visuais de Leitura da Base A -->
-                        <div class="file-config-panel" id="file-config-a" style="display: none;" onclick="event.stopPropagation();">
-                            <div class="file-config-row">
-                                <label for="header-line-a" class="file-config-label">
-                                    <span>Linha do cabeçalho:</span>
-                                    <input type="number" id="header-line-a" class="file-config-input" min="1" max="50" value="1" title="Linha onde estão os títulos das colunas (padrão 1)">
-                                </label>
-                            </div>
-                            <div class="file-sheets-panel" id="sheets-panel-a" style="display: none;">
-                                <div class="file-sheets-header">
-                                    <span class="file-sheets-title">Abas para comparar:</span>
-                                    <span class="file-sheets-hint" id="sheets-hint-a">1 aba selecionada</span>
-                                </div>
-                                <div class="file-sheets-chips" id="sheets-chips-a">
-                                    <!-- Chips de abas visíveis gerados dinamicamente via JS -->
-                                </div>
-                                <div class="file-hidden-sheets-area" id="hidden-area-a" style="display: none;">
-                                    <button type="button" class="btn-toggle-hidden" id="btn-toggle-hidden-a">
-                                        👁️ Mostrar abas ocultas (<span id="hidden-count-a">0</span>)
-                                    </button>
-                                    <div class="file-hidden-chips" id="hidden-chips-a" style="display: none;">
-                                        <!-- Chips de abas ocultas gerados dinamicamente via JS -->
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -331,32 +305,6 @@
                         <div class="file-meta" id="file-meta-b" style="display: none;" data-nosnippet>
                             <span class="filename" id="filename-b">arquivo.xlsx</span>
                             <span class="filesize" id="filesize-b">0 KB</span>
-                        </div>
-                        <!-- Configurações Visuais de Leitura da Base B -->
-                        <div class="file-config-panel" id="file-config-b" style="display: none;" onclick="event.stopPropagation();">
-                            <div class="file-config-row">
-                                <label for="header-line-b" class="file-config-label">
-                                    <span>Linha do cabeçalho:</span>
-                                    <input type="number" id="header-line-b" class="file-config-input" min="1" max="50" value="1" title="Linha onde estão os títulos das colunas (padrão 1)">
-                                </label>
-                            </div>
-                            <div class="file-sheets-panel" id="sheets-panel-b" style="display: none;">
-                                <div class="file-sheets-header">
-                                    <span class="file-sheets-title">Abas para comparar:</span>
-                                    <span class="file-sheets-hint" id="sheets-hint-b">1 aba selecionada</span>
-                                </div>
-                                <div class="file-sheets-chips" id="sheets-chips-b">
-                                    <!-- Chips de abas visíveis gerados dinamicamente via JS -->
-                                </div>
-                                <div class="file-hidden-sheets-area" id="hidden-area-b" style="display: none;">
-                                    <button type="button" class="btn-toggle-hidden" id="btn-toggle-hidden-b">
-                                        👁️ Mostrar abas ocultas (<span id="hidden-count-b">0</span>)
-                                    </button>
-                                    <div class="file-hidden-chips" id="hidden-chips-b" style="display: none;">
-                                        <!-- Chips de abas ocultas gerados dinamicamente via JS -->
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -385,6 +333,93 @@
                 <div>
                     <h2 data-i18n="sheets_step2_title">Definir Identificadores e Regras de Validação</h2>
                     <p class="subtext" data-i18n="sheets_step2_desc">Escolha a coluna única que conecta os registros entre as duas planilhas.</p>
+                </div>
+            </div>
+
+            <!-- Seletor de Abas e Linha do Cabeçalho no Passo 2 (Exibido quando arquivo possuir múltiplas abas) -->
+            <div id="step2-sheets-config" class="step2-sheets-config-box" style="display: none;" data-nosnippet>
+                <div class="step2-sheets-header">
+                    <div class="step2-sheets-header-left">
+                        <span class="step2-sheets-badge" data-i18n="sheets_step2_tabs_badge">Múltiplas Abas Detectadas</span>
+                        <h3 class="step2-sheets-title" data-i18n="sheets_step2_tabs_title">Selecione a Aba e a Linha do Cabeçalho para Comparar</h3>
+                        <p class="step2-sheets-subtext" data-i18n="sheets_step2_tabs_subtext">Este arquivo contém várias abas. Escolha qual aba e em qual linha está o cabeçalho em cada base:</p>
+                    </div>
+                    <div class="step2-sheets-header-right">
+                        <span id="step2-sheet-loading" class="step2-sheet-loading" style="display: none;">
+                            <span class="step2-loading-spinner"></span>
+                            <span data-i18n="sheets_step2_updating">Atualizando colunas...</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="step2-sheets-grid">
+                    <!-- Base Antiga -->
+                    <div class="step2-sheet-card">
+                        <div class="step2-card-top">
+                            <span class="step2-base-tag tag-antiga">Base Antiga</span>
+                            <span id="step2-filename-a" class="step2-filename-text" title="Nome do arquivo da Base Antiga">arquivo.xlsx</span>
+                        </div>
+                        <div class="step2-card-body">
+                            <div class="step2-control-group">
+                                <label for="step2-sheet-select-a" class="step2-control-label" data-i18n="sheets_step2_tab_label">Aba a validar:</label>
+                                <select id="step2-sheet-select-a" class="form-select step2-select" aria-label="Selecionar aba da Base Antiga">
+                                    <!-- Abas preenchidas dinamicamente -->
+                                </select>
+                                <button type="button" class="btn-toggle-step2-hidden" id="btn-toggle-hidden-step2-a" style="display: none;" aria-pressed="false" title="Mostrar abas ocultas">
+                                    <svg class="step2-eye-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                    <span class="step2-hidden-text" id="step2-hidden-text-a">Mostrar abas ocultas</span>
+                                    <span class="step2-hidden-count-wrap">( <span id="step2-hidden-count-a">0</span> )</span>
+                                    <span class="step2-toggle-switch" aria-hidden="true">
+                                        <span class="step2-toggle-slider"></span>
+                                    </span>
+                                </button>
+                            </div>
+                            <div class="step2-control-group">
+                                <label for="step2-header-line-a" class="step2-control-label" data-i18n="sheets_step2_header_line_label">Linha do cabeçalho:</label>
+                                <div class="step2-input-number-wrap">
+                                    <input type="number" id="step2-header-line-a" class="step2-header-input" min="1" max="50" value="1" title="Linha onde estão os títulos das colunas (padrão 1)">
+                                    <span class="step2-input-hint">Linha 1 a 50</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Base Nova -->
+                    <div class="step2-sheet-card">
+                        <div class="step2-card-top">
+                            <span class="step2-base-tag tag-nova">Base Nova</span>
+                            <span id="step2-filename-b" class="step2-filename-text" title="Nome do arquivo da Base Nova">arquivo.xlsx</span>
+                        </div>
+                        <div class="step2-card-body">
+                            <div class="step2-control-group">
+                                <label for="step2-sheet-select-b" class="step2-control-label" data-i18n="sheets_step2_tab_label">Aba a validar:</label>
+                                <select id="step2-sheet-select-b" class="form-select step2-select" aria-label="Selecionar aba da Base Nova">
+                                    <!-- Abas preenchidas dinamicamente -->
+                                </select>
+                                <button type="button" class="btn-toggle-step2-hidden" id="btn-toggle-hidden-step2-b" style="display: none;" aria-pressed="false" title="Mostrar abas ocultas">
+                                    <svg class="step2-eye-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                    <span class="step2-hidden-text" id="step2-hidden-text-b">Mostrar abas ocultas</span>
+                                    <span class="step2-hidden-count-wrap">( <span id="step2-hidden-count-b">0</span> )</span>
+                                    <span class="step2-toggle-switch" aria-hidden="true">
+                                        <span class="step2-toggle-slider"></span>
+                                    </span>
+                                </button>
+                            </div>
+                            <div class="step2-control-group">
+                                <label for="step2-header-line-b" class="step2-control-label" data-i18n="sheets_step2_header_line_label">Linha do cabeçalho:</label>
+                                <div class="step2-input-number-wrap">
+                                    <input type="number" id="step2-header-line-b" class="step2-header-input" min="1" max="50" value="1" title="Linha onde estão os títulos das colunas (padrão 1)">
+                                    <span class="step2-input-hint">Linha 1 a 50</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

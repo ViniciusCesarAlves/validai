@@ -62,6 +62,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const unmappedHint = document.getElementById('unmapped-hint');
     const btnRunCompare = document.getElementById('btn-run-compare');
 
+    // Elementos DOM - Seletor de Aba e Cabeçalho no Passo 2 (Múltiplas Abas)
+    const step2SheetsConfig = document.getElementById('step2-sheets-config');
+    const step2FilenameA = document.getElementById('step2-filename-a');
+    const step2FilenameB = document.getElementById('step2-filename-b');
+    const step2SheetSelectA = document.getElementById('step2-sheet-select-a');
+    const step2SheetSelectB = document.getElementById('step2-sheet-select-b');
+    const step2HeaderLineA = document.getElementById('step2-header-line-a');
+    const step2HeaderLineB = document.getElementById('step2-header-line-b');
+    const step2SheetLoading = document.getElementById('step2-sheet-loading');
+
     // Elementos DOM - Modal de Limpeza / Seleção de Mapeamento
     const modalClearMapping = document.getElementById('modal-clear-mapping');
     const btnModalClose = document.getElementById('btn-modal-close');
@@ -178,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (configPanel) {
             configPanel.style.display = 'block';
         }
-        if (headerLineInput && !headerLineInput.value) {
+        if (headerLineInput) {
             headerLineInput.value = 1;
         }
 
@@ -408,9 +418,6 @@ document.addEventListener('DOMContentLoaded', () => {
         metaBox.style.display = 'inline-flex';
         dropzone.classList.add('file-loaded');
 
-        const suffix = fileKey === 'fileA' ? 'a' : 'b';
-        inspectAndRenderSheets(file, suffix);
-
         // Se ambos os arquivos foram selecionados, habilita o botão
         if (state.fileA && state.fileB) {
             btnReadHeaders.disabled = false;
@@ -500,12 +507,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (data.suggested_keys && data.suggested_keys.length > 0) {
-                    selectPrimaryKey.value = data.suggested_keys[0];
+                    const foundKey = data.suggested_keys.find(k => state.columnsA.includes(k));
+                    if (foundKey) {
+                        selectPrimaryKey.value = foundKey;
+                    }
+                }
+
+                if (!selectPrimaryKey.value && state.columnsA.length > 0) {
+                    const idKeywords = ['CHASSI', 'VIN', 'NOTAFISCAL', 'NUMNF', 'NF', 'NUMERONOTA', 'ID', 'CPF', 'CNPJ', 'MATRICULA', 'CODIGO', 'COD', 'PEDIDO', 'TICKET', 'SERIAL', 'PROTOCOLO'];
+                    const lowKeywords = ['MARCA', 'STATUS', 'SITUACAO', 'UF', 'TIPO', 'CATEGORIA', 'ESTADO', 'CIDADE', 'ATIVO', 'SEXO'];
+                    const candidate = state.columnsA.find(col => {
+                        const clean = col.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                        return idKeywords.some(k => clean.includes(k)) && !lowKeywords.some(k => clean.includes(k));
+                    });
+                    if (candidate) {
+                        selectPrimaryKey.value = candidate;
+                    }
                 }
 
                 renderSecondaryKeysOptions();
                 updateSecondaryKeysUI();
                 renderMappingTable();
+                setupStep2Sheets(data);
 
                 stepConfig.style.display = 'block';
                 stepConfig.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -528,20 +551,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setBtnLoading(btnReadHeaders, true, 'Lendo cabeçalhos e analisando...');
 
-        const headerLineA = parseInt(document.getElementById('header-line-a')?.value || '1', 10) || 1;
-        const headerLineB = parseInt(document.getElementById('header-line-b')?.value || '1', 10) || 1;
-
         const formData = new FormData();
         formData.append('file_a', state.fileA);
         formData.append('file_b', state.fileB);
-        formData.append('header_line_a', headerLineA);
-        formData.append('header_line_b', headerLineB);
-        if (state.selectedSheetsA && state.selectedSheetsA.length > 0) {
-            formData.append('sheets_a', JSON.stringify(state.selectedSheetsA));
-        }
-        if (state.selectedSheetsB && state.selectedSheetsB.length > 0) {
-            formData.append('sheets_b', JSON.stringify(state.selectedSheetsB));
-        }
+        formData.append('header_line_a', 1);
+        formData.append('header_line_b', 1);
 
         try {
             const response = await fetch('/api/upload-headers', {
@@ -589,7 +603,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Selecionar sugestão inteligente automaticamente se houver
             if (data.suggested_keys && data.suggested_keys.length > 0) {
-                selectPrimaryKey.value = data.suggested_keys[0];
+                const foundKey = data.suggested_keys.find(k => state.columnsA.includes(k));
+                if (foundKey) {
+                    selectPrimaryKey.value = foundKey;
+                }
+            }
+
+            // Fallback de segurança no frontend: prioriza identificadores e nunca seleciona MARCA/categórica
+            if (!selectPrimaryKey.value && state.columnsA.length > 0) {
+                const idKeywords = ['CHASSI', 'VIN', 'NOTAFISCAL', 'NUMNF', 'NF', 'NUMERONOTA', 'ID', 'CPF', 'CNPJ', 'MATRICULA', 'CODIGO', 'COD', 'PEDIDO', 'TICKET', 'SERIAL', 'PROTOCOLO'];
+                const lowKeywords = ['MARCA', 'STATUS', 'SITUACAO', 'UF', 'TIPO', 'CATEGORIA', 'ESTADO', 'CIDADE', 'ATIVO', 'SEXO'];
+                const candidate = state.columnsA.find(col => {
+                    const clean = col.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                    return idKeywords.some(k => clean.includes(k)) && !lowKeywords.some(k => clean.includes(k));
+                });
+                if (candidate) {
+                    selectPrimaryKey.value = candidate;
+                }
             }
 
             // Inicializar o seletor múltiplo da coluna da direita
@@ -598,6 +628,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Renderizar tabela de mapeamento de colunas
             renderMappingTable();
+            setupStep2Sheets(data);
 
             // Exibir Passo 2 com transição suave
             stepConfig.style.display = 'block';
@@ -1413,6 +1444,293 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ----------------------------------------------------
+    // SELETOR DE ABA E CABEÇALHO NO PASSO 2 (MÚLTIPLAS ABAS)
+    // ----------------------------------------------------
+    let step2ShowHiddenA = false;
+    let step2ShowHiddenB = false;
+    let step2SheetsDataA = [];
+    let step2SheetsDataB = [];
+    let step2DefaultSheetA = null;
+    let step2DefaultSheetB = null;
+
+    function renderStep2SheetOptions(suffix) {
+        const isA = (suffix === 'a');
+        const selectEl = isA ? step2SheetSelectA : step2SheetSelectB;
+        const btnToggle = isA ? document.getElementById('btn-toggle-hidden-step2-a') : document.getElementById('btn-toggle-hidden-step2-b');
+        const countSpan = isA ? document.getElementById('step2-hidden-count-a') : document.getElementById('step2-hidden-count-b');
+        const sheets = isA ? step2SheetsDataA : step2SheetsDataB;
+        const showHidden = isA ? step2ShowHiddenA : step2ShowHiddenB;
+        const defaultName = isA ? step2DefaultSheetA : step2DefaultSheetB;
+
+        if (!selectEl) return;
+
+        if (!sheets || sheets.length === 0) {
+            selectEl.innerHTML = '<option value="">Arquivo único / CSV</option>';
+            selectEl.disabled = true;
+            if (btnToggle) btnToggle.style.display = 'none';
+            return;
+        }
+
+        const visibleSheets = sheets.filter(s => s.visible !== false);
+        const hiddenSheets = sheets.filter(s => s.visible === false);
+
+        // Configuração do botão de alternância de abas ocultas
+        if (btnToggle) {
+            if (hiddenSheets.length > 0) {
+                btnToggle.style.display = 'inline-flex';
+                if (countSpan) countSpan.textContent = hiddenSheets.length;
+                btnToggle.classList.toggle('is-active', !!showHidden);
+                btnToggle.setAttribute('aria-pressed', showHidden ? 'true' : 'false');
+                btnToggle.setAttribute('title', showHidden ? 'Ocultar abas ocultas' : 'Mostrar abas ocultas');
+            } else {
+                btnToggle.style.display = 'none';
+                btnToggle.classList.remove('is-active');
+            }
+        }
+
+        const currentVal = selectEl.value;
+        selectEl.innerHTML = '';
+
+        // Por padrão (showHidden = false), lista apenas abas visíveis!
+        const sheetsToRender = showHidden
+            ? [...visibleSheets, ...hiddenSheets]
+            : (visibleSheets.length > 0 ? visibleSheets : sheets);
+
+        // Determina qual aba deve ficar selecionada:
+        let target = '';
+        if (currentVal && sheetsToRender.some(s => s.name === currentVal)) {
+            target = currentVal;
+        } else if (defaultName && sheetsToRender.some(s => s.name === defaultName && s.visible !== false)) {
+            target = defaultName;
+        } else {
+            const firstVis = sheetsToRender.find(s => s.visible !== false);
+            target = firstVis ? firstVis.name : (sheetsToRender[0] ? sheetsToRender[0].name : '');
+        }
+
+        if (showHidden && hiddenSheets.length > 0 && visibleSheets.length > 0) {
+            const grpVis = document.createElement('optgroup');
+            grpVis.label = 'Abas Visíveis';
+            visibleSheets.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.name;
+                opt.textContent = s.name;
+                if (s.name === target) opt.selected = true;
+                grpVis.appendChild(opt);
+            });
+            selectEl.appendChild(grpVis);
+
+            const grpHid = document.createElement('optgroup');
+            grpHid.label = 'Abas Ocultas no Excel';
+            hiddenSheets.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.name;
+                opt.textContent = s.name + ' (Oculta)';
+                if (s.name === target) opt.selected = true;
+                grpHid.appendChild(opt);
+            });
+            selectEl.appendChild(grpHid);
+        } else {
+            sheetsToRender.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.name;
+                opt.textContent = s.name + (s.visible === false ? ' (Oculta)' : '');
+                if (s.name === target) opt.selected = true;
+                selectEl.appendChild(opt);
+            });
+        }
+
+        selectEl.disabled = false;
+        selectEl.value = target;
+    }
+
+    function setupStep2Sheets(data) {
+        if (!step2SheetsConfig) return;
+
+        if (!data || !data.has_multiple_sheets) {
+            step2SheetsConfig.style.display = 'none';
+            return;
+        }
+
+        step2SheetsConfig.style.display = 'block';
+
+        if (step2FilenameA) {
+            step2FilenameA.textContent = data.filename_a || 'Base Antiga';
+        }
+        if (step2FilenameB) {
+            step2FilenameB.textContent = data.filename_b || 'Base Nova';
+        }
+
+        // Reseta estado para ocultar abas ocultas por padrão
+        step2ShowHiddenA = false;
+        step2ShowHiddenB = false;
+        step2SheetsDataA = data.sheets_info_a || [];
+        step2SheetsDataB = data.sheets_info_b || [];
+        step2DefaultSheetA = data.default_sheet_a;
+        step2DefaultSheetB = data.default_sheet_b;
+
+        renderStep2SheetOptions('a');
+        renderStep2SheetOptions('b');
+
+        if (step2HeaderLineA) {
+            step2HeaderLineA.value = data.header_line_a || 1;
+        }
+        if (step2HeaderLineB) {
+            step2HeaderLineB.value = data.header_line_b || 1;
+        }
+    }
+
+    let isReloadingStep2 = false;
+
+    async function reloadHeadersStep2() {
+        if (!state.sessionId || isReloadingStep2) return;
+
+        const sheetA = step2SheetSelectA ? step2SheetSelectA.value : null;
+        const sheetB = step2SheetSelectB ? step2SheetSelectB.value : null;
+        const headerLineA = step2HeaderLineA ? (parseInt(step2HeaderLineA.value, 10) || 1) : 1;
+        const headerLineB = step2HeaderLineB ? (parseInt(step2HeaderLineB.value, 10) || 1) : 1;
+
+        isReloadingStep2 = true;
+        if (step2SheetLoading) step2SheetLoading.style.display = 'inline-flex';
+        if (step2SheetSelectA) step2SheetSelectA.disabled = true;
+        if (step2SheetSelectB) step2SheetSelectB.disabled = true;
+        if (step2HeaderLineA) step2HeaderLineA.disabled = true;
+        if (step2HeaderLineB) step2HeaderLineB.disabled = true;
+
+        try {
+            const resp = await fetch('/api/change-sheet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    session_id: state.sessionId,
+                    sheet_a: sheetA,
+                    sheet_b: sheetB,
+                    header_line_a: headerLineA,
+                    header_line_b: headerLineB
+                })
+            });
+
+            const data = await resp.json();
+            if (!resp.ok) {
+                throw new Error(data.error || 'Erro ao alternar aba ou cabeçalho.');
+            }
+
+            // Atualiza colunas e mapeamento no estado
+            state.columnsA = data.cols_a || [];
+            state.columnsB = data.cols_b || [];
+            state.initialMapping = { ...(data.column_mapping || {}) };
+            state.mapping = data.column_mapping || {};
+            state.selectedSecondaryKeys = [];
+            state.isManualMapping = false;
+
+            // Atualiza aviso de colunas Unnamed
+            const alertUnnamed = document.getElementById('alert-unnamed-cols');
+            if (alertUnnamed) {
+                alertUnnamed.style.display = data.has_unnamed ? 'flex' : 'none';
+            }
+
+            // Recriar lista de mapeamento
+            state.mappingList = Object.entries(state.mapping).map(([colA, colB], idx) => ({
+                id: 'map_' + idx + '_' + Math.random().toString(36).substring(2, 7),
+                colA: colA,
+                colB: colB
+            }));
+
+            // Repopular Chave Primária
+            if (selectPrimaryKey) {
+                selectPrimaryKey.innerHTML = '<option value="">Selecione a chave primária...</option>';
+                state.columnsA.forEach(col => {
+                    const opt = document.createElement('option');
+                    opt.value = col;
+                    opt.textContent = col;
+                    selectPrimaryKey.appendChild(opt);
+                });
+
+                if (data.suggested_keys && data.suggested_keys.length > 0) {
+                    const foundKey = data.suggested_keys.find(k => state.columnsA.includes(k));
+                    if (foundKey) {
+                        selectPrimaryKey.value = foundKey;
+                    }
+                }
+
+                if (!selectPrimaryKey.value && state.columnsA.length > 0) {
+                    const idKeywords = ['CHASSI', 'VIN', 'NOTAFISCAL', 'NUMNF', 'NF', 'NUMERONOTA', 'ID', 'CPF', 'CNPJ', 'MATRICULA', 'CODIGO', 'COD', 'PEDIDO', 'TICKET', 'SERIAL', 'PROTOCOLO'];
+                    const lowKeywords = ['MARCA', 'STATUS', 'SITUACAO', 'UF', 'TIPO', 'CATEGORIA', 'ESTADO', 'CIDADE', 'ATIVO', 'SEXO'];
+                    const candidate = state.columnsA.find(col => {
+                        const clean = col.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                        return idKeywords.some(k => clean.includes(k)) && !lowKeywords.some(k => clean.includes(k));
+                    });
+                    if (candidate) {
+                        selectPrimaryKey.value = candidate;
+                    }
+                }
+            }
+
+            // Atualizar Colunas Complementares
+            renderSecondaryKeysOptions();
+            updateSecondaryKeysUI();
+
+            // Atualizar Tabela de Mapeamento
+            renderMappingTable();
+
+        } catch (err) {
+            console.error(err);
+            alert('Falha ao atualizar colunas da aba selecionada: ' + err.message);
+        } finally {
+            isReloadingStep2 = false;
+            if (step2SheetLoading) step2SheetLoading.style.display = 'none';
+            if (step2SheetSelectA && step2SheetSelectA.options.length > 1) {
+                step2SheetSelectA.disabled = false;
+            }
+            if (step2SheetSelectB && step2SheetSelectB.options.length > 1) {
+                step2SheetSelectB.disabled = false;
+            }
+            if (step2HeaderLineA) step2HeaderLineA.disabled = false;
+            if (step2HeaderLineB) step2HeaderLineB.disabled = false;
+        }
+    }
+
+    const btnToggleHiddenStep2A = document.getElementById('btn-toggle-hidden-step2-a');
+    const btnToggleHiddenStep2B = document.getElementById('btn-toggle-hidden-step2-b');
+
+    if (btnToggleHiddenStep2A) {
+        btnToggleHiddenStep2A.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            step2ShowHiddenA = !step2ShowHiddenA;
+            const prevVal = step2SheetSelectA ? step2SheetSelectA.value : '';
+            renderStep2SheetOptions('a');
+            if (step2SheetSelectA && step2SheetSelectA.value !== prevVal) {
+                reloadHeadersStep2();
+            }
+        });
+    }
+
+    if (btnToggleHiddenStep2B) {
+        btnToggleHiddenStep2B.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            step2ShowHiddenB = !step2ShowHiddenB;
+            const prevVal = step2SheetSelectB ? step2SheetSelectB.value : '';
+            renderStep2SheetOptions('b');
+            if (step2SheetSelectB && step2SheetSelectB.value !== prevVal) {
+                reloadHeadersStep2();
+            }
+        });
+    }
+
+    if (step2SheetSelectA) {
+        step2SheetSelectA.addEventListener('change', () => reloadHeadersStep2());
+    }
+    if (step2SheetSelectB) {
+        step2SheetSelectB.addEventListener('change', () => reloadHeadersStep2());
+    }
+    if (step2HeaderLineA) {
+        step2HeaderLineA.addEventListener('change', () => reloadHeadersStep2());
+    }
+    if (step2HeaderLineB) {
+        step2HeaderLineB.addEventListener('change', () => reloadHeadersStep2());
+    }
+
     // PASSO 2 -> PASSO 3: RODAR VALIDAÇÃO
     // ----------------------------------------------------
     btnRunCompare.addEventListener('click', async () => {
@@ -1452,10 +1770,10 @@ document.addEventListener('DOMContentLoaded', () => {
             ignore_case: normCase.checked,
             trim_spaces: normTrim.checked,
             column_mapping: state.mapping,
-            header_line_a: parseInt(document.getElementById('header-line-a')?.value || '1', 10) || 1,
-            header_line_b: parseInt(document.getElementById('header-line-b')?.value || '1', 10) || 1,
-            sheets_a: state.selectedSheetsA,
-            sheets_b: state.selectedSheetsB
+            header_line_a: (step2HeaderLineA && step2HeaderLineA.value) ? (parseInt(step2HeaderLineA.value, 10) || 1) : (parseInt(document.getElementById('header-line-a')?.value || '1', 10) || 1),
+            header_line_b: (step2HeaderLineB && step2HeaderLineB.value) ? (parseInt(step2HeaderLineB.value, 10) || 1) : (parseInt(document.getElementById('header-line-b')?.value || '1', 10) || 1),
+            sheets_a: (step2SheetSelectA && step2SheetSelectA.value) ? step2SheetSelectA.value : state.selectedSheetsA,
+            sheets_b: (step2SheetSelectB && step2SheetSelectB.value) ? step2SheetSelectB.value : state.selectedSheetsB
         };
 
         try {

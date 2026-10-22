@@ -1240,7 +1240,7 @@ body.dark-theme .dropzone:hover .doc-browse-pill {
 
 /* Painel de Configurações do Arquivo (Passo 1: Linha de Cabeçalho e Chips de Abas) */
 .file-config-panel {
-    margin-top: 12px;
+    margin: 12px auto 0 auto;
     width: 100%;
     max-width: 440px;
     background: #ffffff;
@@ -1358,6 +1358,11 @@ body.dark-theme .dropzone:hover .doc-browse-pill {
     border-color: #10b981;
     color: #065f46;
     font-weight: 600;
+}
+
+.sheet-chip.active:hover {
+    background: #d1fae5;
+    border-color: #059669;
 }
 
 .sheet-chip input[type="checkbox"] {
@@ -1505,6 +1510,13 @@ html.dark-theme .sheet-chip.active {
     color: #6ee7b7;
 }
 
+body.dark-theme .sheet-chip.active:hover,
+html[data-theme="dark"] .sheet-chip.active:hover,
+html.dark-theme .sheet-chip.active:hover {
+    background: #047857;
+    border-color: #34d399;
+}
+
 body.dark-theme .btn-toggle-hidden,
 html[data-theme="dark"] .btn-toggle-hidden,
 html.dark-theme .btn-toggle-hidden {
@@ -1529,6 +1541,444 @@ html.dark-theme .alert-unnamed-content strong {
     .file-config-panel {
         width: 100%;
         max-width: 100%;
+    }
+}
+
+/* Seletor de Aba e Cabeçalho no Passo 2 (Múltiplas Abas) */
+.step2-sheets-config-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    transition: all 0.2s ease;
+}
+
+.step2-sheets-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+    gap: 12px;
+}
+
+.step2-sheets-header-left {
+    flex: 1;
+}
+
+.step2-sheets-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: #e0f2fe;
+    color: #0369a1;
+    margin-bottom: 6px;
+}
+
+.step2-sheets-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+}
+
+.step2-sheets-subtext {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0;
+}
+
+.step2-sheets-header-right {
+    display: flex;
+    align-items: center;
+}
+
+.step2-sheet-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #0284c7;
+    background: #e0f2fe;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.step2-loading-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(2, 132, 199, 0.3);
+    border-top-color: #0284c7;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.step2-sheets-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.step2-sheet-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.step2-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.step2-base-tag {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.step2-base-tag.tag-antiga {
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+}
+
+.step2-base-tag.tag-nova {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #86efac;
+}
+
+.step2-filename-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200px;
+}
+
+.step2-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.step2-control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.step2-control-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.step2-select {
+    width: 100%;
+    height: 38px;
+    padding: 0 36px 0 12px !important;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background-color: #ffffff !important;
+    font-size: 13px;
+    font-weight: 500;
+    color: #1e293b;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 12px center !important;
+    background-size: 16px 16px !important;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+}
+
+.step2-select:focus {
+    border-color: #4FD580 !important;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(79, 213, 128, 0.2) !important;
+}
+
+.btn-toggle-step2-hidden {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    align-self: flex-start;
+    margin-top: 6px;
+    padding: 4px 8px 4px 9px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #065f46;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 7px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+.btn-toggle-step2-hidden:hover {
+    background: #d1fae5;
+    color: #047857;
+    border-color: #6ee7b7;
+}
+
+.btn-toggle-step2-hidden.is-active {
+    background: #dcfce7;
+    color: #14532d;
+    border-color: #4FD580;
+}
+
+.step2-eye-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    stroke: currentColor;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.step2-hidden-count-wrap {
+    font-size: 11px;
+    font-weight: 700;
+    opacity: 0.9;
+}
+
+.step2-toggle-switch {
+    display: inline-flex;
+    align-items: center;
+    width: 26px;
+    height: 15px;
+    border-radius: 999px;
+    background: #cbd5e1;
+    padding: 1.5px;
+    box-sizing: border-box;
+    margin-left: 2px;
+    flex-shrink: 0;
+    position: relative;
+    transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+}
+
+.step2-toggle-slider {
+    display: block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    transform: translateX(0);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-toggle-step2-hidden.is-active .step2-toggle-switch {
+    background: #4FD580 !important;
+    box-shadow: 0 0 6px rgba(79, 213, 128, 0.4);
+}
+
+.btn-toggle-step2-hidden.is-active .step2-toggle-slider {
+    transform: translateX(11px);
+    background: #ffffff;
+}
+
+.step2-input-number-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.step2-header-input {
+    width: 70px;
+    height: 36px;
+    padding: 0 8px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    text-align: center;
+}
+
+.step2-header-input:focus {
+    border-color: #4FD580;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(79, 213, 128, 0.2);
+}
+
+.step2-input-hint {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* Dark Theme para Step 2 Sheets Config */
+body.dark-theme .step2-sheets-config-box,
+html[data-theme="dark"] .step2-sheets-config-box,
+html.dark-theme .step2-sheets-config-box {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+body.dark-theme .step2-sheets-badge,
+html[data-theme="dark"] .step2-sheets-badge,
+html.dark-theme .step2-sheets-badge {
+    background: #075985;
+    color: #bae6fd;
+}
+
+body.dark-theme .step2-sheets-title,
+html[data-theme="dark"] .step2-sheets-title,
+html.dark-theme .step2-sheets-title {
+    color: #f1f5f9;
+}
+
+body.dark-theme .step2-sheets-subtext,
+html[data-theme="dark"] .step2-sheets-subtext,
+html.dark-theme .step2-sheets-subtext {
+    color: #94a3b8;
+}
+
+body.dark-theme .step2-sheet-loading,
+html[data-theme="dark"] .step2-sheet-loading,
+html.dark-theme .step2-sheet-loading {
+    background: #0c4a6e;
+    color: #7dd3fc;
+}
+
+body.dark-theme .step2-sheet-card,
+html[data-theme="dark"] .step2-sheet-card,
+html.dark-theme .step2-sheet-card {
+    background: #0f172a;
+    border-color: #334155;
+}
+
+body.dark-theme .step2-card-top,
+html[data-theme="dark"] .step2-card-top,
+html.dark-theme .step2-card-top {
+    border-bottom-color: #1e293b;
+}
+
+body.dark-theme .step2-base-tag.tag-antiga,
+html[data-theme="dark"] .step2-base-tag.tag-antiga,
+html.dark-theme .step2-base-tag.tag-antiga {
+    background: #334155;
+    color: #cbd5e1;
+    border-color: #475569;
+}
+
+body.dark-theme .step2-base-tag.tag-nova,
+html[data-theme="dark"] .step2-base-tag.tag-nova,
+html.dark-theme .step2-base-tag.tag-nova {
+    background: #064e3b;
+    color: #86efac;
+    border-color: #047857;
+}
+
+body.dark-theme .step2-filename-text,
+html[data-theme="dark"] .step2-filename-text,
+html.dark-theme .step2-filename-text {
+    color: #94a3b8;
+}
+
+body.dark-theme .step2-control-label,
+html[data-theme="dark"] .step2-control-label,
+html.dark-theme .step2-control-label {
+    color: #cbd5e1;
+}
+
+body.dark-theme .step2-select,
+html[data-theme="dark"] .step2-select,
+html.dark-theme .step2-select {
+    background-color: #17181f !important;
+    border-color: #2f3240 !important;
+    color: #f3f4f6 !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 12px center !important;
+    background-size: 16px 16px !important;
+}
+
+body.dark-theme .step2-select option,
+html[data-theme="dark"] .step2-select option,
+html.dark-theme .step2-select option,
+body.dark-theme .step2-select optgroup,
+html[data-theme="dark"] .step2-select optgroup,
+html.dark-theme .step2-select optgroup {
+    background-color: #17181f !important;
+    color: #f3f4f6 !important;
+}
+
+body.dark-theme .step2-header-input,
+html[data-theme="dark"] .step2-header-input,
+html.dark-theme .step2-header-input {
+    background-color: #17181f !important;
+    border-color: #2f3240 !important;
+    color: #f3f4f6 !important;
+}
+
+body.dark-theme .btn-toggle-step2-hidden,
+html[data-theme="dark"] .btn-toggle-step2-hidden,
+html.dark-theme .btn-toggle-step2-hidden {
+    background: rgba(79, 213, 128, 0.12) !important;
+    color: #86efac !important;
+    border-color: rgba(79, 213, 128, 0.3) !important;
+}
+
+body.dark-theme .btn-toggle-step2-hidden:hover,
+html[data-theme="dark"] .btn-toggle-step2-hidden:hover,
+html.dark-theme .btn-toggle-step2-hidden:hover {
+    background: rgba(79, 213, 128, 0.2) !important;
+    color: #bbf7d0 !important;
+    border-color: rgba(79, 213, 128, 0.5) !important;
+}
+
+body.dark-theme .btn-toggle-step2-hidden.is-active,
+html[data-theme="dark"] .btn-toggle-step2-hidden.is-active,
+html.dark-theme .btn-toggle-step2-hidden.is-active {
+    background: rgba(79, 213, 128, 0.25) !important;
+    color: #4FD580 !important;
+    border-color: #4FD580 !important;
+}
+
+body.dark-theme .step2-toggle-switch,
+html[data-theme="dark"] .step2-toggle-switch,
+html.dark-theme .step2-toggle-switch {
+    background: #334155;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .btn-toggle-step2-hidden.is-active .step2-toggle-switch,
+html[data-theme="dark"] .btn-toggle-step2-hidden.is-active .step2-toggle-switch,
+html.dark-theme .btn-toggle-step2-hidden.is-active .step2-toggle-switch {
+    background: #4FD580 !important;
+    border-color: #4FD580 !important;
+    box-shadow: 0 0 8px rgba(79, 213, 128, 0.45);
+}
+
+@media (max-width: 768px) {
+    .step2-sheets-header {
+        flex-direction: column;
+    }
+    .step2-sheets-grid {
+        grid-template-columns: 1fr;
     }
 }
 

@@ -78,15 +78,29 @@ def inspect_spreadsheet_file(file_path_or_buffer, filename: str) -> dict:
             if hasattr(file_path_or_buffer, 'seek'):
                 file_path_or_buffer.seek(0)
             if not default_sheet and sheets:
-                default_sheet = sheets[0]['name']
+                first_vis = next((s['name'] for s in sheets if s.get('visible') is not False), None)
+                default_sheet = first_vis or sheets[0]['name']
             return {
                 'is_excel': True,
                 'sheets': sheets,
                 'default_sheet': default_sheet
             }
         except Exception:
-            if hasattr(file_path_or_buffer, 'seek'):
-                file_path_or_buffer.seek(0)
+            try:
+                if hasattr(file_path_or_buffer, 'seek'):
+                    file_path_or_buffer.seek(0)
+                xl = pd.ExcelFile(file_path_or_buffer)
+                sheets = [{'name': name, 'visible': True} for name in xl.sheet_names]
+                if hasattr(file_path_or_buffer, 'seek'):
+                    file_path_or_buffer.seek(0)
+                return {
+                    'is_excel': True,
+                    'sheets': sheets,
+                    'default_sheet': sheets[0]['name'] if sheets else None
+                }
+            except Exception:
+                if hasattr(file_path_or_buffer, 'seek'):
+                    file_path_or_buffer.seek(0)
     elif ext == 'xls':
         try:
             if hasattr(file_path_or_buffer, 'seek'):
@@ -101,8 +115,21 @@ def inspect_spreadsheet_file(file_path_or_buffer, filename: str) -> dict:
                 'default_sheet': sheets[0]['name'] if sheets else None
             }
         except Exception:
-            if hasattr(file_path_or_buffer, 'seek'):
-                file_path_or_buffer.seek(0)
+            try:
+                if hasattr(file_path_or_buffer, 'seek'):
+                    file_path_or_buffer.seek(0)
+                xl = pd.ExcelFile(file_path_or_buffer)
+                sheets = [{'name': name, 'visible': True} for name in xl.sheet_names]
+                if hasattr(file_path_or_buffer, 'seek'):
+                    file_path_or_buffer.seek(0)
+                return {
+                    'is_excel': True,
+                    'sheets': sheets,
+                    'default_sheet': sheets[0]['name'] if sheets else None
+                }
+            except Exception:
+                if hasattr(file_path_or_buffer, 'seek'):
+                    file_path_or_buffer.seek(0)
 
     return {
         'is_excel': False,
@@ -269,18 +296,30 @@ def parse_cell_value(val, normalize_currency=True, normalize_dates=True, ignore_
     if s == '' or s.lower() in ('nan', 'none', 'null', '<na>'):
         return None
 
-    # Tenta conversão para Data se tiver formato de data
-    if normalize_dates:
+    # Tenta conversão para Data se tiver formato de data (nunca aplica em números negativos ou decimais)
+    if normalize_dates and not (s.startswith('-') or re.match(r'^-?\s*R?\$?\s*\d+[,.]\d+$', s)):
         # Padrões comuns: YYYY-MM-DD ou DD/MM/YYYY com ou sem horário (ex: "2026-08-28 00:00:00", "2026-08-28T00:00:00", "28/08/2026 00:00:00")
         m_iso = re.match(r'^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:[T\s](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?(?:\.\d+)?)?.*$', s)
         if m_iso:
             y, m, d = m_iso.groups()[:3]
-            return f"{int(y):04d}-{int(m):02d}-{int(d):02d}"
+            iy, im, id_ = int(y), int(m), int(d)
+            if 1 <= im <= 12 and 1 <= id_ <= 31 and 1900 <= iy <= 2100:
+                return f"{iy:04d}-{im:02d}-{id_:02d}"
         
         m_br = re.match(r'^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})(?:[T\s](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?(?:\.\d+)?)?.*$', s)
         if m_br:
             d, m, y = m_br.groups()[:3]
-            return f"{int(y):04d}-{int(m):02d}-{int(d):02d}"
+            iy, im, id_ = int(y), int(m), int(d)
+            if 1 <= im <= 12 and 1 <= id_ <= 31 and 1900 <= iy <= 2100:
+                return f"{iy:04d}-{im:02d}-{id_:02d}"
+
+        m_br_short = re.match(r'^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2})(?:[T\s].*)?$', s)
+        if m_br_short:
+            d, m, y = m_br_short.groups()
+            iy = 1900 + int(y) if int(y) >= 70 else 2000 + int(y)
+            im, id_ = int(m), int(d)
+            if 1 <= im <= 12 and 1 <= id_ <= 31 and 1900 <= iy <= 2100:
+                return f"{iy:04d}-{im:02d}-{id_:02d}"
 
     # Tenta conversão para Número / Moeda
     if normalize_currency:
@@ -389,6 +428,89 @@ def suggest_column_mappings(cols_a, cols_b):
             used_b.add(best_match)
 
     return mappings
+
+def suggest_primary_keys(df_a: pd.DataFrame, df_b: pd.DataFrame = None, mapping: dict = None, cols_a: list = None) -> list:
+    """
+    Analisa as colunas da Base A e sugere chaves identificadoras primárias ordenadas por pontuação:
+    1. Prioriza termos de identificador forte (CHASSI, VIN, NOTA_FISCAL, NUM_NF, ID, CPF, CNPJ, MATRICULA, CODIGO, PEDIDO, TICKET, SERIAL, etc.)
+    2. Prioriza taxa de unicidade / cardinalidade (nunique / total_linhas)
+    3. Dá bônus se a coluna está mapeada para a Base B
+    4. Penaliza severamente colunas categóricas e de repetição (MARCA, STATUS, SITUACAO, ESTADO, UF, TIPO, CATEGORIA, ATIVO, SEXO, CIDADE, etc.)
+    5. Penaliza colunas com taxa de unicidade < 10%
+    """
+    if cols_a is None:
+        cols_a = list(df_a.columns) if df_a is not None else []
+    if mapping is None:
+        mapping = {}
+
+    len_a = max(len(df_a), 1) if df_a is not None else 1
+    len_b = max(len(df_b), 1) if df_b is not None else len_a
+
+    keywords_high = [
+        'ID', 'CODIGO', 'COD', 'CHASSI', 'VIN', 'CPF', 'CNPJ', 
+        'MATRICULA', 'TICKET', 'NOTAFISCAL', 'NUMNF', 'NF', 
+        'NUMERONOTA', 'PEDIDO', 'NUMPEDIDO', 'REGISTRO', 'CHAVE', 
+        'SEQ', 'SEQUENCIAL', 'SERIAL', 'PROTOCOLO', 'ORDEM'
+    ]
+    low_cardinality_keywords = [
+        'MARCA', 'STATUS', 'SITUACAO', 'ESTADO', 'UF', 'TIPO', 
+        'CATEGORIA', 'ATIVO', 'SEXO', 'PAIS', 'CIDADE', 'SIM_NAO', 'FLAG',
+        'FABRICANTE', 'MONTADORA', 'COR', 'ANO'
+    ]
+
+    scored = []
+    for col_a in cols_a:
+        col_b = mapping.get(col_a)
+        clean_a = to_clean_key(col_a)
+        clean_b = to_clean_key(col_b) if col_b else ''
+
+        tokens_a = [t for t in re.split(r'[^A-Z0-9]+', col_a.upper()) if t]
+        tokens_b = [t for t in re.split(r'[^A-Z0-9]+', col_b.upper()) if t] if col_b else []
+
+        card_a = (df_a[col_a].nunique() / len_a) if (df_a is not None and col_a in df_a.columns) else 0.0
+        card_b = (df_b[col_b].nunique() / len_b) if (df_b is not None and col_b and col_b in df_b.columns) else card_a
+        avg_card = (card_a + card_b) / 2.0
+
+        # Pontuação base pela cardinalidade (0 a 100)
+        score = avg_card * 100.0
+
+        # Bônus se está mapeada na Base B
+        if col_b:
+            score += 35.0
+
+        # Identificação de termos fortes
+        has_id_keyword = False
+        for k in keywords_high:
+            if k in ['ID', 'NF', 'COD']:
+                if k in tokens_a or k in tokens_b or clean_a == k or clean_a.startswith(k + '_') or clean_a.endswith('_' + k):
+                    has_id_keyword = True
+                    break
+            else:
+                if k in clean_a or k in clean_b:
+                    has_id_keyword = True
+                    break
+
+        if has_id_keyword:
+            score += 150.0
+            if any(clean_a == k or clean_b == k for k in keywords_high):
+                score += 50.0
+
+        # Penalização severa para colunas de categorias/marcas/status
+        if any(k in clean_a or k in clean_b for k in low_cardinality_keywords):
+            score -= 100.0
+
+        # Penalização para colunas com repetição excessiva (< 10% de unicidade)
+        if avg_card < 0.10:
+            score -= 60.0
+
+        scored.append({
+            'col_a': col_a,
+            'col_b': col_b,
+            'score': score
+        })
+
+    scored.sort(key=lambda x: x['score'], reverse=True)
+    return [s['col_a'] for s in scored]
 
 def parse_financial_value(val):
     """Converte valor para float tratando moeda brasileira, formatos internacionais e nulos."""

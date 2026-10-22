@@ -1499,6 +1499,85 @@ def test_full_pipeline():
     assert suggested[-1] == 'MARCA', f"MARCA não foi penalizada! Sugestões: {suggested}"
     print("[OK] Algoritmo de auto-sugestão de Chave Primária priorizou CHASSI e penalizou MARCA com perfeição!")
 
+    # 10. Teste de Seleção de Aba e Linha de Cabeçalho no Passo 2 (/api/change-sheet)
+    # Cria uma pasta de trabalho com múltiplas abas:
+    # Aba 1: 'Resumo' (colunas: Titulo, Data_Criacao)
+    # Aba 2: 'Implementos' (linha 1 com texto de lixo, linha 2 com cabeçalho: COD_ITEM, NOME_ITEM, VALOR)
+    buf_multi = io.BytesIO()
+    with pd.ExcelWriter(buf_multi, engine='openpyxl') as writer:
+        df_resumo = pd.DataFrame({'Titulo': ['Relatório Geral'], 'Data_Criacao': ['2026-10-22']})
+        df_resumo.to_excel(writer, sheet_name='Resumo', index=False)
+        
+        df_implementos = pd.DataFrame([
+            ['--- TABELA DE IMPLEMENTOS AGRÍCOLAS ---', None, None],
+            ['COD_ITEM', 'NOME_ITEM', 'VALOR_UNITARIO'],
+            ['IMP001', 'Arado Reversível', 15400.00],
+            ['IMP002', 'Grade Aradora', 28900.50]
+        ])
+        df_implementos.to_excel(writer, sheet_name='Implementos', header=False, index=False)
+        
+        df_tratores = pd.DataFrame({
+            'CHASSI_TRATOR': ['TR01', 'TR02'],
+            'POTENCIA_CV': [120, 180]
+        })
+        df_tratores.to_excel(writer, sheet_name='Tratores', index=False)
+
+    buf_multi.seek(0)
+    raw_multi = buf_multi.getvalue()
+
+    res_upload_multi = client.post('/api/upload-headers', data={
+        'file_a': (io.BytesIO(raw_multi), 'equipamentos_a.xlsx'),
+        'file_b': (io.BytesIO(raw_multi), 'equipamentos_b.xlsx')
+    }, content_type='multipart/form-data')
+    assert res_upload_multi.status_code == 200
+    multi_data = res_upload_multi.get_json()
+    assert multi_data['has_multiple_sheets'] is True
+    assert len(multi_data['sheets_info_a']) == 3
+    assert multi_data['default_sheet_a'] == 'Resumo'
+    assert 'Titulo' in multi_data['cols_a']
+    session_multi_id = multi_data['session_id']
+    print("[OK] Upload de planilha com múltiplas abas detectou has_multiple_sheets=True e listou as 3 abas!")
+
+    # Agora simula o usuário no Passo 2 alternando para a Aba 2 'Implementos' com cabeçalho na linha 2:
+    res_change = client.post('/api/change-sheet', json={
+        'session_id': session_multi_id,
+        'sheet_a': 'Implementos',
+        'sheet_b': 'Implementos',
+        'header_line_a': 2,
+        'header_line_b': 2
+    })
+    assert res_change.status_code == 200, f"Falha POST /api/change-sheet: {res_change.status_code}"
+    change_data = res_change.get_json()
+    assert change_data['success'] is True
+    assert 'COD_ITEM' in change_data['cols_a']
+    assert 'NOME_ITEM' in change_data['cols_a']
+    assert 'VALOR_UNITARIO' in change_data['cols_a']
+    assert change_data['has_unnamed'] is False
+    assert change_data['suggested_keys'][0] == 'COD_ITEM'
+    print("[OK] Endpoint /api/change-sheet alternou para a 2ª aba ('Implementos') com cabeçalho na linha 2 com 100% de precisão!")
+
+    # Executa a comparação com a aba e cabeçalho selecionados
+    res_compare_multi = client.post('/api/compare', json={
+        'session_id': session_multi_id,
+        'primary_key_a': 'COD_ITEM',
+        'primary_key_b': 'COD_ITEM',
+        'secondary_keys_a': [],
+        'normalize_currency': True,
+        'normalize_dates': True,
+        'ignore_case': True,
+        'trim_spaces': True,
+        'column_mapping': change_data['column_mapping'],
+        'header_line_a': 2,
+        'header_line_b': 2,
+        'sheets_a': 'Implementos',
+        'sheets_b': 'Implementos'
+    })
+    assert res_compare_multi.status_code == 200
+    comp_multi_res = res_compare_multi.get_json()
+    assert comp_multi_res['summary']['is_identical'] is True
+    assert comp_multi_res['summary']['total_rows_a'] == 2
+    print("[OK] Comparação final com a aba e cabeçalho escolhidos no Passo 2 realizada com sucesso (100% idêntico)!")
+
     print("\nTODOS OS TESTES PASSARAM COM 100% DE SUCESSO!")
 
 if __name__ == '__main__':

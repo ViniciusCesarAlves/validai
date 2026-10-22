@@ -717,9 +717,23 @@ def upload_headers():
         file_a.save(path_a)
         file_b.save(path_b)
 
+        info_a = comparator.inspect_spreadsheet_file(path_a, filename_a)
+        info_b = comparator.inspect_spreadsheet_file(path_b, filename_b)
+        sheets_info_a = info_a.get('sheets', [])
+        sheets_info_b = info_b.get('sheets', [])
+
+        # Garante que a aba padrão seja a primeira aba VISÍVEL do arquivo
+        first_vis_a = next((s['name'] for s in sheets_info_a if s.get('visible') is not False), None)
+        default_sheet_a = (sheets_a if sheets_a else None) or first_vis_a or info_a.get('default_sheet') or (sheets_info_a[0]['name'] if sheets_info_a else None)
+
+        first_vis_b = next((s['name'] for s in sheets_info_b if s.get('visible') is not False), None)
+        default_sheet_b = (sheets_b if sheets_b else None) or first_vis_b or info_b.get('default_sheet') or (sheets_info_b[0]['name'] if sheets_info_b else None)
+
+        has_multiple_sheets = len(sheets_info_a) > 1 or len(sheets_info_b) > 1
+
         # Ler colunas dos arquivos com suporte a linha de cabeçalho e abas
-        df_a = comparator.read_tabular_file(path_a, filename_a, header_line=header_line_a, sheet_names=sheets_a)
-        df_b = comparator.read_tabular_file(path_b, filename_b, header_line=header_line_b, sheet_names=sheets_b)
+        df_a = comparator.read_tabular_file(path_a, filename_a, header_line=header_line_a, sheet_names=default_sheet_a)
+        df_b = comparator.read_tabular_file(path_b, filename_b, header_line=header_line_b, sheet_names=default_sheet_b)
 
         cols_a = list(df_a.columns)
         cols_b = list(df_b.columns)
@@ -729,53 +743,7 @@ def upload_headers():
         mapping = comparator.suggest_column_mappings(cols_a, cols_b)
 
         # Sugestões de chaves primárias inteligentes com prioridade semântica e análise de cardinalidade
-        keywords_high = [
-            'ID', 'CODIGO', 'COD', 'CHASSI', 'VIN', 'CPF', 'CNPJ', 
-            'MATRICULA', 'TICKET', 'NOTAFISCAL', 'NUMNF', 'NF', 
-            'NUMERONOTA', 'PEDIDO', 'NUMPEDIDO', 'REGISTRO', 'CHAVE', 
-            'SEQ', 'SEQUENCIAL', 'SERIAL', 'PROTOCOLO'
-        ]
-        low_cardinality_keywords = [
-            'MARCA', 'STATUS', 'SITUACAO', 'ESTADO', 'UF', 'TIPO', 
-            'CATEGORIA', 'ATIVO', 'SEXO', 'PAIS', 'CIDADE', 'SIM_NAO', 'FLAG'
-        ]
-
-        suggested_keys = []
-        len_a = max(len(df_a), 1)
-        len_b = max(len(df_b), 1)
-
-        for col_a, col_b in mapping.items():
-            clean_a = comparator.to_clean_key(col_a)
-            clean_b = comparator.to_clean_key(col_b) if col_b else ''
-
-            # Taxa de unicidade (cardinalidade) das colunas em A e B
-            card_a = (df_a[col_a].nunique() / len_a) if col_a in df_a.columns else 0.0
-            card_b = (df_b[col_b].nunique() / len_b) if (col_b and col_b in df_b.columns) else card_a
-            avg_card = (card_a + card_b) / 2.0
-
-            # Pontuação base pela cardinalidade (0 a 100)
-            score = avg_card * 100.0
-
-            # Bônus por termos identificadores fortes
-            if any(k in clean_a or k in clean_b for k in keywords_high):
-                score += 150.0
-                if any(clean_a == k or clean_b == k for k in keywords_high):
-                    score += 50.0
-
-            # Penalização severa para colunas de categorias/marcas/status com baixa cardinalidade
-            if any(k in clean_a or k in clean_b for k in low_cardinality_keywords):
-                score -= 80.0
-
-            if avg_card < 0.10:
-                score -= 50.0
-
-            suggested_keys.append({
-                'col_a': col_a,
-                'col_b': col_b,
-                'score': score
-            })
-
-        suggested_keys.sort(key=lambda x: x['score'], reverse=True)
+        suggested_keys = comparator.suggest_primary_keys(df_a, df_b, mapping, cols_a)
 
         SESSIONS[session_id] = {
             'path_a': path_a,
@@ -784,8 +752,10 @@ def upload_headers():
             'filename_b': filename_b,
             'header_line_a': header_line_a,
             'header_line_b': header_line_b,
-            'sheets_a': sheets_a,
-            'sheets_b': sheets_b,
+            'sheets_a': default_sheet_a,
+            'sheets_b': default_sheet_b,
+            'sheets_info_a': sheets_info_a,
+            'sheets_info_b': sheets_info_b,
             'cols_a': cols_a,
             'cols_b': cols_b,
             'mapping': mapping,
@@ -802,8 +772,15 @@ def upload_headers():
             'cols_a': cols_a,
             'cols_b': cols_b,
             'has_unnamed': has_unnamed,
-            'suggested_keys': [s['col_a'] for s in suggested_keys],
-            'column_mapping': mapping
+            'suggested_keys': suggested_keys,
+            'column_mapping': mapping,
+            'sheets_info_a': sheets_info_a,
+            'sheets_info_b': sheets_info_b,
+            'default_sheet_a': default_sheet_a,
+            'default_sheet_b': default_sheet_b,
+            'header_line_a': int(header_line_a) if str(header_line_a).isdigit() else 1,
+            'header_line_b': int(header_line_b) if str(header_line_b).isdigit() else 1,
+            'has_multiple_sheets': has_multiple_sheets
         })
 
     except HTTPException:
@@ -829,15 +806,7 @@ def sheets_load_example():
 
         mapping = comparator.suggest_column_mappings(cols_a, cols_b)
 
-        key_keywords = ['ID', 'SEQ', 'TICKET', 'MATRICULA', 'CODIGO', 'CHAVE', 'CPF', 'NUMERO', 'REGISTRO']
-        suggested_keys = []
-        for col_a, col_b in mapping.items():
-            col_norm = comparator.normalize_column_name(col_a)
-            if any(k in col_norm for k in key_keywords):
-                suggested_keys.append({'col_a': col_a, 'score': 10})
-
-        if not suggested_keys and 'ID_Pedido' in cols_a:
-            suggested_keys.append({'col_a': 'ID_Pedido', 'score': 10})
+        suggested_keys = comparator.suggest_primary_keys(df_a, df_b, mapping, cols_a)
 
         SESSIONS[session_id] = {
             'is_sample': True,
@@ -857,11 +826,74 @@ def sheets_load_example():
             'rows_b_count': len(df_b),
             'cols_a': cols_a,
             'cols_b': cols_b,
-            'suggested_keys': [s['col_a'] for s in suggested_keys],
-            'column_mapping': mapping
+            'suggested_keys': suggested_keys,
+            'column_mapping': mapping,
+            'sheets_info_a': [{'name': 'Vendas', 'visible': True}],
+            'sheets_info_b': [{'name': 'Vendas', 'visible': True}],
+            'default_sheet_a': 'Vendas',
+            'default_sheet_b': 'Vendas',
+            'header_line_a': 1,
+            'header_line_b': 1,
+            'has_multiple_sheets': False
         })
     except Exception as e:
         return jsonify({'error': f'Erro ao carregar exemplo de planilhas: {str(e)}'}), 500
+
+
+@app.route('/api/change-sheet', methods=['POST'])
+def change_sheet():
+    try:
+        data = request.get_json() or {}
+        session_id = data.get('session_id')
+        if not session_id or session_id not in SESSIONS:
+            return jsonify({'error': 'Sessão não encontrada ou expirada. Recarregue os arquivos.'}), 404
+
+        sess = SESSIONS[session_id]
+        if sess.get('is_sample'):
+            return jsonify({'error': 'A alteração de abas não se aplica a planilhas de exemplo fixas.'}), 400
+
+        sheet_a = data.get('sheet_a') or sess.get('sheets_a')
+        sheet_b = data.get('sheet_b') or sess.get('sheets_b')
+        header_line_a = data.get('header_line_a', sess.get('header_line_a', 1))
+        header_line_b = data.get('header_line_b', sess.get('header_line_b', 1))
+
+        df_a = comparator.read_tabular_file(sess['path_a'], sess['filename_a'], header_line=header_line_a, sheet_names=sheet_a)
+        df_b = comparator.read_tabular_file(sess['path_b'], sess['filename_b'], header_line=header_line_b, sheet_names=sheet_b)
+
+        cols_a = list(df_a.columns)
+        cols_b = list(df_b.columns)
+        has_unnamed = any(str(c).upper().startswith('UNNAMED:') for c in cols_a + cols_b)
+
+        mapping = comparator.suggest_column_mappings(cols_a, cols_b)
+        suggested_keys = comparator.suggest_primary_keys(df_a, df_b, mapping, cols_a)
+
+        # Atualiza a sessão
+        sess['header_line_a'] = header_line_a
+        sess['header_line_b'] = header_line_b
+        sess['sheets_a'] = sheet_a
+        sess['sheets_b'] = sheet_b
+        sess['cols_a'] = cols_a
+        sess['cols_b'] = cols_b
+        sess['mapping'] = mapping
+        sess['rows_a_count'] = len(df_a)
+        sess['rows_b_count'] = len(df_b)
+
+        return jsonify({
+            'success': True,
+            'rows_a_count': len(df_a),
+            'rows_b_count': len(df_b),
+            'cols_a': cols_a,
+            'cols_b': cols_b,
+            'has_unnamed': has_unnamed,
+            'suggested_keys': suggested_keys,
+            'column_mapping': mapping,
+            'active_sheet_a': sheet_a,
+            'active_sheet_b': sheet_b,
+            'header_line_a': int(header_line_a) if str(header_line_a).isdigit() else 1,
+            'header_line_b': int(header_line_b) if str(header_line_b).isdigit() else 1
+        })
+    except Exception as e:
+        return jsonify({'error': f'Falha ao alternar aba/cabeçalho: {str(e)}'}), 500
 
 
 @app.route('/favicon.ico')
