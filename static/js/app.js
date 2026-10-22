@@ -17,7 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
         onlyInAPreview: [],
         onlyInBPreview: [],
         colsDisplayA: [],
-        colsDisplayB: []
+        colsDisplayB: [],
+        selectedSheetsA: [],
+        selectedSheetsB: []
     };
 
     // Tema gerenciado centralmente por header.html
@@ -157,6 +159,206 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------
+
+    // ----------------------------------------------------
+    // INSPEÇÃO DE PLANILHAS E SELETOR DE ABAS (EXCEL)
+    // ----------------------------------------------------
+    async function inspectAndRenderSheets(file, suffix) {
+        const isSingle = (suffix === 'single');
+        const configPanel = document.getElementById(isSingle ? 'single-file-config' : ('file-config-' + suffix));
+        const sheetsPanel = document.getElementById(isSingle ? 'single-sheets-panel' : ('sheets-panel-' + suffix));
+        const sheetsHint = document.getElementById(isSingle ? 'single-sheets-hint' : ('sheets-hint-' + suffix));
+        const chipsContainer = document.getElementById(isSingle ? 'single-sheets-chips' : ('sheets-chips-' + suffix));
+        const hiddenArea = document.getElementById(isSingle ? 'single-hidden-area' : ('hidden-area-' + suffix));
+        const btnToggleHidden = document.getElementById(isSingle ? 'single-btn-toggle-hidden' : ('btn-toggle-hidden-' + suffix));
+        const hiddenCount = document.getElementById(isSingle ? 'single-hidden-count' : ('hidden-count-' + suffix));
+        const hiddenChips = document.getElementById(isSingle ? 'single-hidden-chips' : ('hidden-chips-' + suffix));
+        const headerLineInput = document.getElementById(isSingle ? 'single-header-line' : ('header-line-' + suffix));
+
+        if (configPanel) {
+            configPanel.style.display = 'block';
+        }
+        if (headerLineInput && !headerLineInput.value) {
+            headerLineInput.value = 1;
+        }
+
+        const ext = file.name.split('.').pop().toLowerCase();
+        const isExcel = ['xlsx', 'xls', 'xlsm'].includes(ext);
+
+        if (!isExcel) {
+            if (sheetsPanel) sheetsPanel.style.display = 'none';
+            if (suffix === 'a') state.selectedSheetsA = [];
+            else if (suffix === 'b') state.selectedSheetsB = [];
+            else if (isSingle) singleState.selectedSheets = [];
+            return;
+        }
+
+        if (sheetsPanel) sheetsPanel.style.display = 'block';
+        if (chipsContainer) {
+            chipsContainer.innerHTML = '<span style="font-size:11px; color:#64748b; padding:4px 0;">Carregando abas...</span>';
+        }
+        if (hiddenArea) hiddenArea.style.display = 'none';
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const res = await fetch('/api/excel-sheets', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            const sheets = data.sheets || [];
+            const defaultSheet = data.default_sheet || (sheets.find(s => s.visible !== false)?.name || (sheets[0] ? sheets[0].name : null));
+
+            let selectedList = defaultSheet ? [defaultSheet] : (sheets.length > 0 ? [sheets[0].name] : []);
+            if (suffix === 'a') state.selectedSheetsA = [...selectedList];
+            else if (suffix === 'b') state.selectedSheetsB = [...selectedList];
+            else if (isSingle) singleState.selectedSheets = [...selectedList];
+
+            renderSheetsChipsUI(sheets, selectedList, suffix, {
+                sheetsHint,
+                chipsContainer,
+                hiddenArea,
+                btnToggleHidden,
+                hiddenCount,
+                hiddenChips
+            });
+        } catch (err) {
+            console.error('Erro ao inspecionar abas:', err);
+            if (chipsContainer) {
+                chipsContainer.innerHTML = '<span style="font-size:11px; color:#ef4444;">Não foi possível listar as abas</span>';
+            }
+        }
+    }
+
+    function renderSheetsChipsUI(sheets, initialSelected, suffix, elements) {
+        const { sheetsHint, chipsContainer, hiddenArea, btnToggleHidden, hiddenCount, hiddenChips } = elements;
+
+        function getSelected() {
+            if (suffix === 'a') return state.selectedSheetsA || [];
+            if (suffix === 'b') return state.selectedSheetsB || [];
+            return singleState.selectedSheets || [];
+        }
+
+        function setSelected(list) {
+            if (suffix === 'a') state.selectedSheetsA = list;
+            else if (suffix === 'b') state.selectedSheetsB = list;
+            else singleState.selectedSheets = list;
+        }
+
+        function updateHint() {
+            if (!sheetsHint) return;
+            const cur = getSelected();
+            const count = cur.length;
+            if (count === 0) {
+                sheetsHint.textContent = 'Nenhuma aba selecionada';
+            } else if (count === 1) {
+                sheetsHint.textContent = cur[0];
+            } else {
+                sheetsHint.textContent = count + ' abas selecionadas';
+            }
+        }
+
+        function createChipElement(sheet, isHidden) {
+            const label = document.createElement('label');
+            label.className = 'sheet-chip' + (isHidden ? ' hidden-sheet' : '');
+
+            const isChecked = getSelected().includes(sheet.name);
+            if (isChecked) {
+                label.classList.add('active');
+            }
+
+            const chk = document.createElement('input');
+            chk.type = 'checkbox';
+            chk.value = sheet.name;
+            chk.checked = isChecked;
+
+            chk.addEventListener('change', (e) => {
+                e.stopPropagation();
+                let cur = [...getSelected()];
+                if (chk.checked) {
+                    if (!cur.includes(sheet.name)) {
+                        cur.push(sheet.name);
+                    }
+                    label.classList.add('active');
+                } else {
+                    if (cur.length <= 1) {
+                        chk.checked = true;
+                        return;
+                    }
+                    cur = cur.filter(s => s !== sheet.name);
+                    label.classList.remove('active');
+                }
+                setSelected(cur);
+                updateHint();
+            });
+
+            const textSpan = document.createElement('span');
+            textSpan.textContent = sheet.name;
+
+            label.appendChild(chk);
+            label.appendChild(textSpan);
+
+            if (isHidden) {
+                const badge = document.createElement('span');
+                badge.className = 'sheet-badge-oculta';
+                badge.textContent = 'Oculta';
+                label.appendChild(badge);
+            }
+
+            label.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+
+            return label;
+        }
+
+        if (chipsContainer) {
+            chipsContainer.innerHTML = '';
+        }
+        if (hiddenChips) {
+            hiddenChips.innerHTML = '';
+        }
+
+        const visibleSheets = sheets.filter(s => s.visible !== false);
+        const hiddenSheetsList = sheets.filter(s => s.visible === false);
+
+        const toRenderVisible = visibleSheets.length > 0 ? visibleSheets : sheets;
+        const toRenderHidden = visibleSheets.length > 0 ? hiddenSheetsList : [];
+
+        toRenderVisible.forEach(sheet => {
+            if (chipsContainer) {
+                chipsContainer.appendChild(createChipElement(sheet, false));
+            }
+        });
+
+        if (hiddenArea && btnToggleHidden && hiddenCount && hiddenChips) {
+            if (toRenderHidden.length > 0) {
+                hiddenArea.style.display = 'block';
+                hiddenCount.textContent = toRenderHidden.length;
+                hiddenChips.style.display = 'none';
+
+                toRenderHidden.forEach(sheet => {
+                    hiddenChips.appendChild(createChipElement(sheet, true));
+                });
+
+                btnToggleHidden.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const isShowing = (hiddenChips.style.display !== 'none');
+                    hiddenChips.style.display = isShowing ? 'none' : 'flex';
+                    btnToggleHidden.innerHTML = isShowing
+                        ? '👁️ Mostrar abas ocultas (' + toRenderHidden.length + ')'
+                        : '👁️ Ocultar abas ocultas (' + toRenderHidden.length + ')';
+                };
+            } else {
+                hiddenArea.style.display = 'none';
+            }
+        }
+
+        updateHint();
+    }
+
     // PASSO 1: UPLOAD & DRAG AND DROP
     // ----------------------------------------------------
     function setupDropzone(dropzone, input, metaBox, nameSpan, sizeSpan, fileKey) {
@@ -184,6 +386,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         dropzone.addEventListener('click', (e) => {
+            if (e.target.closest('.file-config-panel')) {
+                return;
+            }
             if (e.target !== input) {
                 input.click();
             }
@@ -202,6 +407,9 @@ document.addEventListener('DOMContentLoaded', () => {
         sizeSpan.textContent = formatBytes(file.size);
         metaBox.style.display = 'inline-flex';
         dropzone.classList.add('file-loaded');
+
+        const suffix = fileKey === 'fileA' ? 'a' : 'b';
+        inspectAndRenderSheets(file, suffix);
 
         // Se ambos os arquivos foram selecionados, habilita o botão
         if (state.fileA && state.fileB) {
@@ -243,6 +451,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 filesizeB.textContent = '14.5 KB';
                 fileMetaB.style.display = 'inline-flex';
                 dropzoneB.classList.add('file-loaded');
+
+                const configA = document.getElementById('file-config-a');
+                const configB = document.getElementById('file-config-b');
+                if (configA) configA.style.display = 'block';
+                if (configB) configB.style.display = 'block';
+                const lineA = document.getElementById('header-line-a');
+                const lineB = document.getElementById('header-line-b');
+                if (lineA) lineA.value = 1;
+                if (lineB) lineB.value = 1;
+                state.selectedSheetsA = ['Vendas_ERP'];
+                state.selectedSheetsB = ['Vendas_ERP'];
+                ['a', 'b'].forEach(sfx => {
+                    const pnl = document.getElementById('sheets-panel-' + sfx);
+                    const chp = document.getElementById('sheets-chips-' + sfx);
+                    const hnt = document.getElementById('sheets-hint-' + sfx);
+                    const hid = document.getElementById('hidden-area-' + sfx);
+                    if (pnl) pnl.style.display = 'block';
+                    if (hid) hid.style.display = 'none';
+                    if (hnt) hnt.textContent = 'Vendas_ERP';
+                    if (chp) {
+                        chp.innerHTML = '<label class="sheet-chip active" style="pointer-events:none;"><input type="checkbox" checked disabled><span>Vendas_ERP</span></label>';
+                    }
+                });
 
                 btnReadHeaders.disabled = false;
 
@@ -297,9 +528,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setBtnLoading(btnReadHeaders, true, 'Lendo cabeçalhos e analisando...');
 
+        const headerLineA = parseInt(document.getElementById('header-line-a')?.value || '1', 10) || 1;
+        const headerLineB = parseInt(document.getElementById('header-line-b')?.value || '1', 10) || 1;
+
         const formData = new FormData();
         formData.append('file_a', state.fileA);
         formData.append('file_b', state.fileB);
+        formData.append('header_line_a', headerLineA);
+        formData.append('header_line_b', headerLineB);
+        if (state.selectedSheetsA && state.selectedSheetsA.length > 0) {
+            formData.append('sheets_a', JSON.stringify(state.selectedSheetsA));
+        }
+        if (state.selectedSheetsB && state.selectedSheetsB.length > 0) {
+            formData.append('sheets_b', JSON.stringify(state.selectedSheetsB));
+        }
 
         try {
             const response = await fetch('/api/upload-headers', {
@@ -313,6 +555,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert(data.error || 'Erro ao processar planilhas.');
                 setBtnLoading(btnReadHeaders, false);
                 return;
+            }
+
+            const alertUnnamed = document.getElementById('alert-unnamed-cols');
+            if (alertUnnamed) {
+                alertUnnamed.style.display = data.has_unnamed ? 'flex' : 'none';
             }
 
             state.sessionId = data.session_id;
@@ -1204,7 +1451,11 @@ document.addEventListener('DOMContentLoaded', () => {
             normalize_dates: normDates.checked,
             ignore_case: normCase.checked,
             trim_spaces: normTrim.checked,
-            column_mapping: state.mapping
+            column_mapping: state.mapping,
+            header_line_a: parseInt(document.getElementById('header-line-a')?.value || '1', 10) || 1,
+            header_line_b: parseInt(document.getElementById('header-line-b')?.value || '1', 10) || 1,
+            sheets_a: state.selectedSheetsA,
+            sheets_b: state.selectedSheetsB
         };
 
         try {
@@ -1737,7 +1988,8 @@ document.addEventListener('DOMContentLoaded', () => {
         rules: [],
         reportId: null,
         summary: null,
-        previewRows: []
+        previewRows: [],
+        selectedSheets: []
     };
 
     // Upload & Drag-and-drop
@@ -1763,6 +2015,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         singleDropzone.addEventListener('click', (e) => {
+            if (e.target.closest('.file-config-panel')) {
+                return;
+            }
             if (e.target !== singleFileInput) {
                 singleFileInput.click();
             }
@@ -1789,6 +2044,8 @@ document.addEventListener('DOMContentLoaded', () => {
         singleFileMeta.style.display = 'inline-flex';
         singleDropzone.classList.add('file-loaded');
         btnSingleReadFile.disabled = false;
+
+        inspectAndRenderSheets(file, 'single');
     }
 
     // Leitura das colunas do arquivo
@@ -1802,8 +2059,13 @@ document.addEventListener('DOMContentLoaded', () => {
             btnText.textContent = 'Lendo colunas...';
             spinner.style.display = 'inline-block';
 
+            const singleHeaderLine = parseInt(document.getElementById('single-header-line')?.value || '1', 10) || 1;
             const formData = new FormData();
             formData.append('file', singleState.file);
+            formData.append('header_line', singleHeaderLine);
+            if (singleState.selectedSheets && singleState.selectedSheets.length > 0) {
+                formData.append('sheets', JSON.stringify(singleState.selectedSheets));
+            }
 
             try {
                 const res = await fetch('/api/single/upload-headers', {
@@ -2195,7 +2457,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         session_id: singleState.sessionId,
-                        rules: singleState.rules
+                        rules: singleState.rules,
+                        header_line: parseInt(document.getElementById('single-header-line')?.value || '1', 10) || 1,
+                        sheets: singleState.selectedSheets
                     })
                 });
                 const data = await res.json();

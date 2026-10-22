@@ -279,6 +279,32 @@
                             <span class="filename" id="filename-a">arquivo.xlsx</span>
                             <span class="filesize" id="filesize-a">0 KB</span>
                         </div>
+                        <!-- Configurações Visuais de Leitura da Base A -->
+                        <div class="file-config-panel" id="file-config-a" style="display: none;" onclick="event.stopPropagation();">
+                            <div class="file-config-row">
+                                <label for="header-line-a" class="file-config-label">
+                                    <span>Linha do cabeçalho:</span>
+                                    <input type="number" id="header-line-a" class="file-config-input" min="1" max="50" value="1" title="Linha onde estão os títulos das colunas (padrão 1)">
+                                </label>
+                            </div>
+                            <div class="file-sheets-panel" id="sheets-panel-a" style="display: none;">
+                                <div class="file-sheets-header">
+                                    <span class="file-sheets-title">Abas para comparar:</span>
+                                    <span class="file-sheets-hint" id="sheets-hint-a">1 aba selecionada</span>
+                                </div>
+                                <div class="file-sheets-chips" id="sheets-chips-a">
+                                    <!-- Chips de abas visíveis gerados dinamicamente via JS -->
+                                </div>
+                                <div class="file-hidden-sheets-area" id="hidden-area-a" style="display: none;">
+                                    <button type="button" class="btn-toggle-hidden" id="btn-toggle-hidden-a">
+                                        👁️ Mostrar abas ocultas (<span id="hidden-count-a">0</span>)
+                                    </button>
+                                    <div class="file-hidden-chips" id="hidden-chips-a" style="display: none;">
+                                        <!-- Chips de abas ocultas gerados dinamicamente via JS -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -305,6 +331,32 @@
                         <div class="file-meta" id="file-meta-b" style="display: none;" data-nosnippet>
                             <span class="filename" id="filename-b">arquivo.xlsx</span>
                             <span class="filesize" id="filesize-b">0 KB</span>
+                        </div>
+                        <!-- Configurações Visuais de Leitura da Base B -->
+                        <div class="file-config-panel" id="file-config-b" style="display: none;" onclick="event.stopPropagation();">
+                            <div class="file-config-row">
+                                <label for="header-line-b" class="file-config-label">
+                                    <span>Linha do cabeçalho:</span>
+                                    <input type="number" id="header-line-b" class="file-config-input" min="1" max="50" value="1" title="Linha onde estão os títulos das colunas (padrão 1)">
+                                </label>
+                            </div>
+                            <div class="file-sheets-panel" id="sheets-panel-b" style="display: none;">
+                                <div class="file-sheets-header">
+                                    <span class="file-sheets-title">Abas para comparar:</span>
+                                    <span class="file-sheets-hint" id="sheets-hint-b">1 aba selecionada</span>
+                                </div>
+                                <div class="file-sheets-chips" id="sheets-chips-b">
+                                    <!-- Chips de abas visíveis gerados dinamicamente via JS -->
+                                </div>
+                                <div class="file-hidden-sheets-area" id="hidden-area-b" style="display: none;">
+                                    <button type="button" class="btn-toggle-hidden" id="btn-toggle-hidden-b">
+                                        👁️ Mostrar abas ocultas (<span id="hidden-count-b">0</span>)
+                                    </button>
+                                    <div class="file-hidden-chips" id="hidden-chips-b" style="display: none;">
+                                        <!-- Chips de abas ocultas gerados dinamicamente via JS -->
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -333,6 +385,14 @@
                 <div>
                     <h2 data-i18n="sheets_step2_title">Definir Identificadores e Regras de Validação</h2>
                     <p class="subtext" data-i18n="sheets_step2_desc">Escolha a coluna única que conecta os registros entre as duas planilhas.</p>
+                </div>
+            </div>
+
+            <!-- Aviso Inteligente de Colunas Unnamed -->
+            <div id="alert-unnamed-cols" class="alert-unnamed-banner" style="display: none;" data-nosnippet>
+                <div class="alert-unnamed-icon">💡</div>
+                <div class="alert-unnamed-content">
+                    <strong>Notamos colunas sem nome ('Unnamed').</strong> Se o cabeçalho da sua planilha não estiver na Linha 1, altere o campo "Linha do Cabeçalho" no Passo 1 e clique em "Ler Cabeçalhos e Continuar" novamente.
                 </div>
             </div>
 
@@ -856,6 +916,32 @@
                             <div class="file-meta" id="single-file-meta" style="display: none;" data-nosnippet>
                                 <span class="filename" id="single-filename">arquivo.xlsx</span>
                                 <span class="filesize" id="single-filesize">0 KB</span>
+                            </div>
+                            <!-- Configurações Visuais de Leitura do Arquivo Único -->
+                            <div class="file-config-panel" id="single-file-config" style="display: none;" onclick="event.stopPropagation();">
+                                <div class="file-config-row">
+                                    <label for="single-header-line" class="file-config-label">
+                                        <span>Linha do cabeçalho:</span>
+                                        <input type="number" id="single-header-line" class="file-config-input" min="1" max="50" value="1" title="Linha onde estão os títulos das colunas (padrão 1)">
+                                    </label>
+                                </div>
+                                <div class="file-sheets-panel" id="single-sheets-panel" style="display: none;">
+                                    <div class="file-sheets-header">
+                                        <span class="file-sheets-title">Abas para auditar:</span>
+                                        <span class="file-sheets-hint" id="single-sheets-hint">1 aba selecionada</span>
+                                    </div>
+                                    <div class="file-sheets-chips" id="single-sheets-chips">
+                                        <!-- Chips de abas visíveis gerados dinamicamente via JS -->
+                                    </div>
+                                    <div class="file-hidden-sheets-area" id="single-hidden-area" style="display: none;">
+                                        <button type="button" class="btn-toggle-hidden" id="single-btn-toggle-hidden">
+                                            👁️ Mostrar abas ocultas (<span id="single-hidden-count">0</span>)
+                                        </button>
+                                        <div class="file-hidden-chips" id="single-hidden-chips" style="display: none;">
+                                            <!-- Chips de abas ocultas gerados dinamicamente via JS -->
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

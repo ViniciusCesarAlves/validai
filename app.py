@@ -675,6 +675,21 @@ def sitemap_xml():
     return Response("\n".join(xml_lines), mimetype='application/xml; charset=utf-8')
 
 
+@app.route('/api/excel-sheets', methods=['POST'])
+@app.route('/inspecionar-arquivo', methods=['POST'])
+@app.route('/api/sheets/inspect-file', methods=['POST'])
+def inspect_spreadsheet_route():
+    try:
+        file = request.files.get('file') or request.files.get('file_a') or request.files.get('file_b')
+        if not file:
+            return jsonify({'error': 'Nenhum arquivo enviado.'}), 400
+        filename = file.filename or 'arquivo.xlsx'
+        info = comparator.inspect_spreadsheet_file(file, filename)
+        return jsonify(info)
+    except Exception as e:
+        return jsonify({'error': str(e), 'is_excel': False, 'sheets': [], 'default_sheet': None}), 500
+
+
 @app.route('/api/upload-headers', methods=['POST'])
 def upload_headers():
     try:
@@ -683,6 +698,11 @@ def upload_headers():
 
         if not file_a or not file_b:
             return jsonify({'error': 'Envie ambos os arquivos (Base Antiga e Base Nova).'}), 400
+
+        header_line_a = request.form.get('header_line_a', 1)
+        header_line_b = request.form.get('header_line_b', 1)
+        sheets_a = request.form.get('sheets_a')
+        sheets_b = request.form.get('sheets_b')
 
         session_id = str(uuid.uuid4())
         session_folder = os.path.join(UPLOAD_DIR, session_id)
@@ -697,37 +717,63 @@ def upload_headers():
         file_a.save(path_a)
         file_b.save(path_b)
 
-        # Ler colunas dos arquivos
-        df_a = comparator.read_tabular_file(path_a, filename_a)
-        df_b = comparator.read_tabular_file(path_b, filename_b)
+        # Ler colunas dos arquivos com suporte a linha de cabeçalho e abas
+        df_a = comparator.read_tabular_file(path_a, filename_a, header_line=header_line_a, sheet_names=sheets_a)
+        df_b = comparator.read_tabular_file(path_b, filename_b, header_line=header_line_b, sheet_names=sheets_b)
 
         cols_a = list(df_a.columns)
         cols_b = list(df_b.columns)
 
+        has_unnamed = any(str(c).upper().startswith('UNNAMED:') for c in cols_a + cols_b)
+
         mapping = comparator.suggest_column_mappings(cols_a, cols_b)
 
-        # Sugestões de chaves primárias inteligentes
-        key_keywords = ['ID', 'SEQ', 'TICKET', 'MATRICULA', 'CODIGO', 'CHAVE', 'CPF', 'NUMERO', 'REGISTRO']
-        suggested_keys = []
-        
-        # Colunas que mapeiam entre si e possuem palavras-chave de identificador
-        for col_a, col_b in mapping.items():
-            col_norm = comparator.normalize_column_name(col_a)
-            if any(k in col_norm for k in key_keywords):
-                suggested_keys.append({
-                    'col_a': col_a,
-                    'col_b': col_b,
-                    'score': 10
-                })
+        # Sugestões de chaves primárias inteligentes com prioridade semântica e análise de cardinalidade
+        keywords_high = [
+            'ID', 'CODIGO', 'COD', 'CHASSI', 'VIN', 'CPF', 'CNPJ', 
+            'MATRICULA', 'TICKET', 'NOTAFISCAL', 'NUMNF', 'NF', 
+            'NUMERONOTA', 'PEDIDO', 'NUMPEDIDO', 'REGISTRO', 'CHAVE', 
+            'SEQ', 'SEQUENCIAL', 'SERIAL', 'PROTOCOLO'
+        ]
+        low_cardinality_keywords = [
+            'MARCA', 'STATUS', 'SITUACAO', 'ESTADO', 'UF', 'TIPO', 
+            'CATEGORIA', 'ATIVO', 'SEXO', 'PAIS', 'CIDADE', 'SIM_NAO', 'FLAG'
+        ]
 
-        # Adiciona outras colunas comuns se não houver muitas
+        suggested_keys = []
+        len_a = max(len(df_a), 1)
+        len_b = max(len(df_b), 1)
+
         for col_a, col_b in mapping.items():
-            if not any(s['col_a'] == col_a for s in suggested_keys):
-                suggested_keys.append({
-                    'col_a': col_a,
-                    'col_b': col_b,
-                    'score': 1
-                })
+            clean_a = comparator.to_clean_key(col_a)
+            clean_b = comparator.to_clean_key(col_b) if col_b else ''
+
+            # Taxa de unicidade (cardinalidade) das colunas em A e B
+            card_a = (df_a[col_a].nunique() / len_a) if col_a in df_a.columns else 0.0
+            card_b = (df_b[col_b].nunique() / len_b) if (col_b and col_b in df_b.columns) else card_a
+            avg_card = (card_a + card_b) / 2.0
+
+            # Pontuação base pela cardinalidade (0 a 100)
+            score = avg_card * 100.0
+
+            # Bônus por termos identificadores fortes
+            if any(k in clean_a or k in clean_b for k in keywords_high):
+                score += 150.0
+                if any(clean_a == k or clean_b == k for k in keywords_high):
+                    score += 50.0
+
+            # Penalização severa para colunas de categorias/marcas/status com baixa cardinalidade
+            if any(k in clean_a or k in clean_b for k in low_cardinality_keywords):
+                score -= 80.0
+
+            if avg_card < 0.10:
+                score -= 50.0
+
+            suggested_keys.append({
+                'col_a': col_a,
+                'col_b': col_b,
+                'score': score
+            })
 
         suggested_keys.sort(key=lambda x: x['score'], reverse=True)
 
@@ -736,6 +782,10 @@ def upload_headers():
             'path_b': path_b,
             'filename_a': filename_a,
             'filename_b': filename_b,
+            'header_line_a': header_line_a,
+            'header_line_b': header_line_b,
+            'sheets_a': sheets_a,
+            'sheets_b': sheets_b,
             'cols_a': cols_a,
             'cols_b': cols_b,
             'mapping': mapping,
@@ -751,6 +801,7 @@ def upload_headers():
             'rows_b_count': len(df_b),
             'cols_a': cols_a,
             'cols_b': cols_b,
+            'has_unnamed': has_unnamed,
             'suggested_keys': [s['col_a'] for s in suggested_keys],
             'column_mapping': mapping
         })
@@ -854,8 +905,13 @@ def compare():
         ignore_case = bool(data.get('ignore_case', True))
         trim_spaces = bool(data.get('trim_spaces', True))
 
-        df_a = comparator.read_tabular_file(sess['path_a'], sess['filename_a'])
-        df_b = comparator.read_tabular_file(sess['path_b'], sess['filename_b'])
+        header_line_a = data.get('header_line_a', sess.get('header_line_a', 1))
+        header_line_b = data.get('header_line_b', sess.get('header_line_b', 1))
+        sheets_a = data.get('sheets_a', sess.get('sheets_a'))
+        sheets_b = data.get('sheets_b', sess.get('sheets_b'))
+
+        df_a = comparator.read_tabular_file(sess['path_a'], sess['filename_a'], header_line=header_line_a, sheet_names=sheets_a)
+        df_b = comparator.read_tabular_file(sess['path_b'], sess['filename_b'], header_line=header_line_b, sheet_names=sheets_b)
 
         # Validação de planos, cotas e limites de volume
         is_sample = bool(sess.get('is_sample') or data.get('is_sample'))
@@ -961,8 +1017,12 @@ def single_upload_headers():
         filepath = os.path.join(session_folder, filename)
         file.save(filepath)
 
-        df = comparator.read_tabular_file(filepath, filename)
+        header_line = request.form.get('header_line', 1)
+        sheets = request.form.get('sheets')
+
+        df = comparator.read_tabular_file(filepath, filename, header_line=header_line, sheet_names=sheets)
         cols = list(df.columns)
+        has_unnamed = any(str(c).upper().startswith('UNNAMED:') for c in cols)
 
         # Amostra das primeiras 5 linhas para preview
         sample_rows = []
@@ -977,6 +1037,8 @@ def single_upload_headers():
             'mode': 'single',
             'path': filepath,
             'filename': filename,
+            'header_line': header_line,
+            'sheets': sheets,
             'cols': cols,
             'total_rows': len(df)
         }
@@ -987,6 +1049,7 @@ def single_upload_headers():
             'total_rows': len(df),
             'total_cols': len(cols),
             'cols': cols,
+            'has_unnamed': has_unnamed,
             'sample_data': sample_rows
         })
 
@@ -1009,7 +1072,9 @@ def single_audit():
             return jsonify({'error': 'Configure ao menos uma regra de auditoria antes de continuar.'}), 400
 
         sess = SESSIONS[session_id]
-        df = comparator.read_tabular_file(sess['path'], sess['filename'])
+        header_line = data.get('header_line', sess.get('header_line', 1))
+        sheets = data.get('sheets', sess.get('sheets'))
+        df = comparator.read_tabular_file(sess['path'], sess['filename'], header_line=header_line, sheet_names=sheets)
 
         is_sample = bool(sess.get('is_sample') or data.get('is_sample'))
         row_count = len(df)
@@ -1374,7 +1439,9 @@ def cadastros_process():
             return jsonify({'error': 'Sessão inválida ou expirada. Faça o upload novamente.'}), 400
 
         sess = SESSIONS[session_id]
-        df = comparator.read_tabular_file(sess['path'], sess['filename'])
+        header_line = data.get('header_line', sess.get('header_line', 1))
+        sheets = data.get('sheets', sess.get('sheets'))
+        df = comparator.read_tabular_file(sess['path'], sess['filename'], header_line=header_line, sheet_names=sheets)
 
         is_sample = bool(sess.get('is_sample') or data.get('is_sample'))
         row_count = len(df)

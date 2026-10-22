@@ -1300,6 +1300,205 @@ def test_full_pipeline():
     assert 'signup-terms' in home_html
     print("[OK] Modal Unificado de Autenticação validado com Botão Google, Confirmação e Termos!")
 
+    # -------------------------------------------------------------
+    # Testes das Novas Funcionalidades de Planilhas e Mapeamento
+    # -------------------------------------------------------------
+    print("\n--- Testando Novas Funcionalidades de Leitura de Planilhas e Mapeamento ---")
+    import openpyxl
+    import pandas as pd
+    import numpy as np
+    import comparator
+
+    # 1. Teste de Inspeção de Abas (/api/sheets/inspect-file e /inspecionar-arquivo)
+    wb_test = openpyxl.Workbook()
+    ws1 = wb_test.active
+    ws1.title = "Aba_Oculta_1"
+    ws1.sheet_state = "hidden"
+    ws2 = wb_test.create_sheet("Implementos")
+    ws2.sheet_state = "visible"
+    ws3 = wb_test.create_sheet("John_Deere")
+    ws3.sheet_state = "visible"
+
+    buf_inspect = io.BytesIO()
+    wb_test.save(buf_inspect)
+    raw_inspect = buf_inspect.getvalue()
+
+    for route in ['/api/sheets/inspect-file', '/inspecionar-arquivo']:
+        res_insp = client.post(route, data={'file': (io.BytesIO(raw_inspect), 'maquinas.xlsx')}, content_type='multipart/form-data')
+        assert res_insp.status_code == 200, f"Falha POST {route}: {res_insp.status_code}"
+        insp_data = res_insp.get_json()
+        assert insp_data['is_excel'] is True
+        assert len(insp_data['sheets']) == 3
+        # Regra Crítica: primeira aba visível deve ser o default, NUNCA a aba oculta!
+        assert insp_data['default_sheet'] == "Implementos", f"Aba default incorreta: {insp_data['default_sheet']}"
+        assert insp_data['sheets'][0]['name'] == "Aba_Oculta_1" and insp_data['sheets'][0]['visible'] is False
+        assert insp_data['sheets'][1]['name'] == "Implementos" and insp_data['sheets'][1]['visible'] is True
+        assert insp_data['sheets'][2]['name'] == "John_Deere" and insp_data['sheets'][2]['visible'] is True
+    print("[OK] Inspeção de abas e proteção de aba oculta (/inspecionar-arquivo) validadas com sucesso!")
+
+    # 2. Teste de Linha do Cabeçalho deslocada (Ex: cabeçalho na Linha 3)
+    df_header_shift = pd.DataFrame([
+        ['Relatório Financeiro Corporativo', None, None],
+        ['Data de Emissão: 2026-10-22', None, None],
+        ['ID_TRANSACAO', 'NOTA_FISCAL', 'TOTAL_BRUTO'],
+        [1001, 'NF-8901', 426569.12],
+        [1002, 'NF-8902', 15890.00]
+    ])
+    buf_shift = io.BytesIO()
+    df_header_shift.to_excel(buf_shift, index=False, header=False)
+    raw_shift = buf_shift.getvalue()
+
+    res_upload_shift = client.post('/api/upload-headers', data={
+        'file_a': (io.BytesIO(raw_shift), 'relatorio_a.xlsx'),
+        'file_b': (io.BytesIO(raw_shift), 'relatorio_b.xlsx'),
+        'header_line_a': '3',
+        'header_line_b': '3'
+    }, content_type='multipart/form-data')
+    assert res_upload_shift.status_code == 200
+    shift_data = res_upload_shift.get_json()
+    assert shift_data['cols_a'] == ['ID_TRANSACAO', 'NOTA_FISCAL', 'TOTAL_BRUTO'], f"Colunas lidas: {shift_data['cols_a']}"
+    assert shift_data['has_unnamed'] is False
+    print("[OK] Linha de cabeçalho configurável (header = 3) lida sem erros e sem Unnamed!")
+
+    # 2.1 Teste do Aviso Amarelo quando Linha 1 possui Unnamed
+    res_upload_unnamed = client.post('/api/upload-headers', data={
+        'file_a': (io.BytesIO(raw_shift), 'relatorio_a.xlsx'),
+        'file_b': (io.BytesIO(raw_shift), 'relatorio_b.xlsx'),
+        'header_line_a': '1',
+        'header_line_b': '1'
+    }, content_type='multipart/form-data')
+    assert res_upload_unnamed.status_code == 200
+    assert res_upload_unnamed.get_json()['has_unnamed'] is True
+    print("[OK] Aviso de colunas Unnamed gerado corretamente quando cabeçalho não está na linha 1!")
+
+    # 3. Teste de Concatenação de Múltiplas Abas (pd.concat)
+    wb_multi = openpyxl.Workbook()
+    ws_imp = wb_multi.active
+    ws_imp.title = "Implementos"
+    ws_imp.append(['ID', 'PRODUTO', 'VALOR'])
+    ws_imp.append([1, 'Trator A', 50000])
+    ws_jd = wb_multi.create_sheet("John_Deere")
+    ws_jd.append(['ID', 'PRODUTO', 'VALOR'])
+    ws_jd.append([2, 'Colheitadeira B', 120000])
+
+    buf_multi = io.BytesIO()
+    wb_multi.save(buf_multi)
+    buf_multi.seek(0)
+
+    df_multi_read = comparator.read_tabular_file(buf_multi, 'equipamentos.xlsx', header_line=1, sheet_names=['Implementos', 'John_Deere'])
+    assert len(df_multi_read) == 2, f"Total de linhas concatenadas incorreto: {len(df_multi_read)}"
+    assert list(df_multi_read['ID']) == [1, 2]
+    print("[OK] Concatenação de múltiplas abas via pd.concat validada com sucesso!")
+
+    # 4. Teste de Proteção de Colunas Esparsas / Vazias
+    df_sparse = pd.DataFrame({
+        'ID': [1, 2, 3],
+        'DEMITIDO': [np.nan, np.nan, np.nan],
+        'OBSERVACOES': [None, None, None],
+        'Unnamed: 3': [np.nan, np.nan, np.nan],
+        'Unnamed: 4': ['Preenchido', np.nan, 'OK']
+    })
+    buf_sparse = io.BytesIO()
+    df_sparse.to_excel(buf_sparse, index=False)
+    buf_sparse.seek(0)
+
+    df_sparse_read = comparator.read_tabular_file(buf_sparse, 'sparse.xlsx')
+    cols_kept = list(df_sparse_read.columns)
+    assert 'DEMITIDO' in cols_kept, "Coluna DEMITIDO (100% NaN) não pode ser descartada!"
+    assert 'OBSERVACOES' in cols_kept, "Coluna OBSERVACOES (100% NaN) não pode ser descartada!"
+    assert 'Unnamed: 4' in cols_kept, "Coluna Unnamed com dados deve ser preservada!"
+    assert 'Unnamed: 3' not in cols_kept, "Coluna Unnamed 100% nula deve ser descartada!"
+    print("[OK] Proteção estrita de colunas esparsas / vazias validada!")
+
+    # 5. Teste de Normalização de Moeda e Decimal com Vírgula Brasileira em CSV vs Excel
+    csv_text = "ID;TOTAL_BRUTO\n101;426569,12\n102;1500,50\n"
+    buf_csv = io.BytesIO(csv_text.encode('utf-8'))
+    df_csv = comparator.read_tabular_file(buf_csv, 'vendas.csv')
+
+    df_excel = pd.DataFrame({
+        'ID': [101, 102],
+        'TOTAL_BRUTO': [426569.12, 1500.50]
+    })
+
+    summary, diff_records, *_ = comparator.compare_datasets(df_excel, df_csv, primary_key_a='ID', primary_key_b='ID')
+    assert summary['is_identical'] is True, f"Diferenças encontradas entre CSV e Excel: {summary['different_rows_count']}"
+    assert summary['different_rows_count'] == 0
+    assert summary['total_cells_diff'] == 0
+    print("[OK] Comparação de decimal brasileiro com vírgula (CSV vs Excel float) sem falsos positivos!")
+
+    # 6. Teste de Auto-Mapeamento com os 9 Grupos de Sinônimos de Negócio
+    cols_source = [
+        'NOTA FISCAL', 'EMPRESA - FILIAL', 'NOME CLIENTE', 'VENDEDOR EQUIPAMENTO',
+        'TIPO CLIENTE', 'MODELO', 'DATA DA VENDA', 'TOTAL_BRUTO', 'QUANTIDADE'
+    ]
+    cols_target = [
+        'NUM_NF', 'LOJA', 'RAZAO_SOCIAL', 'VENDEDOR',
+        'CLIENTE_GRUPOTRIBUTARIO', 'COD_MODELO', 'DT_VENDA', 'VALOR_VENDA', 'QTD'
+    ]
+    mapping_result = comparator.suggest_column_mappings(cols_source, cols_target)
+    for src, tgt in zip(cols_source, cols_target):
+        assert mapping_result.get(src) == tgt, f"Falha mapeando sinônimo: {src} -> {mapping_result.get(src)} (esperado: {tgt})"
+    print("[OK] Auto-mapeamento com todos os 9 grupos de sinônimos de negócio validado com sucesso!")
+
+    # 7. Teste de Endpoint /api/excel-sheets diretamente
+    res_api_sheets = client.post('/api/excel-sheets', data={'file': (io.BytesIO(raw_inspect), 'maquinas.xlsx')}, content_type='multipart/form-data')
+    assert res_api_sheets.status_code == 200
+    api_sheets_data = res_api_sheets.get_json()
+    assert api_sheets_data['is_excel'] is True
+    assert api_sheets_data['default_sheet'] == "Implementos"
+    assert len(api_sheets_data['sheets']) == 3
+    print("[OK] Endpoint /api/excel-sheets validado com sucesso!")
+
+    # 8. Teste de Normalização de Datas (Evitar Falso Positivo "28/08/2026" vs "2026-08-28 00:00:00")
+    val_csv = comparator.parse_cell_value("28/08/2026", normalize_dates=True)
+    val_excel_str = comparator.parse_cell_value("2026-08-28 00:00:00", normalize_dates=True)
+    val_timestamp = comparator.parse_cell_value(pd.Timestamp("2026-08-28 00:00:00"), normalize_dates=True)
+    val_date_iso = comparator.parse_cell_value("2026-08-28", normalize_dates=True)
+    val_iso_t = comparator.parse_cell_value("2026-08-28T14:30:00", normalize_dates=True)
+
+    assert val_csv == "2026-08-28", f"Data CSV normalizada incorretamente: {val_csv}"
+    assert val_excel_str == "2026-08-28", f"Data Excel normalizada incorretamente: {val_excel_str}"
+    assert val_timestamp == "2026-08-28", f"Timestamp normalizado incorretamente: {val_timestamp}"
+    assert val_date_iso == "2026-08-28"
+    assert val_iso_t == "2026-08-28"
+
+    df_dates_a = pd.DataFrame({
+        'ID': [1, 2],
+        'DATA_EMISSAO': ['28/08/2026', '01/09/2026']
+    })
+    df_dates_b = pd.DataFrame({
+        'ID': [1, 2],
+        'DATA_EMISSAO': ['2026-08-28 00:00:00', pd.Timestamp('2026-09-01 00:00:00')]
+    })
+    summary_dates, *_ = comparator.compare_datasets(df_dates_a, df_dates_b, primary_key_a='ID', primary_key_b='ID', normalize_dates=True)
+    assert summary_dates['is_identical'] is True, f"Falso positivo em datas detectado: {summary_dates['different_rows_count']} linhas divergentes"
+    assert summary_dates['different_rows_count'] == 0
+    print("[OK] Normalização de datas (CSV 28/08/2026 vs Excel 2026-08-28 00:00:00) 100% idêntica sem falsos positivos!")
+
+    # 9. Teste de Algoritmo de Auto-Sugestão de Chave Primária (CHASSI/NOTA_FISCAL vs MARCA)
+    df_key_a = pd.DataFrame({
+        'MARCA': ['JOHN DEERE', 'JOHN DEERE', 'CASE', 'NEW HOLLAND', 'MASSEY', 'VALTRA', 'JOHN DEERE', 'CASE', 'VALTRA', 'CASE'],
+        'CHASSI': [f'9BR{i:06d}' for i in range(10)],
+        'MODELO': ['T100', 'T200', 'T300', 'T400', 'T500', 'T600', 'T700', 'T800', 'T900', 'T1000']
+    })
+    buf_key_a = io.BytesIO()
+    df_key_a.to_excel(buf_key_a, index=False)
+    raw_key_a = buf_key_a.getvalue()
+
+    res_upload_keys = client.post('/api/upload-headers', data={
+        'file_a': (io.BytesIO(raw_key_a), 'base_a.xlsx'),
+        'file_b': (io.BytesIO(raw_key_a), 'base_b.xlsx'),
+        'header_line_a': '1',
+        'header_line_b': '1'
+    }, content_type='multipart/form-data')
+    assert res_upload_keys.status_code == 200
+    suggested = res_upload_keys.get_json().get('suggested_keys', [])
+    assert len(suggested) >= 2
+    # CHASSI deve ser a primeira sugestão (#1) e MARCA deve estar depois (penalizada por baixa cardinalidade e categoria)
+    assert suggested[0] == 'CHASSI', f"CHASSI não foi a primeira sugestão! Sugestões: {suggested}"
+    assert suggested[-1] == 'MARCA', f"MARCA não foi penalizada! Sugestões: {suggested}"
+    print("[OK] Algoritmo de auto-sugestão de Chave Primária priorizou CHASSI e penalizou MARCA com perfeição!")
+
     print("\nTODOS OS TESTES PASSARAM COM 100% DE SUCESSO!")
 
 if __name__ == '__main__':

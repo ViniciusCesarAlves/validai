@@ -19,63 +19,248 @@ def normalize_column_name(col: str) -> str:
     col = re.sub(r'[\s\-_/\\|]+', '_', col)
     return col.strip('_')
 
-def read_tabular_file(file_path_or_buffer, filename: str) -> pd.DataFrame:
-    """Lê arquivo Excel (.xlsx, .xls) ou CSV (.csv) com detecção automática de separador e codificação."""
+def to_clean_key(col: str) -> str:
+    """Remove acentos, espaços extras, underscores, hífens e pontuações para correspondência alfanumérica pura."""
+    if not isinstance(col, str):
+        col = str(col)
+    col = col.replace('\ufeff', '').strip().upper()
+    col = unicodedata.normalize('NFKD', col).encode('ASCII', 'ignore').decode('utf-8')
+    return re.sub(r'[^A-Z0-9]', '', col)
+
+BUSINESS_SYNONYM_GROUPS = [
+    # 1. NOTA FISCAL
+    ['NOTA FISCAL', 'NOTA_FISCAL', 'NF', 'NUM_NF', 'NUMERO_NOTA', 'NUMERO_DA_NOTA', 'NR_NOTA', 'NUM_NOTA', 'NUMERONOTA', 'NUMNF', 'NOTA'],
+    # 2. EMPRESA - FILIAL
+    ['EMPRESA - FILIAL', 'EMPRESA_FILIAL', 'EMPRESA FILIAL', 'FILIAL', 'UNIDADE', 'LOJA', 'COD_FILIAL', 'NOME_FILIAL', 'EMPRESA_LOJA'],
+    # 3. NOME CLIENTE
+    ['NOME CLIENTE', 'NOME_CLIENTE', 'CLIENTE', 'RAZAO_SOCIAL', 'RAZAOSOCIAL', 'NOME_DO_CLIENTE', 'NM_CLIENTE'],
+    # 4. VENDEDOR EQUIPAMENTO
+    ['VENDEDOR EQUIPAMENTO', 'VENDEDOR_EQUIPAMENTO', 'NOME_VENDEDOR', 'NOME VENDEDOR', 'VENDEDOR', 'NM_VENDEDOR', 'REPRESENTANTE'],
+    # 5. TIPO CLIENTE
+    ['TIPO CLIENTE', 'TIPO_CLIENTE', 'CLIENTE_GRUPOTRIBUTARIO', 'GRUPO_CLIENTE', 'GRUPO_TRIBUTARIO', 'TIPO_DO_CLIENTE', 'CATEGORIA_CLIENTE'],
+    # 6. MODELO
+    ['MODELO', 'MODELO_COD', 'COD_MODELO', 'CODMODELO', 'MODELO_CODIGO', 'DESCRICAO_MODELO', 'DESC_MODELO'],
+    # 7. DATA DA VENDA
+    ['DATA DA VENDA', 'DATA_DA_VENDA', 'DATA_VENDA', 'DATA_FATURAMENTO', 'DT_VENDA', 'DATA_EMISSAO', 'DT_EMISSAO', 'DT_FATURAMENTO', 'DATA_EMISSAO_NOTA'],
+    # 8. TOTAL_BRUTO / TOTAL
+    ['TOTAL_BRUTO', 'TOTAL BRUTO', 'TOTAL', 'VALOR_VENDA', 'VALOR VENDA', 'VLR_TOTAL', 'VALOR_BRUTO', 'VLR_BRUTO', 'VALOR_TOTAL', 'VLR_VENDA'],
+    # 9. QUANTIDADE
+    ['QUANTIDADE', 'QTD', 'QT', 'QUANT', 'QUANT_TOTAL', 'QTDE']
+]
+
+CLEAN_BUSINESS_SYNONYMS = {}
+for idx, group in enumerate(BUSINESS_SYNONYM_GROUPS):
+    for item in group:
+        CLEAN_BUSINESS_SYNONYMS[to_clean_key(item)] = idx
+
+def inspect_spreadsheet_file(file_path_or_buffer, filename: str) -> dict:
+    """
+    Inspeciona arquivo de planilha e retorna lista de abas com estado de visibilidade ('visible' vs 'hidden').
+    Garante que a primeira aba visível seja identificada como 'default_sheet'.
+    """
     ext = filename.lower().split('.')[-1]
+    if ext in ['xlsx', 'xlsm']:
+        import openpyxl
+        try:
+            if hasattr(file_path_or_buffer, 'seek'):
+                file_path_or_buffer.seek(0)
+            wb = openpyxl.load_workbook(file_path_or_buffer, read_only=True, keep_links=False)
+            sheets = []
+            default_sheet = None
+            for ws in wb.worksheets:
+                title = ws.title
+                state = getattr(ws, 'sheet_state', 'visible')
+                is_visible = (state == 'visible')
+                sheets.append({'name': title, 'visible': is_visible})
+                if is_visible and default_sheet is None:
+                    default_sheet = title
+            wb.close()
+            if hasattr(file_path_or_buffer, 'seek'):
+                file_path_or_buffer.seek(0)
+            if not default_sheet and sheets:
+                default_sheet = sheets[0]['name']
+            return {
+                'is_excel': True,
+                'sheets': sheets,
+                'default_sheet': default_sheet
+            }
+        except Exception:
+            if hasattr(file_path_or_buffer, 'seek'):
+                file_path_or_buffer.seek(0)
+    elif ext == 'xls':
+        try:
+            if hasattr(file_path_or_buffer, 'seek'):
+                file_path_or_buffer.seek(0)
+            xl = pd.ExcelFile(file_path_or_buffer)
+            sheets = [{'name': name, 'visible': True} for name in xl.sheet_names]
+            if hasattr(file_path_or_buffer, 'seek'):
+                file_path_or_buffer.seek(0)
+            return {
+                'is_excel': True,
+                'sheets': sheets,
+                'default_sheet': sheets[0]['name'] if sheets else None
+            }
+        except Exception:
+            if hasattr(file_path_or_buffer, 'seek'):
+                file_path_or_buffer.seek(0)
+
+    return {
+        'is_excel': False,
+        'sheets': [],
+        'default_sheet': None
+    }
+
+def detect_csv_delimiter(sample_text: str) -> str:
+    """Detecta automaticamente o delimitador de um arquivo CSV (; , \t |)."""
+    delims = [';', ',', '\t', '|']
+    lines = [l for l in sample_text.splitlines() if l.strip()]
+    if not lines:
+        return ','
+    # Tenta ver se algum delimitador tem contagem consistente (> 0) em cada linha
+    for d in [';', '\t', '|', ',']:
+        counts = [l.count(d) for l in lines[:5]]
+        if all(c > 0 and c == counts[0] for c in counts):
+            return d
+    # Caso contrário, pega o que mais aparece na primeira linha não-vazia
+    first_line = lines[0]
+    counts = {d: first_line.count(d) for d in delims}
+    best = max(counts, key=counts.get)
+    return best if counts[best] > 0 else ','
+
+def read_tabular_file(file_path_or_buffer, filename: str, header_line: int = 1, sheet_names=None) -> pd.DataFrame:
+    """
+    Lê arquivo Excel (.xlsx, .xls) ou CSV (.csv) com:
+    - Linha de cabeçalho configurável (header_line: 1-indexed)
+    - Seleção de aba única ou múltiplas abas concatenadas (pd.concat)
+    - Proteção estrita de colunas esparsas (só descarta Unnamed 100% nulo)
+    - Auto-detecção de encoding e delimitador CSV
+    """
+    try:
+        header_idx = max(0, int(header_line) - 1)
+    except (ValueError, TypeError):
+        header_idx = 0
+
+    ext = filename.lower().split('.')[-1]
+    
+    # Processamento de sheet_names
+    parsed_sheets = None
+    if sheet_names is not None:
+        if isinstance(sheet_names, str):
+            s_str = sheet_names.strip()
+            if s_str.startswith('[') and s_str.endswith(']'):
+                try:
+                    import json
+                    parsed_sheets = json.loads(s_str)
+                except Exception:
+                    parsed_sheets = [s.strip() for s in s_str.strip('[]').split(',') if s.strip()]
+            elif ',' in s_str:
+                parsed_sheets = [s.strip() for s in s_str.split(',') if s.strip()]
+            elif s_str:
+                parsed_sheets = [s_str]
+        elif isinstance(sheet_names, (list, tuple)):
+            parsed_sheets = [str(s) for s in sheet_names if s]
+
     if ext in ['xlsx', 'xls', 'xlsm']:
-        # Lê com openpyxl ou padrão
-        df = pd.read_excel(file_path_or_buffer)
+        if parsed_sheets and len(parsed_sheets) > 1:
+            dfs = []
+            for s in parsed_sheets:
+                if hasattr(file_path_or_buffer, 'seek'):
+                    file_path_or_buffer.seek(0)
+                dfs.append(pd.read_excel(file_path_or_buffer, sheet_name=s, header=header_idx))
+            df = pd.concat(dfs, ignore_index=True)
+        elif parsed_sheets and len(parsed_sheets) == 1:
+            if hasattr(file_path_or_buffer, 'seek'):
+                file_path_or_buffer.seek(0)
+            df = pd.read_excel(file_path_or_buffer, sheet_name=parsed_sheets[0], header=header_idx)
+        else:
+            # Não informou aba: busca primeira aba visível para nunca carregar aba oculta por engano
+            info = inspect_spreadsheet_file(file_path_or_buffer, filename)
+            target = info.get('default_sheet')
+            if hasattr(file_path_or_buffer, 'seek'):
+                file_path_or_buffer.seek(0)
+            if target:
+                df = pd.read_excel(file_path_or_buffer, sheet_name=target, header=header_idx)
+            else:
+                df = pd.read_excel(file_path_or_buffer, header=header_idx)
     elif ext == 'csv':
-        # Tenta detectar separador (; ou ,) e encoding (utf-8-sig primeiro para tratar BOM)
         encodings = ['utf-8-sig', 'utf-8', 'latin1', 'cp1252', 'iso-8859-1']
         df = None
         for enc in encodings:
             try:
                 if hasattr(file_path_or_buffer, 'seek'):
                     file_path_or_buffer.seek(0)
-                # Lê primeira linha para checar delimitador
-                sample = file_path_or_buffer.read(4096)
+                sample = file_path_or_buffer.read(8192)
                 if isinstance(sample, bytes):
                     sample_text = sample.decode(enc, errors='ignore')
                 else:
                     sample_text = str(sample)
-                
-                delimiter = ';' if sample_text.count(';') > sample_text.count(',') else ','
+
+                delimiter = detect_csv_delimiter(sample_text)
                 if hasattr(file_path_or_buffer, 'seek'):
                     file_path_or_buffer.seek(0)
-                
-                df = pd.read_csv(file_path_or_buffer, sep=delimiter, encoding=enc)
+
+                df = pd.read_csv(file_path_or_buffer, sep=delimiter, encoding=enc, header=header_idx)
                 break
             except Exception:
                 continue
-        # Fallback padrão
+
         if df is None:
             if hasattr(file_path_or_buffer, 'seek'):
                 file_path_or_buffer.seek(0)
-            df = pd.read_csv(file_path_or_buffer, sep=None, engine='python')
+            df = pd.read_csv(file_path_or_buffer, sep=None, engine='python', header=header_idx)
     else:
         raise ValueError(f"Formato de arquivo não suportado: {ext}. Use .xlsx ou .csv")
 
     # Remove BOM (\ufeff) e espaços das pontas de todos os nomes de colunas
     df.columns = [str(c).replace('\ufeff', '').strip() for c in df.columns]
+
+    # Regra estrita de proteção de colunas esparsas / vazias:
+    # NUNCA descarta colunas que possuam um nome válido de cabeçalho, mesmo que 100% das células sejam NaN.
+    # Só descarta se atender a AMBAS as condições simultaneamente:
+    # 1. O nome da coluna for vazio ou começar com 'Unnamed:'; E
+    # 2. 100% das linhas abaixo dela forem nulas/vazias.
+    cols_to_keep = []
+    for col in df.columns:
+        col_str = str(col).strip()
+        is_unnamed = (col_str == '' or col_str.upper().startswith('UNNAMED:'))
+        if is_unnamed:
+            series = df[col]
+            is_all_null = series.isna().all() or series.astype(str).str.strip().isin(['', 'nan', 'None', '<NA>']).all()
+            if not is_all_null:
+                cols_to_keep.append(col)
+        else:
+            cols_to_keep.append(col)
+
+    df = df[cols_to_keep]
     return df
 
 def parse_cell_value(val, normalize_currency=True, normalize_dates=True, ignore_case=True, trim_spaces=True):
     """
     Normaliza valores celulares para permitir comparações inteligentes:
     - Trata nulos/vazios
-    - Trata moedas brasileiras e números com ponto/vírgula
+    - Trata moedas brasileiras, decimais com vírgula e formatos internacionais
     - Trata datas e timestamps
     - Trata textos com espaços extras e maiúsculas
     """
     if val is None or pd.isna(val):
         return None
 
-    # Se for Timestamp ou datetime
-    if isinstance(val, (datetime, date, pd.Timestamp)):
+    # Se for Timestamp ou datetime ou np.datetime64
+    if isinstance(val, (datetime, date, pd.Timestamp, np.datetime64)):
         if normalize_dates:
-            return val.strftime('%Y-%m-%d')
+            try:
+                return pd.to_datetime(val).strftime('%Y-%m-%d')
+            except Exception:
+                pass
         return str(val)
+
+    # Se já for int ou float numérico nativo
+    if isinstance(val, (int, float, np.integer, np.floating)):
+        if pd.isna(val):
+            return None
+        if normalize_currency:
+            return round(float(val), 4)
+        return val
 
     s = str(val).replace('\ufeff', '')
     if trim_spaces:
@@ -86,38 +271,55 @@ def parse_cell_value(val, normalize_currency=True, normalize_dates=True, ignore_
 
     # Tenta conversão para Data se tiver formato de data
     if normalize_dates:
-        # Padrões comuns: YYYY-MM-DD ou DD/MM/YYYY ou YYYY-MM-DD HH:MM:SS
-        date_match = re.match(r'^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:\s+00:00(?::00)?)?$', s)
-        if date_match:
-            y, m, d = date_match.groups()
+        # Padrões comuns: YYYY-MM-DD ou DD/MM/YYYY com ou sem horário (ex: "2026-08-28 00:00:00", "2026-08-28T00:00:00", "28/08/2026 00:00:00")
+        m_iso = re.match(r'^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:[T\s](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?(?:\.\d+)?)?.*$', s)
+        if m_iso:
+            y, m, d = m_iso.groups()[:3]
             return f"{int(y):04d}-{int(m):02d}-{int(d):02d}"
         
-        br_date_match = re.match(r'^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})(?:\s+00:00(?::00)?)?$', s)
-        if br_date_match:
-            d, m, y = br_date_match.groups()
+        m_br = re.match(r'^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})(?:[T\s](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?(?:\.\d+)?)?.*$', s)
+        if m_br:
+            d, m, y = m_br.groups()[:3]
             return f"{int(y):04d}-{int(m):02d}-{int(d):02d}"
 
     # Tenta conversão para Número / Moeda
     if normalize_currency:
         clean_num = s.replace('R$', '').replace('$', '').replace('€', '').strip()
-        # Remove espaços internos comuns em moeda (ex: R$ 1 000,00)
         clean_num = clean_num.replace(' ', '')
-        # Checa se parece com número brasileiro ex: "1.234,56" ou "2580,00" ou "-150,00"
-        if re.match(r'^-?\d{1,3}(?:\.\d{3})*,\d+$', clean_num):
+        is_negative = False
+        if clean_num.startswith('(') and clean_num.endswith(')'):
+            is_negative = True
+            clean_num = clean_num[1:-1].strip()
+        elif clean_num.startswith('-'):
+            is_negative = True
+            clean_num = clean_num[1:].strip()
+
+        # 1. Padrão brasileiro com separador de milhar ponto e decimal vírgula: "1.234,56" ou "1.426.569,12"
+        if re.match(r'^\d{1,3}(?:\.\d{3})+,\d+$', clean_num):
             try:
-                return round(float(clean_num.replace('.', '').replace(',', '.')), 4)
+                num = float(clean_num.replace('.', '').replace(',', '.'))
+                return round(-num if is_negative else num, 4)
             except ValueError:
                 pass
-        # Checa se parece com número decimal com vírgula simples ex: "2580,00" ou "0,5"
-        elif re.match(r'^-?\d+,\d+$', clean_num):
+        # 2. Padrão internacional com milhar vírgula e decimal ponto: "1,234.56"
+        elif re.match(r'^\d{1,3}(?:,\d{3})+\.\d+$', clean_num):
             try:
-                return round(float(clean_num.replace(',', '.')), 4)
+                num = float(clean_num.replace(',', ''))
+                return round(-num if is_negative else num, 4)
             except ValueError:
                 pass
-        # Checa se é número float/int internacional padrão ex: "2580.00" ou "2580"
-        elif re.match(r'^-?\d+(?:\.\d+)?$', clean_num):
+        # 3. Padrão decimal com vírgula simples brasileiro (ex: "426569,12" ou "0,5" ou "12,0")
+        elif re.match(r'^\d+,\d+$', clean_num):
             try:
-                return round(float(clean_num), 4)
+                num = float(clean_num.replace(',', '.'))
+                return round(-num if is_negative else num, 4)
+            except ValueError:
+                pass
+        # 4. Padrão numérico decimal com ponto ou inteiro: "426569.12" ou "2580"
+        elif re.match(r'^\d+(?:\.\d+)?$', clean_num):
+            try:
+                num = float(clean_num)
+                return round(-num if is_negative else num, 4)
             except ValueError:
                 pass
 
@@ -129,42 +331,62 @@ def parse_cell_value(val, normalize_currency=True, normalize_dates=True, ignore_
 def suggest_column_mappings(cols_a, cols_b):
     """
     Mapeia colunas da Base A para a Base B baseado em:
-    1. Correspondência exata
-    2. Correspondência normalizada (sem acentos/espaços)
-    3. Correspondência difflib (similaridade de texto >= 0.75)
+    1. Correspondência exata alfanumérica pura (ignora espaços, _, -, acentos)
+    2. Correspondência por Grupos de Sinônimos de Negócio comuns
+    3. Correspondência SequenceMatcher (similaridade difflib >= 0.75)
     """
-    norm_a = {normalize_column_name(c): c for c in cols_a}
-    norm_b = {normalize_column_name(c): c for c in cols_b}
-
     mappings = {}
     used_b = set()
 
-    # 1. Correspondência exata de normalização
-    for na, orig_a in norm_a.items():
-        if na in norm_b:
-            orig_b = norm_b[na]
-            mappings[orig_a] = orig_b
-            used_b.add(orig_b)
+    # 1. Correspondência exata alfanumérica (ignora espaços, _, -, acentos)
+    clean_b_map = {}
+    for b in cols_b:
+        ck = to_clean_key(b)
+        if ck not in clean_b_map:
+            clean_b_map[ck] = []
+        clean_b_map[ck].append(b)
 
-    # 2. Correspondência por similaridade difflib para colunas restantes
-    unmapped_a = [c for c in cols_a if c not in mappings]
-    remaining_b = [c for c in cols_b if c not in used_b]
+    for a in cols_a:
+        ck_a = to_clean_key(a)
+        if ck_a in clean_b_map:
+            available = [b for b in clean_b_map[ck_a] if b not in used_b]
+            if available:
+                chosen = available[0]
+                mappings[a] = chosen
+                used_b.add(chosen)
 
-    for orig_a in unmapped_a:
-        na = normalize_column_name(orig_a)
+    # 2. Correspondência por Grupos de Sinônimos de Negócio
+    for a in cols_a:
+        if a in mappings:
+            continue
+        ck_a = to_clean_key(a)
+        if ck_a in CLEAN_BUSINESS_SYNONYMS:
+            grp_id = CLEAN_BUSINESS_SYNONYMS[ck_a]
+            candidates = [b for b in cols_b if b not in used_b and CLEAN_BUSINESS_SYNONYMS.get(to_clean_key(b)) == grp_id]
+            if candidates:
+                na = normalize_column_name(a)
+                best_cand = max(candidates, key=lambda b: SequenceMatcher(None, na, normalize_column_name(b)).ratio())
+                mappings[a] = best_cand
+                used_b.add(best_cand)
+
+    # 3. Correspondência difflib para colunas restantes (>= 0.75)
+    for a in cols_a:
+        if a in mappings:
+            continue
+        na = normalize_column_name(a)
+        remaining_b = [b for b in cols_b if b not in used_b]
         best_match = None
         best_ratio = 0.0
-        for orig_b in remaining_b:
-            nb = normalize_column_name(orig_b)
+        for b in remaining_b:
+            nb = normalize_column_name(b)
             ratio = SequenceMatcher(None, na, nb).ratio()
             if ratio > best_ratio:
                 best_ratio = ratio
-                best_match = orig_b
+                best_match = b
         
         if best_match and best_ratio >= 0.75:
-            mappings[orig_a] = best_match
+            mappings[a] = best_match
             used_b.add(best_match)
-            remaining_b.remove(best_match)
 
     return mappings
 
@@ -417,8 +639,11 @@ def compare_datasets(df_a: pd.DataFrame, df_b: pd.DataFrame,
 
             total_cells_checked += 1
 
-            # Checar igualdade
-            is_equal = (norm_a == norm_b)
+            # Checar igualdade (tolerância numérica de ponto flutuante para evitar falsos positivos)
+            if isinstance(norm_a, (int, float)) and isinstance(norm_b, (int, float)):
+                is_equal = (abs(float(norm_a) - float(norm_b)) < 1e-4)
+            else:
+                is_equal = (norm_a == norm_b)
 
             if not is_equal:
                 total_cells_diff += 1
