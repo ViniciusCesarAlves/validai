@@ -1084,6 +1084,9 @@
         // 4. Renderizar Tabelas
         renderTables();
 
+        // 5. Renderizar Gráficos Analíticos de RH (Chart.js)
+        renderRhCharts(data);
+
         stepResults.scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -1253,6 +1256,344 @@
             renderTables();
         });
     }
+
+    // -------------------------------------------------------------------------
+    // 10. GRÁFICOS ANALÍTICOS DE RH (CHART.JS)
+    // -------------------------------------------------------------------------
+    let chartRhEncargosInstance = null;
+    let chartRhImpactoInstance = null;
+    let lastRhData = null;
+
+    function renderRhCharts(data) {
+        lastRhData = data;
+        const chartsWrapper = document.getElementById('rh-charts-wrapper');
+        const chartsContainer = document.getElementById('rh-charts-container');
+        if (!chartsContainer) return;
+
+        try {
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js não carregado. Exibição dos gráficos ignorada com segurança.');
+                if (chartsWrapper) chartsWrapper.style.display = 'none';
+                chartsContainer.style.display = 'none';
+                return;
+            }
+
+            if (chartsWrapper) chartsWrapper.style.display = 'block';
+            chartsContainer.style.display = 'grid';
+
+            renderRhEncargosChart(data);
+            renderRhImpactoChart(data);
+        } catch (err) {
+            console.error('Erro seguro na renderização dos gráficos de RH:', err);
+        }
+    }
+
+    function renderRhEncargosChart(data) {
+        const canvas = document.getElementById('chart-rh-encargos');
+        const badge = document.getElementById('rh-encargos-badge');
+        if (!canvas) return;
+
+        try {
+            if (chartRhEncargosInstance) {
+                chartRhEncargosInstance.destroy();
+                chartRhEncargosInstance = null;
+            }
+
+            const k = data.kpis || {};
+            const dash = k.dashboard_rh || {};
+            const encargos = dash.encargos || {
+                'INSS': 0,
+                'FGTS': 0,
+                'IRRF': 0,
+                'Salário Base': 0,
+                'Horas Extras': 0,
+                'Outros': 0
+            };
+
+            const labels = ['INSS', 'FGTS', 'IRRF', 'Salário Base', 'Horas Extras', 'Outros'];
+            const rawCounts = labels.map(l => encargos[l] || 0);
+            const totalErrors = rawCounts.reduce((acc, c) => acc + c, 0);
+
+            if (badge) {
+                badge.textContent = totalErrors > 0 ? `${totalErrors} Divergências` : 'Nenhum Erro';
+            }
+
+            const chartData = totalErrors > 0 ? rawCounts : [1, 0, 0, 0, 0, 0];
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                           document.documentElement.classList.contains('dark-theme') ||
+                           (document.body && document.body.classList.contains('dark-theme')) ||
+                           (localStorage.getItem('splitc_theme') === 'dark');
+
+            chartRhEncargosInstance = new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: chartData,
+                        backgroundColor: ['#3b82f6', '#10b981', '#ef4444', '#8b5cf6', '#f59e0b', '#64748b'],
+                        hoverBackgroundColor: ['#2563eb', '#059669', '#dc2626', '#7c3aed', '#d97706', '#475569'],
+                        borderWidth: 2,
+                        borderColor: isDark ? '#17181f' : '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '66%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 10,
+                                boxHeight: 10,
+                                padding: 10,
+                                color: isDark ? '#cbd5e1' : '#475569',
+                                font: { size: 11, family: 'Inter, sans-serif', weight: '500' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: isDark ? '#1e293b' : '#0f172a',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            padding: 9,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    if (totalErrors === 0) return ' Sem divergências nos encargos';
+                                    const val = context.parsed || 0;
+                                    const pct = totalErrors > 0 ? ((val / totalErrors) * 100).toFixed(1) : '0.0';
+                                    return ` ${context.label}: ${val} erros (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (e) {
+            console.error('Falha segura no gráfico de encargos de RH:', e);
+        }
+    }
+
+    function renderRhImpactoChart(data) {
+        const canvas = document.getElementById('chart-rh-impacto');
+        const emptyEl = document.getElementById('chart-rh-impacto-empty');
+        if (!canvas) return;
+
+        try {
+            if (chartRhImpactoInstance) {
+                chartRhImpactoInstance.destroy();
+                chartRhImpactoInstance = null;
+            }
+
+            const k = data.kpis || {};
+            const dash = k.dashboard_rh || {};
+            const rubricas = (dash.rubricas || []).slice(0, 5);
+
+            const hasDifferences = rubricas.some(r => Math.abs(r.diff) > 0.001);
+
+            if (!rubricas.length || !hasDifferences) {
+                canvas.style.display = 'none';
+                if (emptyEl) emptyEl.style.display = 'flex';
+                return;
+            }
+
+            canvas.style.display = 'block';
+            if (emptyEl) emptyEl.style.display = 'none';
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                           document.documentElement.classList.contains('dark-theme') ||
+                           (document.body && document.body.classList.contains('dark-theme')) ||
+                           (localStorage.getItem('splitc_theme') === 'dark');
+
+            const labels = rubricas.map(r => r.rubrica);
+            const values = rubricas.map(r => r.diff);
+            const bgColors = values.map(v => v > 0 ? 'rgba(239, 68, 68, 0.85)' : (v < 0 ? 'rgba(59, 130, 246, 0.85)' : 'rgba(16, 185, 129, 0.85)'));
+            const hoverColors = values.map(v => v > 0 ? '#dc2626' : (v < 0 ? '#2563eb' : '#059669'));
+
+            chartRhImpactoInstance = new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Variação Financeira (R$)',
+                        data: values,
+                        backgroundColor: bgColors,
+                        hoverBackgroundColor: hoverColors,
+                        borderRadius: 4,
+                        barThickness: 16,
+                        maxBarThickness: 20
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            left: 15,
+                            right: 15
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)'
+                            },
+                            ticks: {
+                                color: isDark ? '#94a3b8' : '#64748b',
+                                font: { size: 11, family: 'Inter, sans-serif' },
+                                callback: function(val) {
+                                    return 'R$ ' + Number(val).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                                }
+                            }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: {
+                                color: isDark ? '#e2e8f0' : '#1e293b',
+                                font: { size: 12, family: 'Inter, sans-serif', weight: '500' },
+                                autoSkip: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: isDark ? '#1e293b' : '#0f172a',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            padding: 9,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.raw || 0;
+                                    const formatted = 'R$ ' + Number(val).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                    const prefix = val > 0 ? 'Aumento (+): ' : (val < 0 ? 'Redução (-): ' : 'Sem variação: ');
+                                    return ` ${prefix}${formatted}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (e) {
+            console.error('Falha segura no gráfico de impacto por rubrica:', e);
+        }
+    }
+
+    function exportRhChartsToPng() {
+        try {
+            if (!chartRhEncargosInstance && !chartRhImpactoInstance) return;
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                           document.documentElement.classList.contains('dark-theme') ||
+                           (document.body && document.body.classList.contains('dark-theme')) ||
+                           (localStorage.getItem('splitc_theme') === 'dark');
+
+            const bgPage = isDark ? '#0f1117' : '#f8fafc';
+            const bgCard = isDark ? '#17181f' : '#ffffff';
+            const borderCard = isDark ? '#272a36' : '#e2e8f0';
+            const textTitle = isDark ? '#f1f5f9' : '#0f172a';
+            const textMuted = isDark ? '#94a3b8' : '#64748b';
+            const accentGreen = '#10b981';
+
+            const cardPad = 24;
+            const cardGap = 20;
+            const topHeaderH = 70;
+            const cardW = 540;
+            const cardH = 280;
+            const totalW = cardPad * 2 + cardW * 2 + cardGap;
+            const totalH = cardPad * 2 + topHeaderH + cardH;
+
+            const scale = 2;
+            const outCanvas = document.createElement('canvas');
+            outCanvas.width = totalW * scale;
+            outCanvas.height = totalH * scale;
+            const ctx = outCanvas.getContext('2d');
+            ctx.scale(scale, scale);
+
+            ctx.fillStyle = bgPage;
+            ctx.fillRect(0, 0, totalW, totalH);
+
+            ctx.fillStyle = accentGreen;
+            ctx.font = 'bold 20px Inter, system-ui, sans-serif';
+            ctx.fillText('ValidAí', cardPad, cardPad + 24);
+
+            ctx.fillStyle = textTitle;
+            ctx.font = '600 15px Inter, system-ui, sans-serif';
+            ctx.fillText('•  Auditoria de Folha de Pagamento & RH • Painel Analítico', cardPad + 82, cardPad + 24);
+
+            ctx.fillStyle = textMuted;
+            ctx.font = '12px Inter, system-ui, sans-serif';
+            const dateStr = new Date().toLocaleString('pt-BR');
+            ctx.fillText('Gerado via ValidAí em ' + dateStr, cardPad, cardPad + 48);
+
+            function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+                ctx.beginPath();
+                ctx.moveTo(x + radius, y);
+                ctx.lineTo(x + width - radius, y);
+                ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+                ctx.lineTo(x + width, y + height - radius);
+                ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                ctx.lineTo(x + radius, y + height);
+                ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+                ctx.lineTo(x, y + radius);
+                ctx.quadraticCurveTo(x, y, x + radius, y);
+                ctx.closePath();
+                if (fill) ctx.fill();
+                if (stroke) ctx.stroke();
+            }
+
+            const cardY = cardPad + topHeaderH;
+            const c1X = cardPad;
+            const c2X = cardPad + cardW + cardGap;
+
+            ctx.fillStyle = bgCard;
+            ctx.strokeStyle = borderCard;
+            ctx.lineWidth = 1;
+            roundRect(ctx, c1X, cardY, cardW, cardH, 12, true, true);
+            roundRect(ctx, c2X, cardY, cardW, cardH, 12, true, true);
+
+            ctx.fillStyle = textTitle;
+            ctx.font = '600 14px Inter, system-ui, sans-serif';
+            ctx.fillText('Divergências por Tipo de Encargo', c1X + 16, cardY + 28);
+            ctx.fillText('Impacto Financeiro por Rubrica (R$)', c2X + 16, cardY + 28);
+
+            const encCanvas = document.getElementById('chart-rh-encargos');
+            if (encCanvas && chartRhEncargosInstance) {
+                ctx.drawImage(encCanvas, c1X + 16, cardY + 44, cardW - 32, cardH - 56);
+            }
+
+            const impCanvas = document.getElementById('chart-rh-impacto');
+            if (impCanvas && chartRhImpactoInstance && impCanvas.style.display !== 'none') {
+                ctx.drawImage(impCanvas, c2X + 16, cardY + 44, cardW - 32, cardH - 56);
+            }
+
+            const link = document.createElement('a');
+            link.download = 'painel-auditoria-rh.png';
+            link.href = outCanvas.toDataURL('image/png');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (e) {
+            console.error('Falha segura na exportação do painel de RH em PNG:', e);
+        }
+    }
+
+    const btnExportRh = document.getElementById('btn-export-charts-rh');
+    if (btnExportRh) {
+        btnExportRh.addEventListener('click', exportRhChartsToPng);
+    }
+
+    document.addEventListener('click', (e) => {
+        if (e.target && (e.target.closest('#theme-toggle-btn') || (e.target.classList && e.target.classList.contains('theme-toggle-btn')))) {
+            if (lastRhData && stepResults && stepResults.style.display !== 'none') {
+                setTimeout(() => {
+                    renderRhCharts(lastRhData);
+                }, 120);
+            }
+        }
+    });
 
     // Inicialização do Modo Padrão
     updateModeUI('folha');

@@ -404,6 +404,9 @@ document.addEventListener('DOMContentLoaded', () => {
         renderVisualComparison();
         renderDiffTable(data.diff_table_rows || []);
         renderStatsTable(data.stats_comparison || [], s);
+
+        // Renderiza Gráficos Analíticos de Texto (Chart.js)
+        renderTextCharts(data);
     }
 
     // Helper para converter lista de segmentos [{text, type}] em HTML com <del> e <ins>
@@ -765,6 +768,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 15. Botão de Reset ("Comparar Novos Documentos") ---
     btnReset.addEventListener('click', () => {
         stepResults.style.display = 'none';
+        const chartsWrapper = document.getElementById('text-charts-wrapper');
+        if (chartsWrapper) chartsWrapper.style.display = 'none';
+        if (chartTextSimilarityInstance) { chartTextSimilarityInstance.destroy(); chartTextSimilarityInstance = null; }
+        if (chartTextCompositionInstance) { chartTextCompositionInstance.destroy(); chartTextCompositionInstance = null; }
+        lastTextData = null;
         document.getElementById('text-step-upload').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
@@ -772,6 +780,311 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('validaiLanguageChanged', () => {
         if (comparisonData) {
             renderAllResults(comparisonData);
+        }
+    });
+
+    // --- 17. Gráficos Analíticos de Texto (Chart.js) ---
+    let chartTextSimilarityInstance = null;
+    let chartTextCompositionInstance = null;
+    let lastTextData = null;
+
+    function renderTextCharts(data) {
+        lastTextData = data;
+        const chartsWrapper = document.getElementById('text-charts-wrapper');
+        const chartsContainer = document.getElementById('text-charts-container');
+        if (!chartsContainer) return;
+
+        try {
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js não carregado. Exibição dos gráficos ignorada com segurança.');
+                if (chartsWrapper) chartsWrapper.style.display = 'none';
+                chartsContainer.style.display = 'none';
+                return;
+            }
+
+            if (chartsWrapper) chartsWrapper.style.display = 'block';
+            chartsContainer.style.display = 'grid';
+
+            renderTextSimilarityChart(data);
+            renderTextCompositionChart(data);
+        } catch (err) {
+            console.error('Erro seguro na renderização dos gráficos de texto:', err);
+        }
+    }
+
+    function renderTextSimilarityChart(data) {
+        const canvas = document.getElementById('chart-text-similarity');
+        const badge = document.getElementById('text-gauge-badge');
+        if (!canvas) return;
+
+        try {
+            if (chartTextSimilarityInstance) {
+                chartTextSimilarityInstance.destroy();
+                chartTextSimilarityInstance = null;
+            }
+
+            const s = data.summary || {};
+            const simRaw = s.similarity_pct != null ? parseFloat(s.similarity_pct) : 100;
+            const sim = isNaN(simRaw) ? 100 : Math.max(0, Math.min(100, simRaw));
+
+            if (badge) {
+                badge.textContent = `Similaridade: ${sim.toFixed(1)}%`;
+            }
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                           document.documentElement.classList.contains('dark-theme') ||
+                           (document.body && document.body.classList.contains('dark-theme')) ||
+                           (localStorage.getItem('splitc_theme') === 'dark');
+
+            // Cor baseada nas regras: Verde > 85%, Amarelo 60-85%, Laranja/Vermelho < 60%
+            let color = '#10b981';
+            let hoverColor = '#059669';
+            if (sim < 60) {
+                color = '#ef4444';
+                hoverColor = '#dc2626';
+            } else if (sim < 85) {
+                color = '#f59e0b';
+                hoverColor = '#d97706';
+            }
+
+            const trackColor = isDark ? '#272a36' : '#e2e8f0';
+
+            chartTextSimilarityInstance = new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Similaridade', 'Diferença'],
+                    datasets: [{
+                        data: [sim, Math.max(0, 100 - sim)],
+                        backgroundColor: [color, trackColor],
+                        hoverBackgroundColor: [hoverColor, trackColor],
+                        borderWidth: 0,
+                        circumference: 180,
+                        rotation: -90
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '72%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: isDark ? '#1e293b' : '#0f172a',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            padding: 9,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.dataIndex === 0) {
+                                        return ` Similaridade Geral: ${sim.toFixed(1)}%`;
+                                    }
+                                    return ` Variação / Diferença: ${(100 - sim).toFixed(1)}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (e) {
+            console.error('Falha segura no gráfico de similaridade:', e);
+        }
+    }
+
+    function renderTextCompositionChart(data) {
+        const canvas = document.getElementById('chart-text-composition');
+        if (!canvas) return;
+
+        try {
+            if (chartTextCompositionInstance) {
+                chartTextCompositionInstance.destroy();
+                chartTextCompositionInstance = null;
+            }
+
+            const s = data.summary || {};
+            const comp = s.text_composition || {};
+
+            const wordsUnchanged = comp.words_unchanged != null ? comp.words_unchanged : (s.words_unchanged != null ? s.words_unchanged : 0);
+            const wordsAdded = comp.words_added != null ? comp.words_added : (s.words_added != null ? s.words_added : 0);
+            const wordsRemoved = comp.words_removed != null ? comp.words_removed : (s.words_removed != null ? s.words_removed : 0);
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                           document.documentElement.classList.contains('dark-theme') ||
+                           (document.body && document.body.classList.contains('dark-theme')) ||
+                           (localStorage.getItem('splitc_theme') === 'dark');
+
+            const hasData = (wordsUnchanged + wordsAdded + wordsRemoved) > 0;
+            const chartData = hasData ? [wordsUnchanged, wordsAdded, wordsRemoved] : [1, 0, 0];
+
+            chartTextCompositionInstance = new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Texto Inalterado', 'Texto Inserido (+)', 'Texto Removido (-)'],
+                    datasets: [{
+                        data: chartData,
+                        backgroundColor: ['#10b981', '#059669', '#ef4444'],
+                        hoverBackgroundColor: ['#059669', '#047857', '#dc2626'],
+                        borderWidth: 2,
+                        borderColor: isDark ? '#17181f' : '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '66%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 10,
+                                boxHeight: 10,
+                                padding: 10,
+                                color: isDark ? '#cbd5e1' : '#475569',
+                                font: { size: 11, family: 'Inter, sans-serif', weight: '500' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: isDark ? '#1e293b' : '#0f172a',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            padding: 9,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.parsed || 0;
+                                    const sum = wordsUnchanged + wordsAdded + wordsRemoved;
+                                    const pct = sum > 0 ? ((val / sum) * 100).toFixed(1) : '0.0';
+                                    return ` ${context.label}: ${val.toLocaleString('pt-BR')} palavras (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (e) {
+            console.error('Falha segura no gráfico de composição textual:', e);
+        }
+    }
+
+    // Exportação em Imagem PNG direta no cliente (0 MB de RAM no servidor)
+    function exportTextChartsToPng() {
+        try {
+            if (!chartTextSimilarityInstance && !chartTextCompositionInstance) return;
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                           document.documentElement.classList.contains('dark-theme') ||
+                           (document.body && document.body.classList.contains('dark-theme')) ||
+                           (localStorage.getItem('splitc_theme') === 'dark');
+
+            const bgPage = isDark ? '#0f1117' : '#f8fafc';
+            const bgCard = isDark ? '#17181f' : '#ffffff';
+            const borderCard = isDark ? '#272a36' : '#e2e8f0';
+            const textTitle = isDark ? '#f1f5f9' : '#0f172a';
+            const textMuted = isDark ? '#94a3b8' : '#64748b';
+            const accentGreen = '#10b981';
+
+            const cardPad = 24;
+            const cardGap = 20;
+            const topHeaderH = 70;
+            const cardW = 540;
+            const cardH = 280;
+            const totalW = cardPad * 2 + cardW * 2 + cardGap;
+            const totalH = cardPad * 2 + topHeaderH + cardH;
+
+            const scale = 2;
+            const outCanvas = document.createElement('canvas');
+            outCanvas.width = totalW * scale;
+            outCanvas.height = totalH * scale;
+            const ctx = outCanvas.getContext('2d');
+            ctx.scale(scale, scale);
+
+            ctx.fillStyle = bgPage;
+            ctx.fillRect(0, 0, totalW, totalH);
+
+            ctx.fillStyle = accentGreen;
+            ctx.font = 'bold 20px Inter, system-ui, sans-serif';
+            ctx.fillText('ValidAí', cardPad, cardPad + 24);
+
+            ctx.fillStyle = textTitle;
+            ctx.font = '600 15px Inter, system-ui, sans-serif';
+            ctx.fillText('•  Validador de Documentos & Texto • Diagnóstico Visual', cardPad + 82, cardPad + 24);
+
+            ctx.fillStyle = textMuted;
+            ctx.font = '12px Inter, system-ui, sans-serif';
+            const dateStr = new Date().toLocaleString('pt-BR');
+            ctx.fillText('Gerado via ValidAí em ' + dateStr, cardPad, cardPad + 48);
+
+            function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+                ctx.beginPath();
+                ctx.moveTo(x + radius, y);
+                ctx.lineTo(x + width - radius, y);
+                ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+                ctx.lineTo(x + width, y + height - radius);
+                ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                ctx.lineTo(x + radius, y + height);
+                ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+                ctx.lineTo(x, y + radius);
+                ctx.quadraticCurveTo(x, y, x + radius, y);
+                ctx.closePath();
+                if (fill) ctx.fill();
+                if (stroke) ctx.stroke();
+            }
+
+            const cardY = cardPad + topHeaderH;
+            const c1X = cardPad;
+            const c2X = cardPad + cardW + cardGap;
+
+            ctx.fillStyle = bgCard;
+            ctx.strokeStyle = borderCard;
+            ctx.lineWidth = 1;
+            roundRect(ctx, c1X, cardY, cardW, cardH, 12, true, true);
+            roundRect(ctx, c2X, cardY, cardW, cardH, 12, true, true);
+
+            ctx.fillStyle = textTitle;
+            ctx.font = '600 14px Inter, system-ui, sans-serif';
+            ctx.fillText('Índice de Similaridade Global', c1X + 16, cardY + 28);
+            ctx.fillText('Composição do Documento (Palavras)', c2X + 16, cardY + 28);
+
+            const simCanvas = document.getElementById('chart-text-similarity');
+            if (simCanvas && chartTextSimilarityInstance) {
+                const s = lastTextData && lastTextData.summary ? lastTextData.summary : {};
+                const simVal = s.similarity_pct != null ? parseFloat(s.similarity_pct) : 100;
+                ctx.drawImage(simCanvas, c1X + 16, cardY + 44, cardW - 32, cardH - 56);
+                ctx.fillStyle = simVal >= 85 ? '#10b981' : (simVal >= 60 ? '#f59e0b' : '#ef4444');
+                ctx.font = 'bold 22px Inter, system-ui, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(simVal.toFixed(1) + '%', c1X + cardW / 2, cardY + cardH - 30);
+                ctx.textAlign = 'left';
+            }
+
+            const compCanvas = document.getElementById('chart-text-composition');
+            if (compCanvas && chartTextCompositionInstance) {
+                ctx.drawImage(compCanvas, c2X + 16, cardY + 44, cardW - 32, cardH - 56);
+            }
+
+            const link = document.createElement('a');
+            link.download = 'painel-validacao-texto.png';
+            link.href = outCanvas.toDataURL('image/png');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (e) {
+            console.error('Falha segura na exportação do painel de texto em PNG:', e);
+        }
+    }
+
+    const btnExportText = document.getElementById('btn-export-charts-text');
+    if (btnExportText) {
+        btnExportText.addEventListener('click', exportTextChartsToPng);
+    }
+
+    document.addEventListener('click', (e) => {
+        if (e.target && (e.target.closest('#theme-toggle-btn') || (e.target.classList && e.target.classList.contains('theme-toggle-btn')))) {
+            if (lastTextData && stepResults && stepResults.style.display !== 'none') {
+                setTimeout(() => {
+                    renderTextCharts(lastTextData);
+                }, 120);
+            }
         }
     });
 });

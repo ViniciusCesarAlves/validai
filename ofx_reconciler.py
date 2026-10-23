@@ -699,6 +699,15 @@ def reconcile_ofx_vs_sales(
     total_sales_count = len(sales_rows)
     reconciled_pct = round((count_ok / total_sales_count) * 100.0, 1) if total_sales_count > 0 else 0.0
 
+    count_reconciled = count_ok
+    count_pending = count_unpaid
+    count_unidentified = count_divergent_rate + len(orphan_credits)
+
+    val_reconciled = sum(it.get('credited_ofx_val', 0.0) for it in reconciled_items if it.get('status') == 'CONCILIADO')
+    val_pending = sum(it.get('expected_net_val', 0.0) for it in reconciled_items if it.get('status') == 'NAO_REPASSADO')
+    val_unidentified = round(total_divergence_loss + total_orphan_amount, 2)
+    total_actual_fees = round(max(0.0, total_expected_fees + total_divergence_loss), 2)
+
     kpis = {
         'total_sales_count': total_sales_count,
         'total_gross': total_gross,
@@ -719,7 +728,25 @@ def reconcile_ofx_vs_sales(
         'total_orphan_amount': round(total_orphan_amount, 2),
         'total_orphan_amount_fmt': format_brl(total_orphan_amount),
         'expected_rate_pct': expected_rate,
-        'tolerance_cents': tolerance
+        'tolerance_cents': tolerance,
+        'dashboard_taxas': {
+            'status_counts': {
+                'reconciled': count_reconciled,
+                'pending': count_pending,
+                'divergent_or_unidentified': count_unidentified
+            },
+            'status_values': {
+                'reconciled': round(val_reconciled, 2),
+                'pending': round(val_pending, 2),
+                'divergent_or_unidentified': round(val_unidentified, 2)
+            },
+            'financial_comparison': {
+                'gross_expected': round(total_gross, 2),
+                'credited_ofx': round(total_credited_ofx, 2),
+                'fees_estimated': round(total_expected_fees, 2),
+                'fees_discounted': round(total_actual_fees, 2)
+            }
+        }
     }
 
     return {

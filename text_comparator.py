@@ -537,6 +537,11 @@ def compare_texts(
         }
     ]
 
+    words_unchanged = total_words_a if is_identical else max(0, total_words_b - total_words_added)
+    chars_unchanged = chars_a if is_identical else min(chars_a, chars_b)
+    chars_added = max(0, chars_b - chars_a) if not is_identical and chars_b > chars_a else 0
+    chars_removed = max(0, chars_a - chars_b) if not is_identical and chars_a > chars_b else 0
+
     summary = {
         'filename_a': filename_a,
         'filename_b': filename_b,
@@ -557,8 +562,18 @@ def compare_texts(
         'total_words_b': total_words_b,
         'words_added': total_words_added,
         'words_removed': total_words_removed,
+        'words_unchanged': words_unchanged,
         'chars_a': chars_a,
-        'chars_b': chars_b
+        'chars_b': chars_b,
+        'chars_unchanged': chars_unchanged,
+        'chars_added': chars_added,
+        'chars_removed': chars_removed,
+        'text_composition': {
+            'words_unchanged': words_unchanged,
+            'words_added': total_words_added,
+            'words_removed': total_words_removed,
+            'similarity_pct': similarity_pct
+        }
     }
 
     return {

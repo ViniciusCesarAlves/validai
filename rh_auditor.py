@@ -492,6 +492,42 @@ def audit_rh_bases(df_ref: pd.DataFrame, df_audit: pd.DataFrame, options: dict) 
     divergence_count = int(len(employees_with_divergence))
     divergence_pct = round(float((divergence_count / total_audited_count) * 100.0), 1) if total_audited_count > 0 else 0.0
 
+    # 6. Agregações para Dashboard Chart.js (Zero overhead de RAM)
+    encargos_counts = {
+        'INSS': 0,
+        'FGTS': 0,
+        'IRRF': 0,
+        'Salário Base': 0,
+        'Horas Extras': 0,
+        'Outros': 0
+    }
+    for item in divergences_list:
+        col_name = str(item.get('col_ref') or '').upper()
+        if 'INSS' in col_name or 'PREV' in col_name:
+            encargos_counts['INSS'] += 1
+        elif 'FGTS' in col_name:
+            encargos_counts['FGTS'] += 1
+        elif 'IRRF' in col_name or 'IRPF' in col_name or 'IMPOSTO' in col_name or 'RETEN' in col_name:
+            encargos_counts['IRRF'] += 1
+        elif 'SALARIO' in col_name or 'SALÁRIO' in col_name or 'BASE' in col_name:
+            encargos_counts['Salário Base'] += 1
+        elif 'HORA' in col_name or 'EXTRA' in col_name or 'H.E' in col_name or 'HE' in col_name:
+            encargos_counts['Horas Extras'] += 1
+        else:
+            encargos_counts['Outros'] += 1
+
+    rubricas_impacto = []
+    sorted_fin = sorted(financial_summary, key=lambda x: abs(x.get('diff', 0.0)), reverse=True)
+    for f in sorted_fin[:6]:
+        rubricas_impacto.append({
+            'rubrica': f.get('col_ref') or f.get('col_display'),
+            'diff': f.get('diff', 0.0),
+            'diff_abs': abs(f.get('diff', 0.0)),
+            'diff_fmt': f.get('diff_fmt', 'R$ 0,00'),
+            'total_ref': f.get('total_ref', 0.0),
+            'total_audit': f.get('total_audit', 0.0)
+        })
+
     kpis = {
         'total_audited': total_audited_count,
         'divergence_count': divergence_count,
@@ -506,7 +542,11 @@ def audit_rh_bases(df_ref: pd.DataFrame, df_audit: pd.DataFrame, options: dict) 
         'total_ref_sum_fmt': format_brl(total_net_ref_sum),
         'total_audit_sum': float(total_net_audit_sum),
         'total_audit_sum_fmt': format_brl(total_net_audit_sum),
-        'mode': mode
+        'mode': mode,
+        'dashboard_rh': {
+            'encargos': encargos_counts,
+            'rubricas': rubricas_impacto
+        }
     }
 
     # Ordenações

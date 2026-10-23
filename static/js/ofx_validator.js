@@ -549,6 +549,9 @@
         stepConfig.style.display = 'none';
         stepResults.style.display = 'block';
 
+        // Renderiza Gráficos Analíticos de Taxas e Conciliação (Chart.js)
+        renderOfxCharts(data);
+
         window.scrollTo({ top: stepResults.offsetTop - 80, behavior: 'smooth' });
     }
 
@@ -694,6 +697,18 @@
         currentReportId = null;
         reconciliationData = null;
 
+        const chartsWrapper = document.getElementById('ofx-charts-wrapper');
+        if (chartsWrapper) chartsWrapper.style.display = 'none';
+        if (chartOfxAdherenceInstance) {
+            chartOfxAdherenceInstance.destroy();
+            chartOfxAdherenceInstance = null;
+        }
+        if (chartOfxFinancialInstance) {
+            chartOfxFinancialInstance.destroy();
+            chartOfxFinancialInstance = null;
+        }
+        lastOfxData = null;
+
         fileMetaOfx.style.display = 'none';
         fileMetaSales.style.display = 'none';
         dropOfxFile.classList.remove('file-loaded');
@@ -705,6 +720,346 @@
         stepUpload.style.display = 'block';
 
         window.scrollTo({ top: stepUpload.offsetTop - 80, behavior: 'smooth' });
+    });
+
+    // -------------------------------------------------------------------------
+    // 6. GRÁFICOS ANALÍTICOS DE TAXAS E CONCILIAÇÃO (CHART.JS)
+    // -------------------------------------------------------------------------
+    let chartOfxAdherenceInstance = null;
+    let chartOfxFinancialInstance = null;
+    let lastOfxData = null;
+
+    function renderOfxCharts(data) {
+        lastOfxData = data;
+        const chartsWrapper = document.getElementById('ofx-charts-wrapper');
+        const chartsContainer = document.getElementById('ofx-charts-container');
+        if (!chartsContainer) return;
+
+        try {
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js não carregado. Exibição dos gráficos ignorada com segurança.');
+                if (chartsWrapper) chartsWrapper.style.display = 'none';
+                chartsContainer.style.display = 'none';
+                return;
+            }
+
+            if (chartsWrapper) chartsWrapper.style.display = 'block';
+            chartsContainer.style.display = 'grid';
+
+            renderOfxAdherenceChart(data);
+            renderOfxFinancialChart(data);
+        } catch (err) {
+            console.error('Erro seguro na renderização dos gráficos de taxas:', err);
+        }
+    }
+
+    function renderOfxAdherenceChart(data) {
+        const canvas = document.getElementById('chart-ofx-adherence');
+        const badge = document.getElementById('ofx-adherence-badge');
+        if (!canvas) return;
+
+        try {
+            if (chartOfxAdherenceInstance) {
+                chartOfxAdherenceInstance.destroy();
+                chartOfxAdherenceInstance = null;
+            }
+
+            const k = data.kpis || {};
+            const dash = k.dashboard_taxas || {};
+            const counts = dash.status_counts || {};
+
+            const reconciled = counts.reconciled != null ? counts.reconciled : (k.reconciled_count || 0);
+            const pending = counts.pending != null ? counts.pending : (k.unpaid_sales_count || 0);
+            const divergent = counts.divergent_or_unidentified != null ? counts.divergent_or_unidentified : ((k.divergent_fees_count || 0) + (k.orphan_credits_count || 0));
+
+            const total = reconciled + pending + divergent;
+            const recPct = k.reconciled_pct != null ? k.reconciled_pct : (total > 0 ? ((reconciled / total) * 100).toFixed(1) : 0);
+
+            if (badge) {
+                badge.textContent = `Aderência: ${recPct}%`;
+            }
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                           document.documentElement.classList.contains('dark-theme') ||
+                           (document.body && document.body.classList.contains('dark-theme')) ||
+                           (localStorage.getItem('splitc_theme') === 'dark');
+
+            const chartData = total > 0 ? [reconciled, pending, divergent] : [1, 0, 0];
+
+            chartOfxAdherenceInstance = new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Reconciliadas no Prazo', 'Pendentes de Liquidação', 'Divergentes / Não Identificados'],
+                    datasets: [{
+                        data: chartData,
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                        hoverBackgroundColor: ['#059669', '#d97706', '#dc2626'],
+                        borderWidth: 2,
+                        borderColor: isDark ? '#17181f' : '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '66%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 10,
+                                boxHeight: 10,
+                                padding: 10,
+                                color: isDark ? '#cbd5e1' : '#475569',
+                                font: { size: 11, family: 'Inter, sans-serif', weight: '500' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: isDark ? '#1e293b' : '#0f172a',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            padding: 9,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    if (total === 0) return ' Sem lançamentos registrados';
+                                    const val = context.parsed || 0;
+                                    const pct = total > 0 ? ((val / total) * 100).toFixed(1) : '0.0';
+                                    return ` ${context.label}: ${val} transações (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (e) {
+            console.error('Falha segura no gráfico de aderência bancária:', e);
+        }
+    }
+
+    function renderOfxFinancialChart(data) {
+        const canvas = document.getElementById('chart-ofx-financial');
+        if (!canvas) return;
+
+        try {
+            if (chartOfxFinancialInstance) {
+                chartOfxFinancialInstance.destroy();
+                chartOfxFinancialInstance = null;
+            }
+
+            const k = data.kpis || {};
+            const dash = k.dashboard_taxas || {};
+            const comp = dash.financial_comparison || {};
+
+            const grossExpected = comp.gross_expected != null ? comp.gross_expected : (k.total_gross || 0);
+            const creditedOfx = comp.credited_ofx != null ? comp.credited_ofx : (k.total_credited_ofx || 0);
+            const feesEstimated = comp.fees_estimated != null ? comp.fees_estimated : (k.total_expected_fees || 0);
+            const feesDiscounted = comp.fees_discounted != null ? comp.fees_discounted : Math.max(0, (k.total_expected_fees || 0) + (k.total_divergence_loss || 0));
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                           document.documentElement.classList.contains('dark-theme') ||
+                           (document.body && document.body.classList.contains('dark-theme')) ||
+                           (localStorage.getItem('splitc_theme') === 'dark');
+
+            chartOfxFinancialInstance = new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: ['Faturamento vs Repasse', 'Taxas das Maquininhas'],
+                    datasets: [
+                        {
+                            label: 'Esperado / Previsto',
+                            data: [grossExpected, feesEstimated],
+                            backgroundColor: '#3b82f6',
+                            hoverBackgroundColor: '#2563eb',
+                            borderRadius: 4,
+                            barPercentage: 0.7,
+                            categoryPercentage: 0.6
+                        },
+                        {
+                            label: 'Efetivo no Extrato',
+                            data: [creditedOfx, feesDiscounted],
+                            backgroundColor: '#10b981',
+                            hoverBackgroundColor: '#059669',
+                            borderRadius: 4,
+                            barPercentage: 0.7,
+                            categoryPercentage: 0.6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            left: 15,
+                            right: 15
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: isDark ? '#e2e8f0' : '#1e293b',
+                                font: { size: 12, family: 'Inter, sans-serif', weight: '500' }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)'
+                            },
+                            ticks: {
+                                color: isDark ? '#94a3b8' : '#64748b',
+                                font: { size: 11, family: 'Inter, sans-serif' },
+                                callback: function(val) {
+                                    return 'R$ ' + Number(val).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 10,
+                                boxHeight: 10,
+                                padding: 10,
+                                color: isDark ? '#cbd5e1' : '#475569',
+                                font: { size: 11, family: 'Inter, sans-serif', weight: '500' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: isDark ? '#1e293b' : '#0f172a',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            padding: 9,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.raw || 0;
+                                    const formatted = 'R$ ' + Number(val).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                    return ` ${context.dataset.label}: ${formatted}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (e) {
+            console.error('Falha segura no gráfico financeiro de taxas:', e);
+        }
+    }
+
+    function exportOfxChartsToPng() {
+        try {
+            if (!chartOfxAdherenceInstance && !chartOfxFinancialInstance) return;
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                           document.documentElement.classList.contains('dark-theme') ||
+                           (document.body && document.body.classList.contains('dark-theme')) ||
+                           (localStorage.getItem('splitc_theme') === 'dark');
+
+            const bgPage = isDark ? '#0f1117' : '#f8fafc';
+            const bgCard = isDark ? '#17181f' : '#ffffff';
+            const borderCard = isDark ? '#272a36' : '#e2e8f0';
+            const textTitle = isDark ? '#f1f5f9' : '#0f172a';
+            const textMuted = isDark ? '#94a3b8' : '#64748b';
+            const accentGreen = '#10b981';
+
+            const cardPad = 24;
+            const cardGap = 20;
+            const topHeaderH = 70;
+            const cardW = 540;
+            const cardH = 280;
+            const totalW = cardPad * 2 + cardW * 2 + cardGap;
+            const totalH = cardPad * 2 + topHeaderH + cardH;
+
+            const scale = 2;
+            const outCanvas = document.createElement('canvas');
+            outCanvas.width = totalW * scale;
+            outCanvas.height = totalH * scale;
+            const ctx = outCanvas.getContext('2d');
+            ctx.scale(scale, scale);
+
+            ctx.fillStyle = bgPage;
+            ctx.fillRect(0, 0, totalW, totalH);
+
+            ctx.fillStyle = accentGreen;
+            ctx.font = 'bold 20px Inter, system-ui, sans-serif';
+            ctx.fillText('ValidAí', cardPad, cardPad + 24);
+
+            ctx.fillStyle = textTitle;
+            ctx.font = '600 15px Inter, system-ui, sans-serif';
+            ctx.fillText('•  Conciliador de Taxas e Extratos • Painel Analítico', cardPad + 82, cardPad + 24);
+
+            ctx.fillStyle = textMuted;
+            ctx.font = '12px Inter, system-ui, sans-serif';
+            const dateStr = new Date().toLocaleString('pt-BR');
+            ctx.fillText('Gerado via ValidAí em ' + dateStr, cardPad, cardPad + 48);
+
+            function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+                ctx.beginPath();
+                ctx.moveTo(x + radius, y);
+                ctx.lineTo(x + width - radius, y);
+                ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+                ctx.lineTo(x + width, y + height - radius);
+                ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                ctx.lineTo(x + radius, y + height);
+                ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+                ctx.lineTo(x, y + radius);
+                ctx.quadraticCurveTo(x, y, x + radius, y);
+                ctx.closePath();
+                if (fill) ctx.fill();
+                if (stroke) ctx.stroke();
+            }
+
+            const cardY = cardPad + topHeaderH;
+            const c1X = cardPad;
+            const c2X = cardPad + cardW + cardGap;
+
+            ctx.fillStyle = bgCard;
+            ctx.strokeStyle = borderCard;
+            ctx.lineWidth = 1;
+            roundRect(ctx, c1X, cardY, cardW, cardH, 12, true, true);
+            roundRect(ctx, c2X, cardY, cardW, cardH, 12, true, true);
+
+            ctx.fillStyle = textTitle;
+            ctx.font = '600 14px Inter, system-ui, sans-serif';
+            ctx.fillText('Aderência da Liquidação Bancária', c1X + 16, cardY + 28);
+            ctx.fillText('Comparativo Financeiro e Taxas (R$)', c2X + 16, cardY + 28);
+
+            const adhCanvas = document.getElementById('chart-ofx-adherence');
+            if (adhCanvas && chartOfxAdherenceInstance) {
+                ctx.drawImage(adhCanvas, c1X + 16, cardY + 44, cardW - 32, cardH - 56);
+            }
+
+            const finCanvas = document.getElementById('chart-ofx-financial');
+            if (finCanvas && chartOfxFinancialInstance) {
+                ctx.drawImage(finCanvas, c2X + 16, cardY + 44, cardW - 32, cardH - 56);
+            }
+
+            const link = document.createElement('a');
+            link.download = 'painel-conciliacao-taxas.png';
+            link.href = outCanvas.toDataURL('image/png');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (e) {
+            console.error('Falha segura na exportação do painel de taxas em PNG:', e);
+        }
+    }
+
+    const btnExportOfx = document.getElementById('btn-export-charts-ofx');
+    if (btnExportOfx) {
+        btnExportOfx.addEventListener('click', exportOfxChartsToPng);
+    }
+
+    document.addEventListener('click', (e) => {
+        if (e.target && (e.target.closest('#theme-toggle-btn') || (e.target.classList && e.target.classList.contains('theme-toggle-btn')))) {
+            if (lastOfxData && stepResults && stepResults.style.display !== 'none') {
+                setTimeout(() => {
+                    renderOfxCharts(lastOfxData);
+                }, 120);
+            }
+        }
     });
 
 })();

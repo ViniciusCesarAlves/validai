@@ -3171,7 +3171,10 @@ body.dark-theme .text-info {
 
 .step3-charts-container,
 .cadastros-charts-container,
-.xml-charts-container {
+.xml-charts-container,
+.text-charts-container,
+.rh-charts-container,
+.ofx-charts-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
@@ -3325,7 +3328,10 @@ html.dark-theme .step3-chart-empty {
 
     .step3-charts-container,
     .cadastros-charts-container,
-    .xml-charts-container {
+    .xml-charts-container,
+    .text-charts-container,
+    .rh-charts-container,
+    .ofx-charts-container {
         grid-template-columns: 1fr;
         gap: 16px;
         margin-bottom: 16px;
@@ -3339,7 +3345,7 @@ html.dark-theme .step3-chart-empty {
 
     .step3-chart-body {
         height: 220px;
-        max-height: 260px;
+        max-height: 250px;
         width: 100%;
     }
 }
