@@ -57,6 +57,28 @@ def test_full_pipeline():
     assert 'ID_Pedido' in sheets_ex_json['suggested_keys']
     print("[OK] Carregamento de exemplo demonstrativo de planilhas (/api/sheets/load-example) validado com sucesso!")
 
+    # 2.2 Teste de Execução da Comparação do Exemplo Demonstrativo
+    res_compare_demo = client.post('/api/compare', json={
+        'session_id': sheets_ex_json['session_id'],
+        'primary_key_a': 'ID_Pedido',
+        'primary_key_b': 'ID_Pedido',
+        'secondary_keys_a': [],
+        'normalize_currency': True,
+        'normalize_dates': True,
+        'ignore_case': True,
+        'trim_spaces': True,
+        'column_mapping': sheets_ex_json['column_mapping'],
+        'header_line_a': 1,
+        'header_line_b': 1,
+        'sheets_a': ['Vendas_ERP'],
+        'sheets_b': ['Vendas_ERP']
+    })
+    assert res_compare_demo.status_code == 200, f"Falha comparando demo: {res_compare_demo.get_data(as_text=True)}"
+    demo_comp_res = res_compare_demo.get_json()
+    assert demo_comp_res['success'] is True
+    assert demo_comp_res['summary']['different_rows_count'] > 0
+    print("[OK] Execução completa de comparação do exemplo demonstrativo ('Vendas_ERP') validada com sucesso!")
+
     # 3. Teste com seletor único da esquerda (sem colunas complementares)
     compare_payload_single = {
         'session_id': session_id,
@@ -1577,6 +1599,85 @@ def test_full_pipeline():
     assert comp_multi_res['summary']['is_identical'] is True
     assert comp_multi_res['summary']['total_rows_a'] == 2
     print("[OK] Comparação final com a aba e cabeçalho escolhidos no Passo 2 realizada com sucesso (100% idêntico)!")
+
+    # 26. Teste dos Dashboards Analíticos Chart.js e Exportação PNG nos 3 Validadores
+    print("\n--- Testando Dashboards Analíticos (Chart.js) e Exportação PNG nos 3 Validadores ---")
+    
+    # Validador de Planilhas (/)
+    res_home = client.get('/')
+    assert res_home.status_code == 200
+    home_html = res_home.data.decode('utf-8')
+    assert 'cdn.jsdelivr.net/npm/chart.js' in home_html, "Chart.js ausente na Home"
+    assert 'id="step3-charts-wrapper"' in home_html, "Wrapper de gráficos ausente no Passo 3"
+    assert 'id="btn-export-charts-sheets"' in home_html, "Botão de exportação PNG ausente no Passo 3"
+    assert 'id="chart-records-proportion"' in home_html, "Canvas de proporção ausente no Passo 3"
+    assert 'id="chart-diff-cols"' in home_html, "Canvas de top colunas ausente no Passo 3"
+    print("[OK] Validador de Planilhas: Elementos do painel Chart.js e botão exportar PNG validados!")
+
+    # Higienizador de Cadastros (/validador-cadastros)
+    res_cad_page = client.get('/validador-cadastros')
+    assert res_cad_page.status_code == 200
+    cad_html = res_cad_page.data.decode('utf-8')
+    assert 'cdn.jsdelivr.net/npm/chart.js' in cad_html, "Chart.js ausente no Higienizador de Cadastros"
+    assert 'id="cadastros-charts-wrapper"' in cad_html, "Wrapper de gráficos ausente em Cadastros"
+    assert 'id="btn-export-charts-cadastros"' in cad_html, "Botão de exportação PNG ausente em Cadastros"
+    assert 'id="chart-cadastros-health"' in cad_html, "Canvas de saúde da base ausente em Cadastros"
+    assert 'id="chart-cadastros-issues"' in cad_html, "Canvas de inconsistências ausente em Cadastros"
+    
+    # Processamento de Cadastros com checagem do inconsistency_breakdown
+    res_cad_proc = client.post('/api/cadastros/load-example')
+    assert res_cad_proc.status_code == 200
+    cad_ex_sid = res_cad_proc.get_json()['session_id']
+    res_cad_run = client.post('/api/cadastros/process', json={
+        'session_id': cad_ex_sid,
+        'col_doc': 'CPF_Cliente',
+        'col_name': 'Nome_Razao',
+        'col_email': 'Email_Contato',
+        'col_phone': 'Telefone_Celular',
+        'duplicate_keys': ['doc', 'email']
+    })
+    assert res_cad_run.status_code == 200
+    cad_run_data = res_cad_run.get_json()
+    assert 'inconsistency_breakdown' in cad_run_data['summary'], "inconsistency_breakdown ausente no summary de cadastros"
+    incons = cad_run_data['summary']['inconsistency_breakdown']
+    assert 'cpf_invalid' in incons
+    assert 'cnpj_invalid' in incons
+    assert 'missing_zeros' in incons
+    assert 'invalid_emails' in incons
+    assert 'duplicate_rows' in incons
+    print("[OK] Higienizador de Cadastros: Painel Chart.js, breakdown de inconsistências e exportar PNG validados!")
+
+    # Conciliador de XML (/validador-xml)
+    res_xml_page = client.get('/validador-xml')
+    assert res_xml_page.status_code == 200
+    xml_html = res_xml_page.data.decode('utf-8')
+    assert 'cdn.jsdelivr.net/npm/chart.js' in xml_html, "Chart.js ausente no Conciliador de XML"
+    assert 'id="xml-charts-wrapper"' in xml_html, "Wrapper de gráficos ausente no XML"
+    assert 'id="btn-export-charts-xml"' in xml_html, "Botão de exportação PNG ausente no XML"
+    assert 'id="chart-xml-status"' in xml_html, "Canvas de status da conciliação ausente no XML"
+    assert 'id="chart-xml-financial"' in xml_html, "Canvas de confronto financeiro ausente no XML"
+
+    # Processamento de XML com checagem do financial_tax_comparison
+    res_xml_ex = client.post('/api/xml/load-example')
+    assert res_xml_ex.status_code == 200
+    xml_ex_sid = res_xml_ex.get_json()['session_id']
+    res_xml_run = client.post('/api/xml/reconcile', json={
+        'session_id': xml_ex_sid,
+        'col_nf': 'Numero_NF',
+        'col_val': 'Valor_Total_NF',
+        'col_cnpj': 'CNPJ_Fornecedor',
+        'col_tax': 'Total_Impostos'
+    })
+    assert res_xml_run.status_code == 200, f"Falha ao rodar conciliação XML de teste: {res_xml_run.get_json()}"
+    xml_run_data = res_xml_run.get_json()
+    assert 'financial_tax_comparison' in xml_run_data['summary'], "financial_tax_comparison ausente no summary de XML"
+    fin_comp = xml_run_data['summary']['financial_tax_comparison']
+    assert 'xml' in fin_comp and 'sheet' in fin_comp
+    assert 'total_prod' in fin_comp['xml']
+    assert 'total_bc' in fin_comp['xml']
+    assert 'total_icms' in fin_comp['xml']
+    assert 'total_pis_cofins' in fin_comp['xml']
+    print("[OK] Conciliador de XML: Painel Chart.js, confronto tributário e exportar PNG validados!")
 
     print("\nTODOS OS TESTES PASSARAM COM 100% DE SUCESSO!")
 

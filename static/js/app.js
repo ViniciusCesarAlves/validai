@@ -1948,7 +1948,354 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
+
+        // Renderizar Gráficos Analíticos do Passo 3 (Donut e Top Colunas)
+        renderChartsStep3(data);
     }
+    // ----------------------------------------------------
+    // GRÁFICOS ANALÍTICOS DO PASSO 3 (CHART.JS)
+    // ----------------------------------------------------
+    let chartRecordsProportionInstance = null;
+    let chartDiffColsInstance = null;
+
+    function renderChartsStep3(data) {
+        const chartsWrapper = document.getElementById('step3-charts-wrapper');
+        const chartsContainer = document.getElementById('step3-charts-container');
+        if (!chartsContainer) return;
+
+        try {
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js não carregado. Exibição dos gráficos ignorada com segurança.');
+                if (chartsWrapper) chartsWrapper.style.display = 'none';
+                chartsContainer.style.display = 'none';
+                return;
+            }
+
+            if (chartsWrapper) chartsWrapper.style.display = 'block';
+            chartsContainer.style.display = 'grid';
+            renderDonutChart(data);
+            renderBarChart(data);
+        } catch (err) {
+            console.error('Erro seguro na renderização dos gráficos do Passo 3:', err);
+        }
+    }
+
+    function renderDonutChart(data) {
+        const canvas = document.getElementById('chart-records-proportion');
+        if (!canvas) return;
+
+        try {
+            if (chartRecordsProportionInstance) {
+                chartRecordsProportionInstance.destroy();
+                chartRecordsProportionInstance = null;
+            }
+
+            const s = data.summary || {};
+            const matchedCount = s.matched_keys_count || 0;
+            const diffCount = s.different_rows_count || 0;
+            const identicalCount = Math.max(0, matchedCount - diffCount);
+            const exclusiveCount = (s.only_in_a_count || 0) + (s.only_in_b_count || 0);
+
+            const lang = (window.ValidAiI18n && window.ValidAiI18n.getCurrentLanguage) ? window.ValidAiI18n.getCurrentLanguage() : 'pt';
+            const numLocale = lang === 'en' ? 'en-US' : (lang === 'es' ? 'es-ES' : 'pt-BR');
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                           document.documentElement.classList.contains('dark-theme') ||
+                           (document.body && document.body.classList.contains('dark-theme')) ||
+                           (localStorage.getItem('splitc_theme') === 'dark');
+
+            const labelIdentical = lang === 'en' ? '100% Identical' : (lang === 'es' ? '100% Idénticas' : '100% Iguais');
+            const labelDiff = lang === 'en' ? 'With Differences' : (lang === 'es' ? 'Con Diferencias' : 'Com Diferenças');
+            const labelExclusive = lang === 'en' ? 'Exclusive' : (lang === 'es' ? 'Exclusivas' : 'Exclusivas');
+
+            const totalRecords = identicalCount + diffCount + exclusiveCount;
+            const chartData = totalRecords > 0 
+                ? [identicalCount, diffCount, exclusiveCount] 
+                : [1, 0, 0];
+
+            chartRecordsProportionInstance = new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    labels: [labelIdentical, labelDiff, labelExclusive],
+                    datasets: [{
+                        data: chartData,
+                        backgroundColor: ['#10b981', '#ef4444', '#f59e0b'],
+                        hoverBackgroundColor: ['#059669', '#dc2626', '#d97706'],
+                        borderWidth: 2,
+                        borderColor: isDark ? '#17181f' : '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '66%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 10,
+                                boxHeight: 10,
+                                padding: 10,
+                                color: isDark ? '#cbd5e1' : '#475569',
+                                font: { size: 11, family: 'Inter, sans-serif', weight: '500' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: isDark ? '#1e293b' : '#0f172a',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            padding: 9,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    if (totalRecords === 0) return ` 0 registros`;
+                                    const val = context.parsed || 0;
+                                    const pct = totalRecords > 0 ? ((val / totalRecords) * 100).toFixed(1) : '0.0';
+                                    return ` ${context.label}: ${val.toLocaleString(numLocale)} (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (e) {
+            console.error('Falha segura no gráfico Donut:', e);
+        }
+    }
+
+    function renderBarChart(data) {
+        const canvas = document.getElementById('chart-diff-cols');
+        const emptyEl = document.getElementById('chart-diff-cols-empty');
+        if (!canvas) return;
+
+        try {
+            if (chartDiffColsInstance) {
+                chartDiffColsInstance.destroy();
+                chartDiffColsInstance = null;
+            }
+
+            const diffMap = data.columns_with_differences || (data.summary && data.summary.columns_with_differences) || {};
+            const sortedCols = Object.entries(diffMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+            if (sortedCols.length === 0) {
+                canvas.style.display = 'none';
+                if (emptyEl) emptyEl.style.display = 'flex';
+                return;
+            }
+
+            canvas.style.display = 'block';
+            if (emptyEl) emptyEl.style.display = 'none';
+
+            const lang = (window.ValidAiI18n && window.ValidAiI18n.getCurrentLanguage) ? window.ValidAiI18n.getCurrentLanguage() : 'pt';
+            const numLocale = lang === 'en' ? 'en-US' : (lang === 'es' ? 'es-ES' : 'pt-BR');
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                           document.documentElement.classList.contains('dark-theme') ||
+                           (document.body && document.body.classList.contains('dark-theme')) ||
+                           (localStorage.getItem('splitc_theme') === 'dark');
+
+            const datasetLabel = lang === 'en' ? 'Discrepancies' : (lang === 'es' ? 'Discrepancias' : 'Divergências');
+
+            chartDiffColsInstance = new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: sortedCols.map(c => c[0]),
+                    datasets: [{
+                        label: datasetLabel,
+                        data: sortedCols.map(c => c[1]),
+                        backgroundColor: 'rgba(239, 68, 68, 0.85)',
+                        hoverBackgroundColor: '#dc2626',
+                        borderRadius: 4,
+                        barThickness: 16,
+                        maxBarThickness: 20
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            left: 15,
+                            right: 15
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: isDark ? '#1e293b' : '#0f172a',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            padding: 9,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.parsed.x || 0;
+                                    const errLabel = lang === 'en' ? 'divergent rows' : (lang === 'es' ? 'filas con error' : 'linhas com divergência');
+                                    return ` ${val.toLocaleString(numLocale)} ${errLabel}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: {
+                                color: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                precision: 0,
+                                color: isDark ? '#94a3b8' : '#64748b',
+                                font: { size: 10, family: 'Inter, sans-serif' }
+                            }
+                        },
+                        y: {
+                            grid: { display: false, drawBorder: false },
+                            ticks: {
+                                autoSkip: false,
+                                color: isDark ? '#e2e8f0' : '#1e293b',
+                                font: { size: 12, family: 'JetBrains Mono, monospace', weight: '600' }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (e) {
+            console.error('Falha segura no gráfico de Barras:', e);
+        }
+    }
+
+    // Exportação do Painel Analítico em Imagem PNG (Client-side / 0 MB no Servidor)
+    function exportChartsDashboardToPng({ title, filename, chart1, chart2, empty2Text }) {
+        try {
+            if (!chart1 && !chart2) return;
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                           document.documentElement.classList.contains('dark-theme') ||
+                           (document.body && document.body.classList.contains('dark-theme')) ||
+                           (localStorage.getItem('splitc_theme') === 'dark');
+
+            const bgPage = isDark ? '#0f1117' : '#f8fafc';
+            const bgCard = isDark ? '#17181f' : '#ffffff';
+            const borderCard = isDark ? '#272a36' : '#e2e8f0';
+            const textTitle = isDark ? '#f1f5f9' : '#0f172a';
+            const textMuted = isDark ? '#94a3b8' : '#64748b';
+            const accentGreen = '#10b981';
+
+            const cardPad = 24;
+            const cardGap = 20;
+            const topHeaderH = 70;
+            const cardW = 540;
+            const cardH = 280;
+            const totalW = cardPad * 2 + cardW * 2 + cardGap;
+            const totalH = cardPad * 2 + topHeaderH + cardH;
+
+            const scale = 2; // Alta resolução (retina 2x)
+            const outCanvas = document.createElement('canvas');
+            outCanvas.width = totalW * scale;
+            outCanvas.height = totalH * scale;
+            const ctx = outCanvas.getContext('2d');
+            ctx.scale(scale, scale);
+
+            // Fundo
+            ctx.fillStyle = bgPage;
+            ctx.fillRect(0, 0, totalW, totalH);
+
+            // Cabeçalho da Imagem
+            ctx.fillStyle = accentGreen;
+            ctx.font = 'bold 20px Inter, system-ui, sans-serif';
+            ctx.fillText('ValidAí', cardPad, cardPad + 24);
+
+            ctx.fillStyle = textTitle;
+            ctx.font = '600 15px Inter, system-ui, sans-serif';
+            ctx.fillText('•  ' + (title || 'Painel Analítico'), cardPad + 82, cardPad + 24);
+
+            ctx.fillStyle = textMuted;
+            ctx.font = '12px Inter, system-ui, sans-serif';
+            const dateStr = new Date().toLocaleString('pt-BR');
+            ctx.fillText('Gerado via ValidAí em ' + dateStr, cardPad, cardPad + 48);
+
+            function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+                ctx.beginPath();
+                ctx.moveTo(x + radius, y);
+                ctx.lineTo(x + width - radius, y);
+                ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+                ctx.lineTo(x + width, y + height - radius);
+                ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                ctx.lineTo(x + radius, y + height);
+                ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+                ctx.lineTo(x, y + radius);
+                ctx.quadraticCurveTo(x, y, x + radius, y);
+                ctx.closePath();
+                if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+                if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
+            }
+
+            // Card 1
+            const yCards = cardPad + topHeaderH;
+            const x1 = cardPad;
+            roundRect(ctx, x1, yCards, cardW, cardH, 10, bgCard, borderCard);
+
+            if (chart1 && chart1.canvas) {
+                const c1 = chart1.canvas;
+                const innerPad = 14;
+                ctx.drawImage(c1, x1 + innerPad, yCards + innerPad, cardW - innerPad * 2, cardH - innerPad * 2);
+            }
+
+            // Card 2
+            const x2 = cardPad + cardW + cardGap;
+            roundRect(ctx, x2, yCards, cardW, cardH, 10, bgCard, borderCard);
+
+            if (chart2 && chart2.canvas && chart2.canvas.style.display !== 'none') {
+                const c2 = chart2.canvas;
+                const innerPad = 14;
+                ctx.drawImage(c2, x2 + innerPad, yCards + innerPad, cardW - innerPad * 2, cardH - innerPad * 2);
+            } else {
+                ctx.fillStyle = accentGreen;
+                ctx.font = 'bold 22px Inter, system-ui, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('✓', x2 + cardW / 2, yCards + cardH / 2 - 10);
+                ctx.fillStyle = textMuted;
+                ctx.font = '13px Inter, system-ui, sans-serif';
+                ctx.fillText(empty2Text || 'Nenhuma divergência encontrada', x2 + cardW / 2, yCards + cardH / 2 + 18);
+                ctx.textAlign = 'left';
+            }
+
+            // Dispara download
+            const link = document.createElement('a');
+            link.download = filename || 'painel-validai.png';
+            link.href = outCanvas.toDataURL('image/png');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (e) {
+            console.error('Erro seguro na exportação do painel PNG:', e);
+        }
+    }
+
+    const btnExportSheets = document.getElementById('btn-export-charts-sheets');
+    if (btnExportSheets) {
+        btnExportSheets.addEventListener('click', () => {
+            exportChartsDashboardToPng({
+                title: 'Validador de Planilhas • Proporção & Colunas Divergentes',
+                filename: 'painel-comparacao-planilhas-validai.png',
+                chart1: chartRecordsProportionInstance,
+                chart2: chartDiffColsInstance,
+                empty2Text: '100% de conformidade nas colunas analisadas'
+            });
+        });
+    }
+
+    // Re-renderizar gráficos ao alternar tema (claro/escuro)
+    document.addEventListener('click', (e) => {
+        if (e.target && (e.target.closest('#theme-toggle-btn') || (e.target.classList && e.target.classList.contains('theme-toggle-btn')))) {
+            if (state.lastCompareData && stepResults && stepResults.style.display !== 'none') {
+                setTimeout(() => {
+                    renderChartsStep3(state.lastCompareData);
+                }, 120);
+            }
+        }
+    });
+
 
     function flattenDiffRows(diffPreview) {
         state.allDiffRows = [];

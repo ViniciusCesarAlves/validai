@@ -501,6 +501,9 @@
         renderTableMissingFile(data.missing_xml);
         renderTableMirror(data.all_xml_mirror);
 
+        // Renderiza Gráficos Analíticos de Conciliação Fiscal (Chart.js)
+        renderXmlCharts(data);
+
         // Ativa a primeira aba relevante
         if (data.divergences.length > 0) {
             activateTab('tab-xml-divs');
@@ -670,5 +673,356 @@
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#39;');
     }
+
+    // ----------------------------------------------------
+    // GRÁFICOS ANALÍTICOS DE CONCILIAÇÃO FISCAL (CHART.JS)
+    // ----------------------------------------------------
+    let chartXmlStatusInstance = null;
+    let chartXmlFinancialInstance = null;
+    let lastXmlData = null;
+
+    function renderXmlCharts(data) {
+        lastXmlData = data;
+        const chartsWrapper = document.getElementById('xml-charts-wrapper');
+        const chartsContainer = document.getElementById('xml-charts-container');
+        if (!chartsContainer) return;
+
+        try {
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js não carregado. Exibição dos gráficos ignorada com segurança.');
+                if (chartsWrapper) chartsWrapper.style.display = 'none';
+                chartsContainer.style.display = 'none';
+                return;
+            }
+
+            if (chartsWrapper) chartsWrapper.style.display = 'block';
+            chartsContainer.style.display = 'grid';
+
+            renderXmlStatusChart(data);
+            renderXmlFinancialChart(data);
+        } catch (err) {
+            console.error('Erro seguro na renderização dos gráficos de XML:', err);
+        }
+    }
+
+    function renderXmlStatusChart(data) {
+        const canvas = document.getElementById('chart-xml-status');
+        const badgeCompliance = document.getElementById('xml-compliance-badge');
+        if (!canvas) return;
+
+        try {
+            if (chartXmlStatusInstance) {
+                chartXmlStatusInstance.destroy();
+                chartXmlStatusInstance = null;
+            }
+
+            const s = data.summary || {};
+            const matchedCount = s.matched_count || 0;
+            const missingExcelCount = s.missing_in_excel_count || 0;
+            const missingXmlCount = s.missing_xml_count || 0;
+
+            const compliancePct = s.matched_percentage != null ? s.matched_percentage : 0;
+            if (badgeCompliance) {
+                badgeCompliance.textContent = `Conciliadas: ${compliancePct}%`;
+            }
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                           document.documentElement.classList.contains('dark-theme') ||
+                           (document.body && document.body.classList.contains('dark-theme')) ||
+                           (localStorage.getItem('splitc_theme') === 'dark');
+
+            const total = matchedCount + missingExcelCount + missingXmlCount;
+            const chartData = total > 0
+                ? [matchedCount, missingExcelCount, missingXmlCount]
+                : [1, 0, 0];
+
+            chartXmlStatusInstance = new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    labels: ['100% Conciliadas', 'Apenas no XML (Não Lançadas)', 'Apenas na Planilha (Sem XML)'],
+                    datasets: [{
+                        data: chartData,
+                        backgroundColor: ['#10b981', '#3b82f6', '#ef4444'],
+                        hoverBackgroundColor: ['#059669', '#2563eb', '#dc2626'],
+                        borderWidth: 2,
+                        borderColor: isDark ? '#17181f' : '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '66%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 10,
+                                boxHeight: 10,
+                                padding: 10,
+                                color: isDark ? '#cbd5e1' : '#475569',
+                                font: { size: 11, family: 'Inter, sans-serif', weight: '500' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: isDark ? '#1e293b' : '#0f172a',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            padding: 9,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.parsed || 0;
+                                    const pct = total > 0 ? ((val / total) * 100).toFixed(1) : '0.0';
+                                    return ` ${context.label}: ${val.toLocaleString("pt-BR")} (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (e) {
+            console.error('Falha segura no gráfico Donut de XML:', e);
+        }
+    }
+
+    function renderXmlFinancialChart(data) {
+        const canvas = document.getElementById('chart-xml-financial');
+        if (!canvas) return;
+
+        try {
+            if (chartXmlFinancialInstance) {
+                chartXmlFinancialInstance.destroy();
+                chartXmlFinancialInstance = null;
+            }
+
+            const s = data.summary || {};
+            const comp = s.financial_tax_comparison || {};
+            const xml = comp.xml || {};
+            const sheet = comp.sheet || {};
+
+            const labels = ['Valor Produtos', 'Base Cálc. ICMS', 'Valor ICMS', 'PIS / COFINS'];
+            const xmlValues = [
+                xml.total_prod || s.total_xml_value || 0,
+                xml.total_bc || 0,
+                xml.total_icms || 0,
+                xml.total_pis_cofins || 0
+            ];
+            const sheetValues = [
+                sheet.total_prod || s.total_sheet_value || 0,
+                sheet.total_bc || 0,
+                sheet.total_icms || 0,
+                sheet.total_pis_cofins || 0
+            ];
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                           document.documentElement.classList.contains('dark-theme') ||
+                           (document.body && document.body.classList.contains('dark-theme')) ||
+                           (localStorage.getItem('splitc_theme') === 'dark');
+
+            function fmtMoney(val) {
+                return 'R$ ' + (val || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+
+            chartXmlFinancialInstance = new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Total XML (SEFAZ)',
+                            data: xmlValues,
+                            backgroundColor: '#10b981',
+                            hoverBackgroundColor: '#059669',
+                            borderRadius: 4,
+                            barPercentage: 0.8,
+                            categoryPercentage: 0.7
+                        },
+                        {
+                            label: 'Total Planilha (Excel)',
+                            data: sheetValues,
+                            backgroundColor: '#6366f1',
+                            hoverBackgroundColor: '#4f46e5',
+                            borderRadius: 4,
+                            barPercentage: 0.8,
+                            categoryPercentage: 0.7
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            left: 10,
+                            right: 10,
+                            top: 5,
+                            bottom: 5
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 10,
+                                boxHeight: 10,
+                                padding: 10,
+                                color: isDark ? '#cbd5e1' : '#475569',
+                                font: { size: 11, family: 'Inter, sans-serif', weight: '500' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: isDark ? '#1e293b' : '#0f172a',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            padding: 9,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.dataset.label}: ${fmtMoney(context.parsed.y)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false, drawBorder: false },
+                            ticks: {
+                                color: isDark ? '#e2e8f0' : '#1e293b',
+                                font: { size: 11, family: 'Inter, sans-serif', weight: '600' }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: isDark ? '#94a3b8' : '#64748b',
+                                font: { size: 10, family: 'Inter, sans-serif' },
+                                callback: function(val) {
+                                    if (val >= 1000000) return 'R$ ' + (val / 1000000).toFixed(1) + 'M';
+                                    if (val >= 1000) return 'R$ ' + (val / 1000).toFixed(0) + 'k';
+                                    return 'R$ ' + val;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (e) {
+            console.error('Falha segura no gráfico Financeiro de XML:', e);
+        }
+    }
+
+    // Exportação do Painel em Imagem PNG (Client-side / 0 MB no Servidor)
+    function exportXmlChartsToPng() {
+        try {
+            if (!chartXmlStatusInstance && !chartXmlFinancialInstance) return;
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                           document.documentElement.classList.contains('dark-theme') ||
+                           (document.body && document.body.classList.contains('dark-theme')) ||
+                           (localStorage.getItem('splitc_theme') === 'dark');
+
+            const bgPage = isDark ? '#0f1117' : '#f8fafc';
+            const bgCard = isDark ? '#17181f' : '#ffffff';
+            const borderCard = isDark ? '#272a36' : '#e2e8f0';
+            const textTitle = isDark ? '#f1f5f9' : '#0f172a';
+            const textMuted = isDark ? '#94a3b8' : '#64748b';
+            const accentGreen = '#10b981';
+
+            const cardPad = 24;
+            const cardGap = 20;
+            const topHeaderH = 70;
+            const cardW = 540;
+            const cardH = 280;
+            const totalW = cardPad * 2 + cardW * 2 + cardGap;
+            const totalH = cardPad * 2 + topHeaderH + cardH;
+
+            const scale = 2;
+            const outCanvas = document.createElement('canvas');
+            outCanvas.width = totalW * scale;
+            outCanvas.height = totalH * scale;
+            const ctx = outCanvas.getContext('2d');
+            ctx.scale(scale, scale);
+
+            ctx.fillStyle = bgPage;
+            ctx.fillRect(0, 0, totalW, totalH);
+
+            ctx.fillStyle = accentGreen;
+            ctx.font = 'bold 20px Inter, system-ui, sans-serif';
+            ctx.fillText('ValidAí', cardPad, cardPad + 24);
+
+            ctx.fillStyle = textTitle;
+            ctx.font = '600 15px Inter, system-ui, sans-serif';
+            ctx.fillText('•  Conciliação Fiscal de XMLs • Status & Confronto Tributário', cardPad + 82, cardPad + 24);
+
+            ctx.fillStyle = textMuted;
+            ctx.font = '12px Inter, system-ui, sans-serif';
+            const dateStr = new Date().toLocaleString('pt-BR');
+            ctx.fillText('Gerado via ValidAí em ' + dateStr, cardPad, cardPad + 48);
+
+            function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+                ctx.beginPath();
+                ctx.moveTo(x + radius, y);
+                ctx.lineTo(x + width - radius, y);
+                ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+                ctx.lineTo(x + width, y + height - radius);
+                ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                ctx.lineTo(x + radius, y + height);
+                ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+                ctx.lineTo(x, y + radius);
+                ctx.quadraticCurveTo(x, y + radius, x + radius, y);
+                ctx.closePath();
+                if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+                if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
+            }
+
+            const yCards = cardPad + topHeaderH;
+            const x1 = cardPad;
+            roundRect(ctx, x1, yCards, cardW, cardH, 10, bgCard, borderCard);
+
+            if (chartXmlStatusInstance && chartXmlStatusInstance.canvas) {
+                const c1 = chartXmlStatusInstance.canvas;
+                const innerPad = 14;
+                ctx.drawImage(c1, x1 + innerPad, yCards + innerPad, cardW - innerPad * 2, cardH - innerPad * 2);
+            }
+
+            const x2 = cardPad + cardW + cardGap;
+            roundRect(ctx, x2, yCards, cardW, cardH, 10, bgCard, borderCard);
+
+            if (chartXmlFinancialInstance && chartXmlFinancialInstance.canvas) {
+                const c2 = chartXmlFinancialInstance.canvas;
+                const innerPad = 14;
+                ctx.drawImage(c2, x2 + innerPad, yCards + innerPad, cardW - innerPad * 2, cardH - innerPad * 2);
+            }
+
+            const link = document.createElement('a');
+            link.download = 'painel-conciliacao-xml-validai.png';
+            link.href = outCanvas.toDataURL('image/png');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (e) {
+            console.error('Erro seguro na exportação do painel PNG de XML:', e);
+        }
+    }
+
+    const btnExportXml = document.getElementById('btn-export-charts-xml');
+    if (btnExportXml) {
+        btnExportXml.addEventListener('click', exportXmlChartsToPng);
+    }
+
+    document.addEventListener('click', (e) => {
+        if (e.target && (e.target.closest('#theme-toggle-btn') || (e.target.classList && e.target.classList.contains('theme-toggle-btn')))) {
+            if (lastXmlData && stepResults && stepResults.style.display !== 'none') {
+                setTimeout(() => {
+                    renderXmlCharts(lastXmlData);
+                }, 120);
+            }
+        }
+    });
+
 })();
 

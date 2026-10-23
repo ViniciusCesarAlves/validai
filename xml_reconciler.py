@@ -251,6 +251,7 @@ def parse_single_invoice_xml(xml_bytes, filename="nota.xml"):
 
         v_nf = parse_float_value(_find_text(icms_tot, ['vNF'])) or 0.0
         v_prod = parse_float_value(_find_text(icms_tot, ['vProd'])) or v_nf
+        v_bc = parse_float_value(_find_text(icms_tot, ['vBC'])) or 0.0
         v_icms = parse_float_value(_find_text(icms_tot, ['vICMS'])) or 0.0
         v_st = parse_float_value(_find_text(icms_tot, ['vST', 'vICMSST'])) or 0.0
         v_ipi = parse_float_value(_find_text(icms_tot, ['vIPI'])) or 0.0
@@ -289,6 +290,7 @@ def parse_single_invoice_xml(xml_bytes, filename="nota.xml"):
             'dest_nome': dest_nome or "-",
             'vProd': round(v_prod, 2),
             'vNF': round(v_nf, 2),
+            'vBC': round(v_bc, 2),
             'vICMS': round(v_icms, 2),
             'vST': round(v_st, 2),
             'vIPI': round(v_ipi, 2),
@@ -342,6 +344,7 @@ def parse_single_invoice_xml(xml_bytes, filename="nota.xml"):
             'dest_nome': dest_nome or "-",
             'vProd': round(v_nf, 2),
             'vNF': round(v_nf, 2),
+            'vBC': 0.0,
             'vICMS': round(v_icms, 2),
             'vST': 0.0,
             'vIPI': 0.0,
@@ -417,6 +420,7 @@ def parse_single_invoice_xml(xml_bytes, filename="nota.xml"):
             'dest_nome': dest_nome or "-",
             'vProd': round(v_prod, 2),
             'vNF': round(v_nf, 2),
+            'vBC': 0.0,
             'vICMS': 0.0,
             'vST': 0.0,
             'vIPI': 0.0,
@@ -780,6 +784,39 @@ def reconcile_xml_vs_sheet(invoices, df_sheet, options):
     matched_pct = round((matched_count / total_xmls * 100), 1) if total_xmls > 0 else 0.0
     net_diff = round(total_xml_value - total_sheet_value, 2)
 
+    # Confronto Financeiro e Tributário (XML vs Planilha)
+    xml_tot_prod = sum(inv.get('vProd', 0.0) for inv in invoices)
+    xml_tot_bc = sum(inv.get('vBC', 0.0) for inv in invoices)
+    xml_tot_icms = sum(inv.get('vICMS', 0.0) for inv in invoices)
+    xml_tot_pis_cofins = sum(inv.get('vPIS', 0.0) + inv.get('vCOFINS', 0.0) for inv in invoices)
+
+    def _find_sheet_col(keywords):
+        for c in df_sheet.columns:
+            c_norm = comparator.normalize_column_name(c)
+            if any(k == c_norm or k in c_norm for k in keywords):
+                return c
+        return None
+
+    def _sum_sheet_col(col_name):
+        if not col_name or col_name not in df_sheet.columns:
+            return 0.0
+        s = 0.0
+        for val in df_sheet[col_name]:
+            fv = parse_float_value(val)
+            if fv:
+                s += fv
+        return s
+
+    col_sheet_prod = _find_sheet_col(['VPROD', 'VALOR_PRODUTOS', 'VALOR_MERCADORIA', 'PRODUTO', 'PRODUTOS']) or col_val
+    col_sheet_bc = _find_sheet_col(['BASE_ICMS', 'BC_ICMS', 'VBC', 'BASE_CALCULO', 'BASE_CALC'])
+    col_sheet_icms = _find_sheet_col(['VALOR_ICMS', 'VLR_ICMS', 'VICMS', 'ICMS']) or (col_tax if col_tax else None)
+    col_sheet_pis_cofins = _find_sheet_col(['PIS_COFINS', 'VALOR_PIS_COFINS', 'PIS', 'COFINS', 'VPIS', 'VCOFINS'])
+
+    sheet_tot_prod = _sum_sheet_col(col_sheet_prod) or total_sheet_value
+    sheet_tot_bc = _sum_sheet_col(col_sheet_bc)
+    sheet_tot_icms = _sum_sheet_col(col_sheet_icms)
+    sheet_tot_pis_cofins = _sum_sheet_col(col_sheet_pis_cofins)
+
     summary = {
         'total_xmls': total_xmls,
         'total_sheet_rows': len(df_sheet),
@@ -793,7 +830,21 @@ def reconcile_xml_vs_sheet(invoices, df_sheet, options):
         'total_sheet_value': round(total_sheet_value, 2),
         'total_sheet_value_fmt': format_brl(total_sheet_value),
         'net_difference': net_diff,
-        'net_difference_fmt': format_brl(net_diff)
+        'net_difference_fmt': format_brl(net_diff),
+        'financial_tax_comparison': {
+            'xml': {
+                'total_prod': round(xml_tot_prod, 2),
+                'total_bc': round(xml_tot_bc, 2),
+                'total_icms': round(xml_tot_icms, 2),
+                'total_pis_cofins': round(xml_tot_pis_cofins, 2)
+            },
+            'sheet': {
+                'total_prod': round(sheet_tot_prod, 2),
+                'total_bc': round(sheet_tot_bc, 2),
+                'total_icms': round(sheet_tot_icms, 2),
+                'total_pis_cofins': round(sheet_tot_pis_cofins, 2)
+            }
+        }
     }
 
     return {

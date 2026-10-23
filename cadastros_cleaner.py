@@ -486,6 +486,10 @@ def process_cadastros(df, options):
     invalid_docs = []
     suspicious_contacts = []
     auto_corrections_count = 0
+    recovered_zeros_count = 0
+    cpf_invalid_count = 0
+    cnpj_invalid_count = 0
+    invalid_emails_count = 0
     row_errors = {}  # r_idx -> list of error descriptions
     row_cell_errors = {}  # r_idx -> set of col_names with errors
 
@@ -513,10 +517,18 @@ def process_cadastros(df, options):
                 auto_corrections_count += 1
             if recovered_zero:
                 auto_corrections_count += 1
+                recovered_zeros_count += 1
 
             df_clean.at[r_idx, col_doc] = formatted_doc
 
             if not is_valid:
+                if doc_type == 'CPF' or 'CPF' in str(reason):
+                    cpf_invalid_count += 1
+                elif doc_type == 'CNPJ' or 'CNPJ' in str(reason):
+                    cnpj_invalid_count += 1
+                else:
+                    cpf_invalid_count += 1
+
                 row_errors[r_idx].append(f"Documento ({col_doc}): {reason}")
                 row_cell_errors[r_idx].add(col_doc)
                 name_val = df.at[r_idx, col_name] if (col_name and col_name in df.columns) else ""
@@ -556,6 +568,7 @@ def process_cadastros(df, options):
                 df_clean.at[r_idx, col_email] = cleaned
 
             if not is_valid:
+                invalid_emails_count += 1
                 row_errors[r_idx].append(f"E-mail ({col_email}): {reason}")
                 row_cell_errors[r_idx].add(col_email)
                 name_val = df.at[r_idx, col_name] if (col_name and col_name in df.columns) else ""
@@ -700,7 +713,14 @@ def process_cadastros(df, options):
         'suspicious_contacts_count': len(suspicious_contacts),
         'auto_corrections_count': auto_corrections_count,
         'clean_rows_count': len(df_clean),
-        'removed_duplicates_count': len(duplicate_rows_indices) if remove_duplicates else 0
+        'removed_duplicates_count': len(duplicate_rows_indices) if remove_duplicates else 0,
+        'inconsistency_breakdown': {
+            'cpf_invalid': cpf_invalid_count,
+            'cnpj_invalid': cnpj_invalid_count,
+            'missing_zeros': recovered_zeros_count,
+            'invalid_emails': invalid_emails_count,
+            'duplicate_rows': len(duplicate_rows_indices)
+        }
     }
 
     # Prévia da base higienizada (primeiras 60 linhas)

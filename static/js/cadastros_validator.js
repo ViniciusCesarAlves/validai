@@ -490,6 +490,9 @@
         renderTableDups(data.duplicates);
         renderTableContacts(data.suspicious_contacts);
         renderTablePreview(data.clean_columns, data.preview_clean);
+
+        // Renderiza Gráficos Analíticos de Cadastros (Chart.js)
+        renderCadastrosCharts(data);
     }
 
     function renderTableDocs(items) {
@@ -642,4 +645,342 @@
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#39;');
     }
+
+    // ----------------------------------------------------
+    // GRÁFICOS ANALÍTICOS DE CADASTROS (CHART.JS)
+    // ----------------------------------------------------
+    let chartCadastrosHealthInstance = null;
+    let chartCadastrosIssuesInstance = null;
+    let lastCadastrosData = null;
+
+    function renderCadastrosCharts(data) {
+        lastCadastrosData = data;
+        const chartsWrapper = document.getElementById('cadastros-charts-wrapper');
+        const chartsContainer = document.getElementById('cadastros-charts-container');
+        if (!chartsContainer) return;
+
+        try {
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js não carregado. Exibição dos gráficos ignorada com segurança.');
+                if (chartsWrapper) chartsWrapper.style.display = 'none';
+                chartsContainer.style.display = 'none';
+                return;
+            }
+
+            if (chartsWrapper) chartsWrapper.style.display = 'block';
+            chartsContainer.style.display = 'grid';
+
+            renderCadastrosHealthChart(data);
+            renderCadastrosIssuesChart(data);
+        } catch (err) {
+            console.error('Erro seguro na renderização dos gráficos de cadastros:', err);
+        }
+    }
+
+    function renderCadastrosHealthChart(data) {
+        const canvas = document.getElementById('chart-cadastros-health');
+        const badgeCompliance = document.getElementById('cadastros-compliance-badge');
+        if (!canvas) return;
+
+        try {
+            if (chartCadastrosHealthInstance) {
+                chartCadastrosHealthInstance.destroy();
+                chartCadastrosHealthInstance = null;
+            }
+
+            const s = data.summary || {};
+            const totalRows = s.total_rows || 0;
+            const validCount = s.valid_count || 0;
+            const duplicatesCount = s.duplicates_count || 0;
+            const invalidCount = (s.invalid_docs_count || 0) + (s.suspicious_contacts_count || 0);
+
+            const compliancePct = s.valid_percentage != null ? s.valid_percentage : (totalRows > 0 ? ((validCount / totalRows) * 100).toFixed(1) : 100);
+            if (badgeCompliance) {
+                badgeCompliance.textContent = `Conformidade: ${compliancePct}%`;
+            }
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                           document.documentElement.classList.contains('dark-theme') ||
+                           (document.body && document.body.classList.contains('dark-theme')) ||
+                           (localStorage.getItem('splitc_theme') === 'dark');
+
+            const chartData = (totalRows > 0 || (validCount + invalidCount + duplicatesCount > 0))
+                ? [validCount, invalidCount, duplicatesCount]
+                : [1, 0, 0];
+
+            chartCadastrosHealthInstance = new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Cadastros Válidos', 'Inválidos / Incompletos', 'Duplicados'],
+                    datasets: [{
+                        data: chartData,
+                        backgroundColor: ['#10b981', '#ef4444', '#f59e0b'],
+                        hoverBackgroundColor: ['#059669', '#dc2626', '#d97706'],
+                        borderWidth: 2,
+                        borderColor: isDark ? '#17181f' : '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '66%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 10,
+                                boxHeight: 10,
+                                padding: 10,
+                                color: isDark ? '#cbd5e1' : '#475569',
+                                font: { size: 11, family: 'Inter, sans-serif', weight: '500' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: isDark ? '#1e293b' : '#0f172a',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            padding: 9,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.parsed || 0;
+                                    const sum = validCount + invalidCount + duplicatesCount || totalRows;
+                                    const pct = sum > 0 ? ((val / sum) * 100).toFixed(1) : '0.0';
+                                    return ` ${context.label}: ${val.toLocaleString("pt-BR")} (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (e) {
+            console.error('Falha segura no gráfico Donut de Cadastros:', e);
+        }
+    }
+
+    function renderCadastrosIssuesChart(data) {
+        const canvas = document.getElementById('chart-cadastros-issues');
+        const emptyEl = document.getElementById('chart-cadastros-issues-empty');
+        if (!canvas) return;
+
+        try {
+            if (chartCadastrosIssuesInstance) {
+                chartCadastrosIssuesInstance.destroy();
+                chartCadastrosIssuesInstance = null;
+            }
+
+            const s = data.summary || {};
+            const b = s.inconsistency_breakdown || {};
+
+            const issuesList = [
+                { label: 'CPF com Dígito Inválido', count: b.cpf_invalid || 0 },
+                { label: 'CNPJ com Dígito Inválido', count: b.cnpj_invalid || 0 },
+                { label: 'Zeros à Esquerda Ausentes', count: b.missing_zeros || 0 },
+                { label: 'E-mails Inválidos', count: b.invalid_emails || 0 },
+                { label: 'Linhas Repetidas', count: b.duplicate_rows != null ? b.duplicate_rows : (s.duplicates_count || 0) }
+            ];
+
+            const totalIssues = issuesList.reduce((acc, curr) => acc + curr.count, 0);
+
+            if (totalIssues === 0) {
+                canvas.style.display = 'none';
+                if (emptyEl) emptyEl.style.display = 'flex';
+                return;
+            }
+
+            canvas.style.display = 'block';
+            if (emptyEl) emptyEl.style.display = 'none';
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                           document.documentElement.classList.contains('dark-theme') ||
+                           (document.body && document.body.classList.contains('dark-theme')) ||
+                           (localStorage.getItem('splitc_theme') === 'dark');
+
+            chartCadastrosIssuesInstance = new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: issuesList.map(i => i.label),
+                    datasets: [{
+                        label: 'Ocorrências',
+                        data: issuesList.map(i => i.count),
+                        backgroundColor: 'rgba(239, 68, 68, 0.85)',
+                        hoverBackgroundColor: '#dc2626',
+                        borderRadius: 4,
+                        barThickness: 16,
+                        maxBarThickness: 20
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            left: 15,
+                            right: 15
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: isDark ? '#1e293b' : '#0f172a',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            padding: 9,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.parsed.x || 0;
+                                    return ` ${val.toLocaleString("pt-BR")} ocorrência(s)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: {
+                                color: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                precision: 0,
+                                color: isDark ? '#94a3b8' : '#64748b',
+                                font: { size: 10, family: 'Inter, sans-serif' }
+                            }
+                        },
+                        y: {
+                            grid: { display: false, drawBorder: false },
+                            ticks: {
+                                autoSkip: false,
+                                color: isDark ? '#e2e8f0' : '#1e293b',
+                                font: { size: 12, family: 'Inter, sans-serif', weight: '600' }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (e) {
+            console.error('Falha segura no gráfico de Inconsistências de Cadastros:', e);
+        }
+    }
+
+    // Exportação do Painel em Imagem PNG (Client-side / 0 MB no Servidor)
+    function exportCadastrosChartsToPng() {
+        try {
+            if (!chartCadastrosHealthInstance && !chartCadastrosIssuesInstance) return;
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                           document.documentElement.classList.contains('dark-theme') ||
+                           (document.body && document.body.classList.contains('dark-theme')) ||
+                           (localStorage.getItem('splitc_theme') === 'dark');
+
+            const bgPage = isDark ? '#0f1117' : '#f8fafc';
+            const bgCard = isDark ? '#17181f' : '#ffffff';
+            const borderCard = isDark ? '#272a36' : '#e2e8f0';
+            const textTitle = isDark ? '#f1f5f9' : '#0f172a';
+            const textMuted = isDark ? '#94a3b8' : '#64748b';
+            const accentGreen = '#10b981';
+
+            const cardPad = 24;
+            const cardGap = 20;
+            const topHeaderH = 70;
+            const cardW = 540;
+            const cardH = 280;
+            const totalW = cardPad * 2 + cardW * 2 + cardGap;
+            const totalH = cardPad * 2 + topHeaderH + cardH;
+
+            const scale = 2;
+            const outCanvas = document.createElement('canvas');
+            outCanvas.width = totalW * scale;
+            outCanvas.height = totalH * scale;
+            const ctx = outCanvas.getContext('2d');
+            ctx.scale(scale, scale);
+
+            ctx.fillStyle = bgPage;
+            ctx.fillRect(0, 0, totalW, totalH);
+
+            ctx.fillStyle = accentGreen;
+            ctx.font = 'bold 20px Inter, system-ui, sans-serif';
+            ctx.fillText('ValidAí', cardPad, cardPad + 24);
+
+            ctx.fillStyle = textTitle;
+            ctx.font = '600 15px Inter, system-ui, sans-serif';
+            ctx.fillText('•  Higienizador de Cadastros • Saúde da Base & Inconsistências', cardPad + 82, cardPad + 24);
+
+            ctx.fillStyle = textMuted;
+            ctx.font = '12px Inter, system-ui, sans-serif';
+            const dateStr = new Date().toLocaleString('pt-BR');
+            ctx.fillText('Gerado via ValidAí em ' + dateStr, cardPad, cardPad + 48);
+
+            function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+                ctx.beginPath();
+                ctx.moveTo(x + radius, y);
+                ctx.lineTo(x + width - radius, y);
+                ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+                ctx.lineTo(x + width, y + height - radius);
+                ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                ctx.lineTo(x + radius, y + height);
+                ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+                ctx.lineTo(x, y + radius);
+                ctx.quadraticCurveTo(x, y, x + radius, y);
+                ctx.closePath();
+                if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+                if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
+            }
+
+            const yCards = cardPad + topHeaderH;
+            const x1 = cardPad;
+            roundRect(ctx, x1, yCards, cardW, cardH, 10, bgCard, borderCard);
+
+            if (chartCadastrosHealthInstance && chartCadastrosHealthInstance.canvas) {
+                const c1 = chartCadastrosHealthInstance.canvas;
+                const innerPad = 14;
+                ctx.drawImage(c1, x1 + innerPad, yCards + innerPad, cardW - innerPad * 2, cardH - innerPad * 2);
+            }
+
+            const x2 = cardPad + cardW + cardGap;
+            roundRect(ctx, x2, yCards, cardW, cardH, 10, bgCard, borderCard);
+
+            if (chartCadastrosIssuesInstance && chartCadastrosIssuesInstance.canvas && chartCadastrosIssuesInstance.canvas.style.display !== 'none') {
+                const c2 = chartCadastrosIssuesInstance.canvas;
+                const innerPad = 14;
+                ctx.drawImage(c2, x2 + innerPad, yCards + innerPad, cardW - innerPad * 2, cardH - innerPad * 2);
+            } else {
+                ctx.fillStyle = accentGreen;
+                ctx.font = 'bold 22px Inter, system-ui, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('✓', x2 + cardW / 2, yCards + cardH / 2 - 10);
+                ctx.fillStyle = textMuted;
+                ctx.font = '13px Inter, system-ui, sans-serif';
+                ctx.fillText('100% dos cadastros em conformidade', x2 + cardW / 2, yCards + cardH / 2 + 18);
+                ctx.textAlign = 'left';
+            }
+
+            const link = document.createElement('a');
+            link.download = 'painel-cadastros-validai.png';
+            link.href = outCanvas.toDataURL('image/png');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (e) {
+            console.error('Erro seguro na exportação do painel PNG de cadastros:', e);
+        }
+    }
+
+    const btnExportCadastros = document.getElementById('btn-export-charts-cadastros');
+    if (btnExportCadastros) {
+        btnExportCadastros.addEventListener('click', exportCadastrosChartsToPng);
+    }
+
+    document.addEventListener('click', (e) => {
+        if (e.target && (e.target.closest('#theme-toggle-btn') || (e.target.classList && e.target.classList.contains('theme-toggle-btn')))) {
+            if (lastCadastrosData && stepResults && stepResults.style.display !== 'none') {
+                setTimeout(() => {
+                    renderCadastrosCharts(lastCadastrosData);
+                }, 120);
+            }
+        }
+    });
+
 })();

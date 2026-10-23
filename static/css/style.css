@@ -3121,6 +3121,229 @@ body.dark-theme .text-info {
     min-width: 250px;
 }
 
+/* ==========================================================================
+   Gráficos Analíticos Dashboards (Chart.js) - Planilhas, Cadastros e XML
+   ========================================================================== */
+.charts-dashboard-wrapper {
+    margin-bottom: 24px;
+}
+
+.charts-dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.charts-dashboard-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-color, #0f172a);
+}
+
+.btn-export-chart {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color, #e2e8f0);
+    background: #ffffff;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.btn-export-chart:hover {
+    background: #f8fafc;
+    color: #10b981;
+    border-color: #10b981;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.15);
+}
+
+.step3-charts-container,
+.cadastros-charts-container,
+.xml-charts-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 8px;
+}
+
+.step3-chart-card {
+    background: #ffffff;
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: var(--radius-md, 10px);
+    padding: 16px 18px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    transition: all 0.2s ease;
+}
+
+.step3-chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.step3-chart-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.step3-chart-icon {
+    stroke: var(--primary, #4FD580);
+    flex-shrink: 0;
+}
+
+.step3-chart-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text-color, #0f172a);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.step3-chart-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #64748b;
+    white-space: nowrap;
+    letter-spacing: 0.2px;
+}
+
+.step3-chart-body {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.step3-chart-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+    color: #64748b;
+    font-size: 12.5px;
+    font-weight: 600;
+    height: 100%;
+    width: 100%;
+    padding: 16px;
+}
+
+/* Dark Theme para os Gráficos Analíticos */
+body.dark-theme .charts-dashboard-title,
+html[data-theme="dark"] .charts-dashboard-title,
+html.dark-theme .charts-dashboard-title {
+    color: #f1f5f9;
+}
+
+body.dark-theme .btn-export-chart,
+html[data-theme="dark"] .btn-export-chart,
+html.dark-theme .btn-export-chart {
+    background: #17181f;
+    border-color: #272a36;
+    color: #cbd5e1;
+    box-shadow: none;
+}
+
+body.dark-theme .btn-export-chart:hover,
+html[data-theme="dark"] .btn-export-chart:hover,
+html.dark-theme .btn-export-chart:hover {
+    background: #1f222c;
+    border-color: #10b981;
+    color: #4fd580;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+}
+
+body.dark-theme .step3-chart-card,
+html[data-theme="dark"] .step3-chart-card,
+html.dark-theme .step3-chart-card {
+    background: #17181f;
+    border-color: #272a36;
+}
+
+body.dark-theme .step3-chart-title,
+html[data-theme="dark"] .step3-chart-title,
+html.dark-theme .step3-chart-title {
+    color: #f1f5f9;
+}
+
+body.dark-theme .step3-chart-badge,
+html[data-theme="dark"] .step3-chart-badge,
+html.dark-theme .step3-chart-badge {
+    background: #232733;
+    color: #94a3b8;
+}
+
+body.dark-theme .step3-chart-empty,
+html[data-theme="dark"] .step3-chart-empty,
+html.dark-theme .step3-chart-empty {
+    color: #94a3b8;
+}
+
+/* Mobile Responsiveness (@media max-width: 768px) */
+@media (max-width: 768px) {
+    .charts-dashboard-header {
+        margin-bottom: 12px;
+    }
+
+    .charts-dashboard-title {
+        font-size: 13px;
+    }
+
+    .btn-export-chart {
+        width: 100%;
+        justify-content: center;
+        padding: 7px 12px;
+    }
+
+    .step3-charts-container,
+    .cadastros-charts-container,
+    .xml-charts-container {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+        width: 100%;
+    }
+
+    .step3-chart-card {
+        padding: 14px 14px;
+        width: 100%;
+    }
+
+    .step3-chart-body {
+        height: 220px;
+        max-height: 260px;
+        width: 100%;
+    }
+}
+
 /* Download Section */
 .download-section {
     background: #f0fdf4;

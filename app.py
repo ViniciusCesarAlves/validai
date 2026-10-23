@@ -815,7 +815,11 @@ def sheets_load_example():
             'filename_a': filename_a,
             'filename_b': filename_b,
             'cols_a': cols_a,
-            'cols_b': cols_b
+            'cols_b': cols_b,
+            'sheets_a': 'Vendas_ERP',
+            'sheets_b': 'Vendas_ERP',
+            'header_line_a': 1,
+            'header_line_b': 1
         }
 
         return jsonify({
@@ -828,10 +832,10 @@ def sheets_load_example():
             'cols_b': cols_b,
             'suggested_keys': suggested_keys,
             'column_mapping': mapping,
-            'sheets_info_a': [{'name': 'Vendas', 'visible': True}],
-            'sheets_info_b': [{'name': 'Vendas', 'visible': True}],
-            'default_sheet_a': 'Vendas',
-            'default_sheet_b': 'Vendas',
+            'sheets_info_a': [{'name': 'Vendas_ERP', 'visible': True}],
+            'sheets_info_b': [{'name': 'Vendas_ERP', 'visible': True}],
+            'default_sheet_a': 'Vendas_ERP',
+            'default_sheet_b': 'Vendas_ERP',
             'header_line_a': 1,
             'header_line_b': 1,
             'has_multiple_sheets': False

@@ -55,6 +55,7 @@
         })();
     </script>
     <script src="/static/js/i18n.js?v=10" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 
     <!-- Schema.org JSON-LD: WebSite & Organization -->
     <script type="application/ld+json">
@@ -688,6 +689,63 @@
                     <div class="kpi-label" data-i18n="kpi_only_b">Apenas na Base Nova</div>
                     <div class="kpi-val text-info" id="kpi-rows-only-b">0</div>
                     <div class="kpi-sub" id="kpi-only-b-sub" data-i18n="kpi_only_b_sub">não existem em A</div>
+                </div>
+            </div>
+
+            <!-- Bloco de Gráficos Analíticos (Chart.js) -->
+            <div class="charts-dashboard-wrapper" id="step3-charts-wrapper" style="display: none;">
+                <div class="charts-dashboard-header">
+                    <div class="charts-dashboard-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4FD580" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10h-10z"></path></svg>
+                        <span data-i18n="chart_dashboard_title">Diagnóstico Visual da Comparação</span>
+                    </div>
+                    <button type="button" class="btn-export-chart" id="btn-export-charts-sheets" title="Baixar Painel em Imagem PNG">
+                        <span>📷</span>
+                        <span data-i18n="chart_btn_export_png">Baixar Painel (PNG)</span>
+                    </button>
+                </div>
+                <div class="step3-charts-container" id="step3-charts-container">
+                    <!-- Gráfico 1: Proporção de Registros (Donut) -->
+                    <div class="step3-chart-card">
+                        <div class="step3-chart-header">
+                            <div class="step3-chart-title-wrap">
+                                <svg class="step3-chart-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="M12 2a10 10 0 0 1 10 10h-10z"></path>
+                                </svg>
+                                <h3 class="step3-chart-title" data-i18n="chart_records_proportion_title">Proporção de Registros</h3>
+                            </div>
+                            <span class="step3-chart-badge" data-i18n="chart_records_badge">Distribuição das Linhas</span>
+                        </div>
+                        <div class="step3-chart-body">
+                            <canvas id="chart-records-proportion" aria-label="Gráfico de Proporção de Registros" role="img"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico 2: Top Colunas Divergentes (Barras Horizontais) -->
+                    <div class="step3-chart-card">
+                        <div class="step3-chart-header">
+                            <div class="step3-chart-title-wrap">
+                                <svg class="step3-chart-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                                </svg>
+                                <h3 class="step3-chart-title" data-i18n="chart_diff_cols_title">Top Colunas Divergentes</h3>
+                            </div>
+                            <span class="step3-chart-badge" data-i18n="chart_top_cols_badge">Top 5 Discrepâncias</span>
+                        </div>
+                        <div class="step3-chart-body">
+                            <canvas id="chart-diff-cols" aria-label="Gráfico de Top Colunas Divergentes" role="img"></canvas>
+                            <div class="step3-chart-empty" id="chart-diff-cols-empty" style="display: none;">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4FD580" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                                <span data-i18n="chart_diff_cols_empty">Nenhuma divergência encontrada nas colunas</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1756,6 +1814,6 @@
         </div>
     </div>
 
-    <script src="/static/js/app.js?v=10" defer></script>
+    <script src="/static/js/app.js?v=11" defer></script>
 </body>
 </html>

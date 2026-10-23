@@ -188,25 +188,33 @@ def read_tabular_file(file_path_or_buffer, filename: str, header_line: int = 1, 
             parsed_sheets = [str(s) for s in sheet_names if s]
 
     if ext in ['xlsx', 'xls', 'xlsm']:
-        if parsed_sheets and len(parsed_sheets) > 1:
-            dfs = []
+        info = inspect_spreadsheet_file(file_path_or_buffer, filename)
+        available_sheet_names = [s['name'] for s in info.get('sheets', [])]
+        default_target = info.get('default_sheet') or (available_sheet_names[0] if available_sheet_names else None)
+
+        valid_sheets = []
+        if parsed_sheets:
             for s in parsed_sheets:
+                if s in available_sheet_names:
+                    valid_sheets.append(s)
+
+        if valid_sheets and len(valid_sheets) > 1:
+            dfs = []
+            for s in valid_sheets:
                 if hasattr(file_path_or_buffer, 'seek'):
                     file_path_or_buffer.seek(0)
                 dfs.append(pd.read_excel(file_path_or_buffer, sheet_name=s, header=header_idx))
             df = pd.concat(dfs, ignore_index=True)
-        elif parsed_sheets and len(parsed_sheets) == 1:
+        elif valid_sheets and len(valid_sheets) == 1:
             if hasattr(file_path_or_buffer, 'seek'):
                 file_path_or_buffer.seek(0)
-            df = pd.read_excel(file_path_or_buffer, sheet_name=parsed_sheets[0], header=header_idx)
+            df = pd.read_excel(file_path_or_buffer, sheet_name=valid_sheets[0], header=header_idx)
         else:
-            # Não informou aba: busca primeira aba visível para nunca carregar aba oculta por engano
-            info = inspect_spreadsheet_file(file_path_or_buffer, filename)
-            target = info.get('default_sheet')
+            # Não informou aba ou a aba solicitada não existe: usa aba padrão visível
             if hasattr(file_path_or_buffer, 'seek'):
                 file_path_or_buffer.seek(0)
-            if target:
-                df = pd.read_excel(file_path_or_buffer, sheet_name=target, header=header_idx)
+            if default_target:
+                df = pd.read_excel(file_path_or_buffer, sheet_name=default_target, header=header_idx)
             else:
                 df = pd.read_excel(file_path_or_buffer, header=header_idx)
     elif ext == 'csv':
@@ -1273,7 +1281,7 @@ def create_demo_files(output_dir):
         {"ID_Pedido": "PED-1012", "Data_Venda": "12/10/2026", "Cliente": "Restaurante Sabor & Cia", "Vendedor": "Carlos Eduardo", "Valor_Bruto": 2300.00, "Desconto": 50.00, "Valor_Liquido": 2250.00, "Status_Entrega": "Entregue"} # Novo pedido em B
     ]
 
-    pd.DataFrame(data_a).to_excel(path_a, index=False)
-    pd.DataFrame(data_b).to_excel(path_b, index=False)
+    pd.DataFrame(data_a).to_excel(path_a, sheet_name="Vendas_ERP", index=False)
+    pd.DataFrame(data_b).to_excel(path_b, sheet_name="Vendas_ERP", index=False)
     return path_a, "Base_Vendas_ERP_Anterior.xlsx", path_b, "Base_Vendas_ERP_Atualizada.xlsx"
 

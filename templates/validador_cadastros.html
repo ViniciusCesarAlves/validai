@@ -165,6 +165,7 @@
         })();
     </script>
     <script src="/static/js/i18n.js?v=10" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 </head>
 <body>
 
@@ -572,6 +573,63 @@
                 </div>
             </div>
 
+            <!-- Bloco de Gráficos Analíticos de Cadastros (Chart.js) -->
+            <div class="charts-dashboard-wrapper" id="cadastros-charts-wrapper" style="display: none;">
+                <div class="charts-dashboard-header">
+                    <div class="charts-dashboard-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4FD580" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10h-10z"></path></svg>
+                        <span data-i18n="cadastros_charts_title">Diagnóstico Visual da Base de Cadastros</span>
+                    </div>
+                    <button type="button" class="btn-export-chart" id="btn-export-charts-cadastros" title="Baixar Painel em Imagem PNG">
+                        <span>📷</span>
+                        <span data-i18n="chart_btn_export_png">Baixar Painel (PNG)</span>
+                    </button>
+                </div>
+                <div class="cadastros-charts-container" id="cadastros-charts-container">
+                    <!-- Gráfico 1: Saúde da Base (Donut) -->
+                    <div class="step3-chart-card">
+                        <div class="step3-chart-header">
+                            <div class="step3-chart-title-wrap">
+                                <svg class="step3-chart-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="M12 2a10 10 0 0 1 10 10h-10z"></path>
+                                </svg>
+                                <h3 class="step3-chart-title" data-i18n="cadastros_chart_health_title">Saúde da Base Cadastral</h3>
+                            </div>
+                            <span class="step3-chart-badge" id="cadastros-compliance-badge">Conformidade: --%</span>
+                        </div>
+                        <div class="step3-chart-body">
+                            <canvas id="chart-cadastros-health" aria-label="Gráfico de Saúde da Base" role="img"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico 2: Tipos de Inconsistência (Barras Horizontais) -->
+                    <div class="step3-chart-card">
+                        <div class="step3-chart-header">
+                            <div class="step3-chart-title-wrap">
+                                <svg class="step3-chart-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                                </svg>
+                                <h3 class="step3-chart-title" data-i18n="cadastros_chart_issues_title">Tipos de Inconsistência Encontrados</h3>
+                            </div>
+                            <span class="step3-chart-badge" data-i18n="cadastros_chart_issues_badge">Falhas Auditadas</span>
+                        </div>
+                        <div class="step3-chart-body">
+                            <canvas id="chart-cadastros-issues" aria-label="Gráfico de Tipos de Inconsistência" role="img"></canvas>
+                            <div class="step3-chart-empty" id="chart-cadastros-issues-empty" style="display: none;">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4FD580" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                                <span data-i18n="cadastros_chart_no_issues">Nenhuma inconsistência identificada na base</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Seção de Download dos Relatórios em Excel - Padronizado com .download-section do index.html -->
             <div class="download-section">
                 <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
@@ -815,6 +873,6 @@
     {% include 'partials/footer.html' %}
 
     <!-- Script Controlador do Higienizador de Cadastros -->
-    <script src="/static/js/cadastros_validator.js?v=10" defer></script>
+    <script src="/static/js/cadastros_validator.js?v=11" defer></script>
 </body>
 </html>
