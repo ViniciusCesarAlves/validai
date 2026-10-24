@@ -6,15 +6,15 @@
     <title data-i18n="ofx_page_title">{{ seo.title }}</title>
     <meta name="description" content="{{ seo.description }}">
     <meta name="robots" content="{{ seo.robots }}">
-    <link rel="canonical" href="https://validai.app.br{{ request.path }}">
+    <link rel="canonical" href="{{ seo.canonical_url }}">
     <meta http-equiv="content-language" content="pt-BR">
-    <link rel="alternate" hreflang="pt-br" href="https://validai.app.br{{ request.path }}">
-    <link rel="alternate" hreflang="x-default" href="https://validai.app.br{{ request.path }}">
+    <link rel="alternate" hreflang="pt-br" href="{{ seo.canonical_url }}">
+    <link rel="alternate" hreflang="x-default" href="{{ seo.canonical_url }}">
 
     <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
     <meta property="og:title" content="{{ seo.title }}">
     <meta property="og:description" content="{{ seo.description }}">
-    <meta property="og:url" content="https://validai.app.br{{ request.path }}">
+    <meta property="og:url" content="{{ seo.canonical_url }}">
     <meta property="og:type" content="website">
     <meta property="og:image" content="{{ seo.og_image }}">
     <meta property="og:locale" content="pt_BR">
@@ -48,21 +48,21 @@
       "@type": ["WebApplication", "SoftwareApplication"],
       "name": "ValidAí - Conciliador de Taxas e Extratos (.OFX vs Vendas)",
       "url": "https://validai.app.br/conciliador-taxas",
-      "description": "Cruze extratos bancários e de maquininhas (.OFX) contra seu relatório de vendas do PDV/ERP. Audite taxas cobradas, detecte cobranças a maior e vendas não repassadas.",
+      "description": "Audite taxas de maquininhas (Stone, Cielo, Rede) e repasses de marketplaces contra extratos bancários .OFX.",
       "applicationCategory": "BusinessApplication",
-      "operatingSystem": "All",
+      "operatingSystem": "Web, Windows, macOS, Linux, Android, iOS",
       "inLanguage": "pt-BR",
       "offers": {
         "@type": "Offer",
-        "price": "0",
+        "name": "Plano Standard Gratuito",
+        "price": "0.00",
         "priceCurrency": "BRL"
       },
       "featureList": [
-        "Conciliação de Taxas e Extratos (.OFX vs Relatório de Vendas PDV/ERP)",
-        "Detecção de Cobranças a Maior e Taxas Abusivas de Maquininhas",
-        "Auditoria de Vendas Não Repassadas e Pendências de Crédito",
-        "Conciliador de Notas Fiscais (XML NFe/NFSe vs Planilha Financeira Excel)",
-        "Higienizador de Cadastros (CPF, CNPJ, E-mail e Duplicados)"
+        "Conciliar extrato bancário OFX com vendas de maquininhas de cartão (Stone, Cielo, Rede, Getnet, PagBank, Mercado Pago)",
+        "Auditar taxas MDR descontadas a maior e antecipação de recebíveis",
+        "Identificar vendas não repassadas e créditos avulsos",
+        "Converter extrato OFX em planilha espelho Excel tabulada"
       ]
     }
     </script>
@@ -76,7 +76,7 @@
         {
           "@type": "ListItem",
           "position": 1,
-          "name": "Home",
+          "name": "ValidAí",
           "item": "https://validai.app.br/"
         },
         {
@@ -84,6 +84,64 @@
           "position": 2,
           "name": "Conciliador de Taxas e Extratos (.OFX)",
           "item": "https://validai.app.br/conciliador-taxas"
+        }
+      ]
+    }
+    </script>
+
+    <!-- Schema.org JSON-LD: FAQPage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Como conciliar extrato bancário OFX com vendas de maquininhas de cartão?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Para conciliar extrato bancário OFX com vendas de maquininhas de cartão (Stone, Cielo, Rede, Getnet, PagBank, Mercado Pago), envie o arquivo .OFX do banco ou da adquirente de um lado e a planilha de vendas do PDV/ERP (.xlsx ou .csv) do outro. O ValidAí cruza automaticamente datas, NSU/ID e valores líquidos em segundos."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Como o ValidAí permite auditar taxas MDR descontadas a maior?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Para cada venda registrada no seu PDV, a ferramenta calcula o Líquido Esperado aplicando a taxa contratada (%) e confronta contra o Valor Efetivamente Creditado no extrato .OFX, permitindo auditar taxas MDR descontadas a maior ou tarifas de antecipação indevidas e apurando o prejuízo exato em reais para reembolso."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Como identificar vendas não repassadas no extrato da conta ou adquirente?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "O motor compara cada transação do relatório de vendas contra os créditos do arquivo .OFX dentro da janela de liquidação configurada para identificar vendas não repassadas, apontando vendas aprovadas no PDV que nunca entraram na conta bancária, estornos ocultos ou chargebacks."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "O que é um arquivo .OFX e onde consigo baixá-lo?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "O arquivo .OFX (Open Financial Exchange) é o formato universal utilizado por bancos (Itaú, Bradesco, Santander, Banco do Brasil, Inter, Nubank, Sicoob, Sicredi) e operadoras para exportação estruturada de extratos financeiros, podendo ser baixado diretamente no Internet Banking ou portal da maquininha."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Posso converter o extrato .OFX em planilha Excel estruturada?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sim! Além do Relatório de Auditoria de Taxas com células pintadas em cores, o ValidAí gera o Espelho Tabulado do Extrato OFX em Excel (.xlsx), convertendo todas as movimentações financeiras em colunas prontas para conciliação contábil."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Meus dados financeiros e extratos bancários estão seguros?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sim, 100% seguros. O processamento dos arquivos .OFX e das planilhas de vendas ocorre exclusivamente em memória volátil da sessão temporária, sem gravação permanente de extratos bancários em banco de dados e em estrita conformidade com a LGPD."
+          }
         }
       ]
     }
@@ -201,7 +259,7 @@
             </div>
 
             <!-- Alerta de erro de upload -->
-            <div id="ofx-upload-alert" class="alert-box alert-error" style="display: none; margin-top: 16px;">
+            <div id="ofx-upload-alert" class="alert-box alert-error" style="display: none; margin-top: 16px;" data-nosnippet>
                 <div class="alert-icon-wrapper">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"/>
@@ -746,46 +804,55 @@
             <div class="seo-faq-list">
                 <details class="seo-faq-item">
                     <summary class="seo-faq-question">
+                        <span>Como conciliar extrato bancário OFX com vendas de maquininhas de cartão?</span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        Para <strong>conciliar extrato bancário OFX com vendas de maquininhas de cartão (Stone, Cielo, Rede, Getnet, PagBank, Mercado Pago)</strong>, envie o arquivo <code>.OFX</code> do banco ou da adquirente de um lado e a planilha de vendas do PDV/ERP (<code>.xlsx</code> ou <code>.csv</code>) do outro. O ValidAí cruza automaticamente datas, NSU/ID e valores líquidos em segundos.
+                    </div>
+                </details>
+
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>Como o ValidAí permite auditar taxas MDR descontadas a maior?</span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        Para cada venda registrada no seu PDV, a ferramenta calcula o <strong>Líquido Esperado</strong> aplicando a taxa contratada (%) e confronta contra o <strong>Valor Efetivamente Creditado</strong> no extrato <code>.OFX</code>, permitindo <strong>auditar taxas MDR descontadas a maior</strong> ou tarifas de antecipação indevidas e apurando o prejuízo exato em reais para reembolso.
+                    </div>
+                </details>
+
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
+                        <span>Como identificar vendas não repassadas no extrato da conta ou adquirente?</span>
+                    </summary>
+                    <div class="seo-faq-answer">
+                        O motor compara cada transação do relatório de vendas contra os créditos do arquivo <code>.OFX</code> dentro da janela de liquidação configurada para <strong>identificar vendas não repassadas</strong>, apontando vendas aprovadas no PDV que nunca entraram na conta bancária, estornos ocultos ou chargebacks.
+                    </div>
+                </details>
+
+                <details class="seo-faq-item">
+                    <summary class="seo-faq-question">
                         <span>O que é um arquivo .OFX e onde consigo baixá-lo?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        O arquivo <code>.OFX</code> (Open Financial Exchange) é o formato padrão utilizado por instituições financeiras para exportação de extratos bancários. Você pode baixá-lo no Internet Banking do seu banco (Itaú, Bradesco, Santander, Banco do Brasil, Inter, etc.) ou no portal da sua maquininha de cartão (Stone, Cielo, Rede, PagBank, Mercado Pago).
+                        O arquivo <code>.OFX</code> (Open Financial Exchange) é o formato universal utilizado por bancos (Itaú, Bradesco, Santander, Banco do Brasil, Inter, Nubank, Sicoob, Sicredi) e operadoras para exportação estruturada de extratos financeiros, podendo ser baixado diretamente no Internet Banking ou portal da maquininha.
                     </div>
                 </details>
 
                 <details class="seo-faq-item">
                     <summary class="seo-faq-question">
-                        <span>Como o ValidAí calcula se a taxa da maquininha foi cobrada a maior?</span>
+                        <span>Posso converter o extrato .OFX em planilha Excel estruturada?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        Para cada venda do seu PDV, o sistema multiplica o Valor Bruto pela Taxa Esperada (%) informada por você. Em seguida, compara o <strong>Líquido Esperado</strong> com o <strong>Valor Efetivamente Creditado</strong> no extrato OFX. Se o crédito for inferior (além da margem de centavos), o sistema calcula o percentual real cobrado e destaca o prejuízo exato em R$ para contestação.
+                        Sim! Além do Relatório de Auditoria de Taxas com células pintadas em cores, o ValidAí gera o <strong>Espelho Tabulado do Extrato OFX em Excel (.xlsx)</strong>, convertendo todas as movimentações financeiras em colunas prontas para conciliação contábil.
                     </div>
                 </details>
 
                 <details class="seo-faq-item">
                     <summary class="seo-faq-question">
-                        <span>O que significa uma "Venda Não Repassada"?</span>
+                        <span>Meus dados financeiros e extratos bancários estão seguros?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        É uma venda que consta registrada no seu sistema de loja (PDV ou ERP), mas cujo pagamento nunca foi identificado no extrato bancário ou da operadora. Esse apontamento permite identificar furos de caixa ou vendas que a adquirente esqueceu de pagar.
-                    </div>
-                </details>
-
-                <details class="seo-faq-item">
-                    <summary class="seo-faq-question">
-                        <span>Quais operadoras de cartão e marketplaces são compatíveis?</span>
-                    </summary>
-                    <div class="seo-faq-answer">
-                        O conciliador é universal e compatível com todas as principais adquirentes e plataformas do mercado: Stone, Cielo, Rede, PagBank, Getnet, SafraPay, Mercado Pago, iFood, Mercado Livre, Shopee e extratos bancários de qualquer banco brasileiro.
-                    </div>
-                </details>
-
-                <details class="seo-faq-item">
-                    <summary class="seo-faq-question">
-                        <span>Meus dados financeiros e extratos estão seguros?</span>
-                    </summary>
-                    <div class="seo-faq-answer">
-                        Sim, 100% seguros. O processamento dos arquivos .OFX e das planilhas de vendas é realizado na memória temporária da sessão, com criptografia de ponta a ponta e sem gravação definitiva de extratos bancários em bancos de dados, em estrita conformidade com a LGPD.
+                        Sim, 100% seguros. O processamento dos arquivos <code>.OFX</code> e das planilhas de vendas ocorre exclusivamente em memória volátil da sessão temporária, sem gravação permanente de extratos bancários em banco de dados e em estrita conformidade com a LGPD.
                     </div>
                 </details>
             </div>

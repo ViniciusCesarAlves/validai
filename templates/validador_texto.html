@@ -6,15 +6,15 @@
     <title data-i18n="text_page_title">{{ seo.title }}</title>
     <meta name="description" content="{{ seo.description }}">
     <meta name="robots" content="{{ seo.robots }}">
-    <link rel="canonical" href="https://validai.app.br{{ request.path }}">
+    <link rel="canonical" href="{{ seo.canonical_url }}">
     <meta http-equiv="content-language" content="pt-BR">
-    <link rel="alternate" hreflang="pt-br" href="https://validai.app.br{{ request.path }}">
-    <link rel="alternate" hreflang="x-default" href="https://validai.app.br{{ request.path }}">
+    <link rel="alternate" hreflang="pt-br" href="{{ seo.canonical_url }}">
+    <link rel="alternate" hreflang="x-default" href="{{ seo.canonical_url }}">
 
     <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
     <meta property="og:title" content="{{ seo.title }}">
     <meta property="og:description" content="{{ seo.description }}">
-    <meta property="og:url" content="https://validai.app.br{{ request.path }}">
+    <meta property="og:url" content="{{ seo.canonical_url }}">
     <meta property="og:type" content="website">
     <meta property="og:image" content="{{ seo.og_image }}">
     <meta property="og:locale" content="pt_BR">
@@ -44,20 +44,21 @@
       "@type": ["WebApplication", "SoftwareApplication"],
       "name": "ValidAí - Comparador e Validador de Textos",
       "url": "https://validai.app.br/validador-texto",
-      "description": "Compare dois blocos de texto ou documentos lado a lado e identifique diferenças, adições e remoções instantaneamente com precisão.",
+      "description": "Compare dois blocos de texto lado a lado e identifique diferenças, adições e remoções instantaneamente com precisão.",
       "applicationCategory": "BusinessApplication",
-      "operatingSystem": "All",
+      "operatingSystem": "Web, Windows, macOS, Linux, Android, iOS",
       "inLanguage": "pt-BR",
       "offers": {
         "@type": "Offer",
-        "price": "0",
+        "name": "Plano Standard Gratuito",
+        "price": "0.00",
         "priceCurrency": "BRL"
       },
       "featureList": [
-        "Comparador e Validador de Textos e Documentos Online (.docx, .pdf, .txt)",
-        "Comparador e Validador de Planilhas Excel (.xlsx, .xls) e CSV",
-        "Higienizador de Cadastros (Validação de CPF, CNPJ, E-mail e Duplicados)",
-        "Conciliador de Notas Fiscais (XML NFe/NFSe vs Planilha Financeira Excel)"
+        "Comparar dois arquivos Word (.docx) ou PDF online lado a lado",
+        "Comparador de contratos jurídicos e minutas com marcação redline de texto inserido e removido",
+        "Normalização inteligente de quebras de linha, caixa e espaços extras",
+        "Exportação de Relatório Executivo em PDF com alterações grifadas"
       ]
     }
     </script>
@@ -71,7 +72,7 @@
         {
           "@type": "ListItem",
           "position": 1,
-          "name": "Home",
+          "name": "ValidAí",
           "item": "https://validai.app.br/"
         },
         {
@@ -92,26 +93,26 @@
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "Como comparar dois documentos ou blocos de texto e destacar alterações?",
+          "name": "Como comparar dois documentos Word (.docx), PDF ou blocos de texto online?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Você pode enviar dois arquivos (.pdf, .docx ou .txt) ou colar os textos diretamente nos campos Original e Novo para limpar texto para colar no Excel ou conferir minutas contratuais. Ao clicar em Encontrar Diferenças, o ValidAí exibe o índice de similaridade, destaca alterações e gera relatório em PDF."
+            "text": "Para comparar dois arquivos Word (.docx) ou PDF online (além de .txt ou textos colados), envie o Documento Original e o Documento Novo no Passo 1 e clique em Encontrar Diferenças. O sistema funciona como um comparador de contratos jurídicos e minutas com marcação redline de texto inserido e removido, calcula a similaridade exata e permite limpar texto para colar no Excel."
           }
         },
         {
           "@type": "Question",
-          "name": "Meus dados e planilhas estão seguros durante a validação?",
+          "name": "Meus documentos e contratos estão seguros durante a validação?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Sim. Todo o processamento de documentos e planilhas ocorre temporariamente em memória apenas durante a sua sessão de análise, sem armazenamento permanente em banco de dados e com total confidencialidade."
+            "text": "Sim. Todo o processamento de documentos Word, PDFs e textos ocorre temporariamente em memória volátil apenas durante a sua sessão de análise em conformidade com a LGPD, sem armazenamento permanente em banco de dados e com total sigilo contratual."
           }
         },
         {
           "@type": "Question",
-          "name": "Quais formatos de arquivo o ValidAí aceita (.xlsx, .xls, .csv, .xml)?",
+          "name": "Quais formatos de arquivo o Validador de Texto aceita (.pdf, .docx, .txt)?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "No Validador de Texto são aceitos arquivos .pdf, .docx e .txt (além de texto colado). Nos demais módulos da plataforma, você também pode auditar planilhas .xlsx, .xls, .csv e notas fiscais eletrônicas em .xml ou .zip."
+            "text": "No Validador de Texto são aceitos documentos PDF pesquisáveis (.pdf), arquivos Microsoft Word (.docx) e textos puros (.txt), além da opção de colar textos diretamente. Nos demais módulos do ValidAí, você também pode auditar planilhas .xlsx, .xls, .csv, notas fiscais .xml/.zip e extratos .OFX."
           }
         },
         {
@@ -119,7 +120,7 @@
           "name": "Como funciona a normalização automática para evitar falsos positivos?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Você pode ativar opções inteligentes para remover quebras de linha indesejadas, converter maiúsculas e minúsculas ou desconsiderar diferenças de caixa, ignorar espaços extras e pontuações, e pular linhas em branco."
+            "text": "Você pode ativar opções inteligentes para remover quebras de linha indesejadas de PDFs, converter maiúsculas e minúsculas ou desconsiderar diferenças de caixa, ignorar espaços extras e pontuações, pular linhas em branco e escolher entre destaque por palavra inteira ou caractere a caractere."
           }
         },
         {
@@ -127,7 +128,7 @@
           "name": "Qual a diferença entre os modos de exibição Rich Text, Redline e Plain Text?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "O modo Rich Text exibe o documento original e o documento novo lado a lado com rolagem sincronizada. O modo Redline funde as duas versões marcando inserções em verde e exclusões em vermelho. O modo Plain Text compara linha a linha."
+            "text": "O modo Rich Text exibe o documento original e o documento novo lado a lado com rolagem sincronizada. O modo Redline (Unificado) funde as duas versões em uma única folha contínua com marcação redline de texto inserido em verde e removido tachado em vermelho — ideal para revisão de cláusulas jurídicas. Já o modo Plain Text compara linha a linha em fonte monoespaçada."
           }
         },
         {
@@ -135,7 +136,7 @@
           "name": "Posso baixar um relatório em PDF com todas as diferenças grifadas?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Sim. Após executar a comparação, basta clicar em Baixar Relatório em PDF com Alterações Destacadas para gerar um documento executivo pronto para compartilhar com clientes e gestores."
+            "text": "Sim. Após executar a comparação, basta clicar em Baixar Relatório em PDF (.pdf) com Alterações Destacadas para gerar um parecer executivo pronto para compartilhar com clientes, gestores ou departamento jurídico."
           }
         }
       ]
@@ -285,7 +286,7 @@
                             </svg>
                             <span data-i18n="paste_label_a">Texto Original (Referência)</span>
                         </label>
-                        <span class="paste-counter" id="counter-doc-a">0 caracteres</span>
+                        <span class="paste-counter" id="counter-doc-a" data-nosnippet>0 caracteres</span>
                     </div>
                     <textarea id="textarea-doc-a" class="doc-textarea" placeholder="Cole ou digite aqui o texto original..." data-i18n-placeholder="paste_ph_a"></textarea>
                 </div>
@@ -298,7 +299,7 @@
                             </svg>
                             <span data-i18n="paste_label_b">Texto Novo (Comparação)</span>
                         </label>
-                        <span class="paste-counter" id="counter-doc-b">0 caracteres</span>
+                        <span class="paste-counter" id="counter-doc-b" data-nosnippet>0 caracteres</span>
                     </div>
                     <textarea id="textarea-doc-b" class="doc-textarea" placeholder="Cole ou digite aqui o texto novo para comparar..." data-i18n-placeholder="paste_ph_b"></textarea>
                 </div>
@@ -724,7 +725,7 @@
         </section>
 
         <!-- Alerta de Erro Flutuante -->
-        <div id="text-toast-error" class="toast-error" style="display: none;">
+        <div id="text-toast-error" class="toast-error" style="display: none;" data-nosnippet>
             <span class="toast-icon" aria-hidden="true">
                 <svg class="splitc-icon splitc-icon-sm" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
@@ -756,28 +757,28 @@
             <div class="seo-faq-list">
                 <details class="seo-faq-item">
                     <summary class="seo-faq-question">
-                        <span>Como comparar dois documentos ou blocos de texto e destacar alterações?</span>
+                        <span>Como comparar dois documentos Word (.docx), PDF ou blocos de texto online?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        Você pode enviar dois arquivos (<code>.pdf</code>, <code>.docx</code> ou <code>.txt</code>) ou colar os textos diretamente nos campos Original e Novo para <strong>limpar texto para colar no Excel</strong> e auditar minutas. Ao clicar em Encontrar Diferenças, o ValidAí exibe o índice de similaridade, destaca adições em verde e remoções em vermelho, e permite baixar um relatório em PDF formatado.
+                        Para <strong>comparar dois arquivos Word (.docx) ou PDF online</strong> (além de <code>.txt</code> ou textos colados), envie o Documento Original e o Documento Novo no Passo 1 e clique em Encontrar Diferenças. O sistema funciona como um <strong>comparador de contratos jurídicos e minutas com marcação redline de texto inserido e removido</strong>, calcula a similaridade exata e permite <strong>limpar texto para colar no Excel</strong>.
                     </div>
                 </details>
 
                 <details class="seo-faq-item">
                     <summary class="seo-faq-question">
-                        <span>Meus dados e planilhas estão seguros durante a validação?</span>
+                        <span>Meus documentos e contratos estão seguros durante a validação?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        Sim. Todo o processamento de documentos e planilhas ocorre temporariamente em memória apenas durante a sua sessão de análise, sem armazenamento permanente em banco de dados e com total confidencialidade.
+                        Sim. Todo o processamento de documentos Word, PDFs e textos ocorre temporariamente em memória volátil apenas durante a sua sessão de análise em conformidade com a LGPD, sem armazenamento permanente em banco de dados e com total sigilo contratual.
                     </div>
                 </details>
 
                 <details class="seo-faq-item">
                     <summary class="seo-faq-question">
-                        <span>Quais formatos de arquivo o ValidAí aceita (.xlsx, .xls, .csv, .xml)?</span>
+                        <span>Quais formatos de arquivo o Validador de Texto aceita (.pdf, .docx, .txt)?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        No Validador de Texto são aceitos arquivos <code>.pdf</code>, <code>.docx</code> e <code>.txt</code> (além de texto colado). Nos demais módulos da plataforma, você também pode auditar planilhas <code>.xlsx</code>, <code>.xls</code>, <code>.csv</code> e notas fiscais eletrônicas em <code>.xml</code> ou <code>.zip</code>.
+                        No Validador de Texto são aceitos documentos PDF pesquisáveis (<code>.pdf</code>), arquivos Microsoft Word (<code>.docx</code>) e textos puros (<code>.txt</code>), além da opção de colar textos diretamente. Nos demais módulos do ValidAí, você também pode auditar planilhas <code>.xlsx</code>, <code>.xls</code>, <code>.csv</code>, notas fiscais <code>.xml</code>/<code>.zip</code> e extratos <code>.OFX</code>.
                     </div>
                 </details>
 
@@ -786,7 +787,7 @@
                         <span>Como funciona a normalização automática para evitar falsos positivos?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        Você pode ativar opções inteligentes para <strong>remover quebras de linha indesejadas</strong>, <strong>converter maiúsculas e minúsculas</strong> ou desconsiderar diferenças de caixa, ignorar espaços extras e pontuações, pular linhas em branco e escolher entre destaque por palavra inteira ou caractere a caractere.
+                        Você pode ativar opções inteligentes para <strong>remover quebras de linha indesejadas</strong> de PDFs, <strong>converter maiúsculas e minúsculas</strong> ou desconsiderar diferenças de caixa, ignorar espaços extras e pontuações, pular linhas em branco e escolher entre destaque por palavra inteira ou caractere a caractere.
                     </div>
                 </details>
 
@@ -795,7 +796,7 @@
                         <span>Qual a diferença entre os modos de exibição Rich Text, Redline e Plain Text?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        O modo <strong>Rich Text</strong> exibe o documento original e o documento novo lado a lado com rolagem sincronizada. O modo <strong>Redline (Unificado)</strong> funde as duas versões em uma única folha contínua marcando inserções em verde e exclusões tachadas em vermelho — ideal para revisão jurídica. Já o modo <strong>Plain Text</strong> compara linha a linha em fonte monoespaçada.
+                        O modo <strong>Rich Text</strong> exibe o documento original e o documento novo lado a lado com rolagem sincronizada. O modo <strong>Redline (Unificado)</strong> funde as duas versões em uma única folha contínua com marcação redline de texto inserido em verde e removido tachado em vermelho — ideal para revisão de cláusulas jurídicas. Já o modo <strong>Plain Text</strong> compara linha a linha em fonte monoespaçada.
                     </div>
                 </details>
 
@@ -804,7 +805,7 @@
                         <span>Posso baixar um relatório em PDF com todas as diferenças grifadas?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        Sim. Após executar a comparação, basta clicar em <strong>Baixar Relatório em PDF (.pdf) com Alterações Destacadas</strong> para gerar um documento executivo pronto para compartilhar com clientes, gestores ou departamento jurídico.
+                        Sim. Após executar a comparação, basta clicar em <strong>Baixar Relatório em PDF (.pdf) com Alterações Destacadas</strong> para gerar um parecer executivo pronto para compartilhar com clientes, gestores ou departamento jurídico.
                     </div>
                 </details>
             </div>

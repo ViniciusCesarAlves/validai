@@ -6,10 +6,10 @@
     <title>{{ seo.title }}</title>
     <meta name="description" content="{{ seo.description }}">
     <meta name="robots" content="noindex, follow">
-    <link rel="canonical" href="https://validai.app.br{{ request.path }}">
+    <link rel="canonical" href="{{ seo.canonical_url }}">
     <meta http-equiv="content-language" content="pt-BR">
-    <link rel="alternate" hreflang="pt-br" href="https://validai.app.br{{ request.path }}">
-    <link rel="alternate" hreflang="x-default" href="https://validai.app.br{{ request.path }}">
+    <link rel="alternate" hreflang="pt-br" href="{{ seo.canonical_url }}">
+    <link rel="alternate" hreflang="x-default" href="{{ seo.canonical_url }}">
 
     <!-- Open Graph -->
     <meta property="og:type" content="website">
@@ -17,7 +17,7 @@
     <meta property="og:site_name" content="ValidAí">
     <meta property="og:title" content="{{ seo.title }}">
     <meta property="og:description" content="{{ seo.description }}">
-    <meta property="og:url" content="https://validai.app.br{{ request.path }}">
+    <meta property="og:url" content="{{ seo.canonical_url }}">
     <meta property="og:image" content="{{ seo.og_image }}">
 
     <!-- Twitter Cards -->

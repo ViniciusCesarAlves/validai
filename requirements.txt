@@ -11,3 +11,4 @@ python-dotenv
 supabase
 mercadopago
 requests
+Brotli

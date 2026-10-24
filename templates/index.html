@@ -6,25 +6,25 @@
     <title data-i18n="page_title">ValidAí | Comparador e Validador de Planilhas Excel e CSV Online</title>
     <meta name="description" content="Compare, audite e valide duas planilhas Excel (.xlsx, .xls) ou CSV gratuitamente. Encontre divergências célula por célula e baixe o relatório pintado.">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://validai.app.br{{ request.path }}">
+    <link rel="canonical" href="{{ seo.canonical_url }}">
     <meta http-equiv="content-language" content="pt-BR">
-    <link rel="alternate" hreflang="pt-br" href="https://validai.app.br{{ request.path }}">
-    <link rel="alternate" hreflang="x-default" href="https://validai.app.br{{ request.path }}">
+    <link rel="alternate" hreflang="pt-br" href="{{ seo.canonical_url }}">
+    <link rel="alternate" hreflang="x-default" href="{{ seo.canonical_url }}">
 
     <!-- Open Graph / Facebook / LinkedIn / WhatsApp -->
     <meta property="og:type" content="website">
     <meta property="og:locale" content="pt_BR">
     <meta property="og:site_name" content="ValidAí">
-    <meta property="og:title" content="ValidAí | Comparador e Validador de Planilhas Excel e CSV Online">
-    <meta property="og:description" content="Compare, audite e valide duas planilhas Excel (.xlsx, .xls) ou CSV gratuitamente. Encontre divergências célula por célula e baixe o relatório pintado.">
-    <meta property="og:url" content="https://validai.app.br{{ request.path }}">
-    <meta property="og:image" content="https://validai.app.br/static/images/og-banner.png">
+    <meta property="og:title" content="{{ seo.title }}">
+    <meta property="og:description" content="{{ seo.description }}">
+    <meta property="og:url" content="{{ seo.canonical_url }}">
+    <meta property="og:image" content="{{ seo.og_image }}">
 
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="ValidAí | Comparador e Validador de Planilhas Excel e CSV Online">
-    <meta name="twitter:description" content="Compare, audite e valide duas planilhas Excel (.xlsx, .xls) ou CSV gratuitamente. Encontre divergências célula por célula e baixe o relatório pintado.">
-    <meta name="twitter:image" content="https://validai.app.br/static/images/og-banner.png">
+    <meta name="twitter:title" content="{{ seo.title }}">
+    <meta name="twitter:description" content="{{ seo.description }}">
+    <meta name="twitter:image" content="{{ seo.og_image }}">
     <link rel="icon" href="/favicon.ico" sizes="48x48">
     <link rel="icon" type="image/png" href="/static/images/favicon-48x48.png" sizes="48x48">
     <link rel="icon" type="image/png" href="/static/images/favicon-96x96.png" sizes="96x96">
@@ -94,45 +94,26 @@
     {
       "@context": "https://schema.org",
       "@type": ["WebApplication", "SoftwareApplication"],
-      "name": "ValidAí",
+      "name": "ValidAí - Comparador e Validador de Planilhas Excel e CSV Online",
       "url": "https://validai.app.br/",
       "applicationCategory": "BusinessApplication",
-      "operatingSystem": "All",
+      "operatingSystem": "Web, Windows, macOS, Linux, Android, iOS",
       "inLanguage": "pt-BR",
       "description": "Compare, audite e valide duas planilhas Excel (.xlsx, .xls) ou CSV gratuitamente. Encontre divergências célula por célula e baixe o relatório pintado.",
       "offers": {
-        "@type": "AggregateOffer",
-        "priceCurrency": "BRL",
-        "lowPrice": "0.00",
-        "highPrice": "9.99",
-        "offerCount": "3",
-        "offers": [
-          {
-            "@type": "Offer",
-            "name": "Plano Standard Gratuito",
-            "price": "0.00",
-            "priceCurrency": "BRL"
-          },
-          {
-            "@type": "Offer",
-            "name": "Plano Plus",
-            "price": "4.99",
-            "priceCurrency": "BRL"
-          },
-          {
-            "@type": "Offer",
-            "name": "Plano Pro",
-            "price": "9.99",
-            "priceCurrency": "BRL"
-          }
-        ]
+        "@type": "Offer",
+        "name": "Plano Standard Gratuito",
+        "price": "0.00",
+        "priceCurrency": "BRL"
       },
       "featureList": [
         "Comparador e Validador de Planilhas Excel (.xlsx, .xls) e CSV",
         "Auditoria Interna de Planilhas com Regras de Consistência",
         "Comparador e Validador de Textos, Contratos PDF e Word (.docx)",
         "Higienizador de Cadastros (Validação de CPF/CNPJ Módulo 11, E-mails e Duplicados)",
-        "Conciliador de XML de Notas Fiscais (NFe e NFSe vs. Planilha Financeira Excel)"
+        "Conciliador de XML de Notas Fiscais (NFe e NFSe vs. Planilha Financeira Excel)",
+        "Conciliador de Taxas e Extratos Bancários (.OFX vs. Vendas de Maquininhas)",
+        "Auditoria de Folha de Pagamento e Benefícios de RH"
       ]
     }
     </script>
@@ -148,7 +129,7 @@
           "name": "Como comparar duas planilhas Excel e achar diferenças automaticamente?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "No ValidAí, basta enviar a Base Antiga (Referência) e a Base Nova (Comparação) em formato .xlsx, .xls ou .csv no Passo 1, escolher a coluna identificadora única (Chave Primária, como ID, CPF, CNPJ ou Número da Nota) no Passo 2 e clicar em 'Rodar Validação Completa'. O sistema cruza todas as linhas e colunas em segundos, permitindo validar CNPJ no Excel e gerando um relatório com as células divergentes pintadas."
+            "text": "Para comparar duas planilhas excel online grátis e achar diferenças entre duas planilhas sem PROCV ou PROCX, basta enviar a Base Antiga (Referência) e a Base Nova (Comparação) no Passo 1 do ValidAí, escolher a coluna de Chave Primária (como ID, CPF, CNPJ ou Código) no Passo 2 e clicar em Executar Validação. O sistema permite bater duas bases excel e pintar células divergentes automaticamente em um relatório .xlsx pronto para download, além de validar CNPJ no Excel."
           }
         },
         {
@@ -156,7 +137,7 @@
           "name": "Meus dados e planilhas estão seguros durante a validação?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Sim. O processamento ocorre em sessões isoladas e temporárias exclusivamente para executar os cálculos de auditoria e gerar os relatórios de download. Seus arquivos não são compartilhados com terceiros nem utilizados para treinamento externo, garantindo conformidade e confidencialidade corporativa."
+            "text": "Sim. O ValidAí processa os arquivos temporariamente em memória volátil apenas durante a sessão ativa para gerar a comparação e o relatório de auditoria em conformidade com a LGPD. Não armazenamos bancos de dados permanentes com o conteúdo das suas planilhas nem compartilhamos informações com terceiros."
           }
         },
         {
@@ -164,7 +145,7 @@
           "name": "Quais formatos de arquivo o ValidAí aceita (.xlsx, .xls, .csv, .xml)?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "O ValidAí aceita planilhas .xlsx, .xls e .csv (até 100 MB) no Validador de Planilhas e no Higienizador de Cadastros; pacotes .zip e arquivos .xml de Notas Fiscais (NF-e, NFS-e e CT-e) no Conciliador de XML; e documentos .pdf, .docx (Word) e .txt no Validador de Texto."
+            "text": "O Comparador de Planilhas e o Higienizador de Cadastros aceitam arquivos Microsoft Excel (.xlsx e .xls) e CSV (.csv com detecção automática de codificação UTF-8/Latin-1 e delimitadores). Além disso, a plataforma oferece módulos dedicados para pacotes .zip/.xml de Notas Fiscais (NFe, NFSe e CTe), extratos bancários .OFX e documentos Word (.docx) ou PDF."
           }
         },
         {
@@ -172,15 +153,15 @@
           "name": "Como funciona a normalização automática para evitar falsos positivos?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "A normalização inteligente permite remover caracteres especiais online, entender como formatar CPF e equiparar automaticamente variações de formatação: moedas e decimais ('R$ 15.650,00' e '15650.00'), formatos de data ('01/08/2026' e '2026-08-01'), letras maiúsculas e minúsculas, zeros à esquerda e espaços extras."
+            "text": "Antes de comparar os valores, o algoritmo de normalização inteligente do ValidAí permite remover caracteres especiais online e compreender como formatar CPF sem falsos positivos, ignorando diferenças irrelevantes entre sistemas como maiúsculas/minúsculas, acentuação, espaços duplos, zeros à esquerda, formatos de data (DD/MM/AAAA vs AAAA-MM-DD) e símbolos de moeda (R$), destacando apenas divergências reais de conteúdo."
           }
         },
         {
           "@type": "Question",
-          "name": "O que é a Chave Primária (Identificador Principal) e qual coluna devo escolher?",
+          "name": "O que é a Chave Primária e como unir várias abas do Excel para comparar?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "A Chave Primária é a coluna que identifica exclusivamente cada registro nas duas planilhas, como CPF, CNPJ, Código do Produto, Número da Nota Fiscal ou ID do Pedido. Graças a ela, o ValidAí localiza e cruza o mesmo registro com precisão mesmo que as planilhas estejam fora de ordem."
+            "text": "A Chave Primária é a coluna que identifica exclusivamente cada registro nas duas planilhas, como CPF, CNPJ, Chassi, Código do Produto ou Número da Nota Fiscal, cruzando os dados mesmo fora de ordem. Se o seu arquivo tiver múltiplas guias mensais ou por filial, você também pode marcar múltiplas guias no seletor do Passo 2 para unir várias abas do excel para comparar de uma só vez."
           }
         },
         {
@@ -188,7 +169,7 @@
           "name": "É possível auditar apenas uma planilha isolada para achar duplicidades e erros internos?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Sim! Basta alternar para o modo 'Auditar 1 Base' no topo do Passo 1. Nele você pode aplicar 12 tipos de regras de consistência em uma única planilha, como validar e-mail em lote, busca de valores duplicados, campos vazios obrigatórios, validação de apenas números ou letras e comparação entre colunas."
+            "text": "Sim! Basta alternar para o modo Auditar 1 Base no topo do Passo 1. Nele você pode validar e-mail em lote e aplicar 12 tipos de regras de consistência em uma única planilha, como busca de valores duplicados, campos vazios obrigatórios, validação de apenas números ou letras e comparação matemática entre duas colunas do mesmo arquivo."
           }
         }
       ]
@@ -205,7 +186,7 @@
     <main class="container main-content">
 
         <!-- Banner Comemorativo Pós-Checkout Mercado Pago -->
-        <div id="mp-checkout-success-banner" class="mp-checkout-success-banner" role="status" aria-live="polite" style="display: none;">
+        <div id="mp-checkout-success-banner" class="mp-checkout-success-banner" role="status" aria-live="polite" style="display: none;" data-nosnippet>
             <div class="mp-checkout-success-content">
                 <svg class="splitc-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
@@ -1141,7 +1122,7 @@
                                 <span class="filesize" id="single-filesize">0 KB</span>
                             </div>
                             <!-- Configurações Visuais de Leitura do Arquivo Único -->
-                            <div class="file-config-panel" id="single-file-config" style="display: none;" onclick="event.stopPropagation();">
+                            <div class="file-config-panel" id="single-file-config" style="display: none;" onclick="event.stopPropagation();" data-nosnippet>
                                 <div class="file-config-row">
                                     <label for="single-header-line" class="file-config-label">
                                         <span>Linha do cabeçalho:</span>
@@ -1872,7 +1853,7 @@
                         <span>Como comparar duas planilhas Excel e achar diferenças automaticamente?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        Basta enviar a planilha de referência (Base A) e a planilha a validar (Base B) no Passo 1 do ValidAí, escolher a coluna de chave primária (como ID, CPF, CNPJ ou Código) no Passo 2 e clicar em Executar Validação. O sistema cruza todas as linhas e colunas instantaneamente, permitindo <strong>validar CNPJ no Excel</strong>, identificar divergências e gerar um relatório Excel pintado célula por célula.
+                        Para <strong>comparar duas planilhas excel online grátis</strong> e <strong>achar diferenças entre duas planilhas sem PROCV ou PROCX</strong>, basta enviar a Base Antiga (Referência) e a Base Nova (Comparação) no Passo 1 do ValidAí, escolher a coluna de Chave Primária (como ID, CPF, CNPJ ou Código) no Passo 2 e clicar em Executar Validação. O sistema permite <strong>bater duas bases excel e pintar células divergentes</strong> automaticamente em um relatório <code>.xlsx</code> pronto para download, além de <strong>validar CNPJ no Excel</strong>.
                     </div>
                 </details>
 
@@ -1881,7 +1862,7 @@
                         <span>Meus dados e planilhas estão seguros durante a validação?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        Sim. O ValidAí processa os arquivos temporariamente em memória apenas durante a sessão ativa para gerar a comparação e o relatório de auditoria. Não armazenamos bancos de dados permanentes com o conteúdo das suas planilhas nem compartilhamos informações com terceiros.
+                        Sim. O ValidAí processa os arquivos temporariamente em memória volátil apenas durante a sessão ativa para gerar a comparação e o relatório de auditoria em conformidade com a LGPD. Não armazenamos bancos de dados permanentes com o conteúdo das suas planilhas nem compartilhamos informações com terceiros.
                     </div>
                 </details>
 
@@ -1890,7 +1871,7 @@
                         <span>Quais formatos de arquivo o ValidAí aceita (.xlsx, .xls, .csv, .xml)?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        O Comparador de Planilhas e o Higienizador de Cadastros aceitam arquivos Microsoft Excel (<code>.xlsx</code> e <code>.xls</code>) e arquivos de valores separados por vírgula (<code>.csv</code> com detecção automática de codificação UTF-8/Latin-1 e delimitadores). Já o Conciliador de Notas Fiscais aceita pacotes <code>.zip</code> ou arquivos <code>.xml</code> padronizados de NFe e NFSe combinados com sua planilha financeira.
+                        O Comparador de Planilhas e o Higienizador de Cadastros aceitam arquivos Microsoft Excel (<code>.xlsx</code> e <code>.xls</code>) e CSV (<code>.csv</code> com detecção automática de codificação UTF-8/Latin-1 e delimitadores). Além disso, a plataforma oferece módulos dedicados para pacotes <code>.zip</code>/<code>.xml</code> de Notas Fiscais (NFe, NFSe e CTe), extratos bancários <code>.OFX</code> e documentos Word (<code>.docx</code>) ou PDF.
                     </div>
                 </details>
 
@@ -1899,16 +1880,16 @@
                         <span>Como funciona a normalização automática para evitar falsos positivos?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        Antes de comparar os valores, o algoritmo de normalização inteligente do ValidAí permite <strong>remover caracteres especiais online</strong> e compreender <strong>como formatar CPF</strong> sem falsos positivos, ignorando diferenças irrelevantes entre sistemas, como maiúsculas/minúsculas, acentuação, espaços duplos, zeros à esquerda e símbolos de moeda, destacando apenas divergências reais de conteúdo.
+                        Antes de comparar os valores, o algoritmo de normalização inteligente do ValidAí permite <strong>remover caracteres especiais online</strong> e compreender <strong>como formatar CPF</strong> sem falsos positivos, ignorando diferenças irrelevantes entre sistemas como maiúsculas/minúsculas, acentuação, espaços duplos, zeros à esquerda, formatos de data (DD/MM/AAAA vs AAAA-MM-DD) e símbolos de moeda (R$), destacando apenas divergências reais de conteúdo.
                     </div>
                 </details>
 
                 <details class="seo-faq-item">
                     <summary class="seo-faq-question">
-                        <span>O que é a Chave Primária (Identificador Principal) e qual coluna devo escolher?</span>
+                        <span>O que é a Chave Primária e como unir várias abas do Excel para comparar?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        A Chave Primária é a coluna que identifica exclusivamente cada registro nas duas planilhas, como CPF, CNPJ, Código do Produto, Número da Nota Fiscal ou ID do Pedido. Graças a ela, o ValidAí localiza e cruza o mesmo registro com precisão mesmo que as planilhas estejam fora de ordem ou tenham quantidades de linhas diferentes.
+                        A Chave Primária é a coluna que identifica exclusivamente cada registro nas duas planilhas, como CPF, CNPJ, Chassi, Código do Produto ou Número da Nota Fiscal, cruzando os dados mesmo fora de ordem. Se o seu arquivo tiver múltiplas guias mensais ou por filial, você também pode marcar múltiplas guias no seletor do Passo 2 para <strong>unir várias abas do excel para comparar</strong> de uma só vez.
                     </div>
                 </details>
 
@@ -1917,7 +1898,7 @@
                         <span>É possível auditar apenas uma planilha isolada para achar duplicidades e erros internos?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        Sim! Basta alternar para o modo <strong>Auditar 1 Base</strong> no topo do Passo 1. Nele você pode <strong>validar e-mail em lote</strong> e aplicar 12 tipos de regras de consistência em uma única planilha, como busca de valores duplicados, campos vazios obrigatórios, validação de apenas números ou letras e comparação entre duas colunas do mesmo arquivo.
+                        Sim! Basta alternar para o modo <strong>Auditar 1 Base</strong> no topo do Passo 1. Nele você pode <strong>validar e-mail em lote</strong> e aplicar 12 tipos de regras de consistência em uma única planilha, como busca de valores duplicados, campos vazios obrigatórios, validação de apenas números ou letras e comparação matemática entre duas colunas do mesmo arquivo.
                     </div>
                 </details>
             </div>
@@ -1943,7 +1924,7 @@
     {% include 'partials/footer.html' %}
 
     <!-- Modal de Limpeza e Seleção de Mapeamento -->
-    <div id="modal-clear-mapping" class="modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-clear-title">
+    <div id="modal-clear-mapping" class="modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-clear-title" data-nosnippet>
         <div class="modal-card">
             <div class="modal-header">
                 <div class="modal-header-icon-wrap">
@@ -2034,7 +2015,7 @@
     </div>
 
     <!-- Portal do Dropdown Pesquisável de Colunas -->
-    <div id="mapping-dropdown-portal" class="mapping-dropdown-portal" style="display: none;">
+    <div id="mapping-dropdown-portal" class="mapping-dropdown-portal" style="display: none;" data-nosnippet>
         <div class="dropdown-search-wrapper">
             <svg class="splitc-icon input-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="7"/>

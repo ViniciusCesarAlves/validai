@@ -3,28 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planos e Preços | ValidAí - Validador de Arquivos e Dados</title>
-    <meta name="description" content="Conheça os planos do ValidAí. Validações gratuitas diárias ou planos Standard e Pro com arquivos ilimitados e suporte prioritário.">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://validai.app.br/planos">
+    <title>{{ seo.title }}</title>
+    <meta name="description" content="{{ seo.description }}">
+    <meta name="robots" content="{{ seo.robots }}">
+    <link rel="canonical" href="{{ seo.canonical_url }}">
     <meta http-equiv="content-language" content="pt-BR">
-    <link rel="alternate" hreflang="pt-br" href="https://validai.app.br/planos">
-    <link rel="alternate" hreflang="x-default" href="https://validai.app.br/planos">
+    <link rel="alternate" hreflang="pt-br" href="{{ seo.canonical_url }}">
+    <link rel="alternate" hreflang="x-default" href="{{ seo.canonical_url }}">
 
     <!-- Open Graph / Redes Sociais -->
-    <meta property="og:title" content="Planos e Preços | ValidAí - Validador de Arquivos e Dados">
-    <meta property="og:description" content="Conheça os planos do ValidAí. Validações gratuitas no plano Standard ou desbloqueie arquivos completos e sem limites nos planos Plus (R$ 4,99) e Pro (R$ 9,99).">
-    <meta property="og:url" content="https://validai.app.br/planos">
+    <meta property="og:title" content="{{ seo.title }}">
+    <meta property="og:description" content="{{ seo.description }}">
+    <meta property="og:url" content="{{ seo.canonical_url }}">
     <meta property="og:type" content="website">
-    <meta property="og:image" content="https://validai.app.br/static/images/og-banner.png">
+    <meta property="og:image" content="{{ seo.og_image }}">
     <meta property="og:locale" content="pt_BR">
     <meta property="og:site_name" content="ValidAí">
 
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Planos e Preços | ValidAí">
-    <meta name="twitter:description" content="Automatize suas auditorias e conciliações sem limites. Planos a partir de R$ 4,99/mês sem fidelidade.">
-    <meta name="twitter:image" content="https://validai.app.br/static/images/og-banner.png">
+    <meta name="twitter:title" content="{{ seo.title }}">
+    <meta name="twitter:description" content="{{ seo.description }}">
+    <meta name="twitter:image" content="{{ seo.og_image }}">
     <link rel="icon" href="/favicon.ico" sizes="48x48">
     <link rel="icon" type="image/png" href="/static/images/favicon-48x48.png" sizes="48x48">
     <link rel="icon" type="image/png" href="/static/images/favicon-96x96.png" sizes="96x96">
@@ -459,12 +459,15 @@
             justify-content: center;
             flex-shrink: 0;
         }
+        .trust-content h3,
         .trust-content h4 {
             font-size: 14px;
             font-weight: 700;
             color: var(--text-main, #0f172a);
             margin: 0 0 4px 0;
         }
+        [data-theme="dark"] .trust-content h3,
+        .dark-theme .trust-content h3,
         [data-theme="dark"] .trust-content h4,
         .dark-theme .trust-content h4 {
             color: #f8fafc !important;
@@ -511,7 +514,7 @@
         {
           "@type": "ListItem",
           "position": 1,
-          "name": "Home",
+          "name": "ValidAí",
           "item": "https://validai.app.br/"
         },
         {
@@ -759,7 +762,7 @@
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4FD580" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                     </div>
                     <div class="trust-content">
-                        <h4>Pagamento Seguro Mercado Pago</h4>
+                        <h3>Pagamento Seguro Mercado Pago</h3>
                         <p>PIX instantâneo ou Cartão de Crédito com criptografia bancária de ponta a ponta.</p>
                     </div>
                 </div>
@@ -769,7 +772,7 @@
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4FD580" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                     </div>
                     <div class="trust-content">
-                        <h4>Privacidade Estrita (LGPD)</h4>
+                        <h3>Privacidade Estrita (LGPD)</h3>
                         <p>Seus arquivos são processados estritamente em memória volátil e nunca são salvos em disco.</p>
                     </div>
                 </div>
@@ -779,7 +782,7 @@
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4FD580" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     </div>
                     <div class="trust-content">
-                        <h4>Sem Fidelidade ou Multas</h4>
+                        <h3>Sem Fidelidade ou Multas</h3>
                         <p>A assinatura é válida por 30 dias. Você decide quando renovar, com liberdade total.</p>
                     </div>
                 </div>

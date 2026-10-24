@@ -6,15 +6,15 @@
     <title data-i18n="rh_page_title">{{ seo.title }}</title>
     <meta name="description" content="{{ seo.description }}">
     <meta name="robots" content="{{ seo.robots }}">
-    <link rel="canonical" href="https://validai.app.br{{ request.path }}">
+    <link rel="canonical" href="{{ seo.canonical_url }}">
     <meta http-equiv="content-language" content="pt-BR">
-    <link rel="alternate" hreflang="pt-br" href="https://validai.app.br{{ request.path }}">
-    <link rel="alternate" hreflang="x-default" href="https://validai.app.br{{ request.path }}">
+    <link rel="alternate" hreflang="pt-br" href="{{ seo.canonical_url }}">
+    <link rel="alternate" hreflang="x-default" href="{{ seo.canonical_url }}">
 
     <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
     <meta property="og:title" content="{{ seo.title }}">
     <meta property="og:description" content="{{ seo.description }}">
-    <meta property="og:url" content="https://validai.app.br{{ request.path }}">
+    <meta property="og:url" content="{{ seo.canonical_url }}">
     <meta property="og:type" content="website">
     <meta property="og:image" content="{{ seo.og_image }}">
     <meta property="og:locale" content="pt_BR">
@@ -48,21 +48,22 @@
       "@type": ["WebApplication", "SoftwareApplication"],
       "name": "ValidAí - Auditoria de Folha e RH",
       "url": "https://validai.app.br/auditoria-rh",
-      "description": "Cruze folhas de pagamento (mês anterior vs. atual) ou ative a auditoria de colaboradores ativos no RH contra faturas de benefícios corporativos (planos de saúde, VR/VA, seguros).",
+      "description": "Batimento automatizado de folha de pagamento (mês anterior vs. atual) e conciliação de ativos do RH contra faturas de benefícios corporativos.",
       "applicationCategory": "BusinessApplication",
-      "operatingSystem": "All",
+      "operatingSystem": "Web, Windows, macOS, Linux, Android, iOS",
       "inLanguage": "pt-BR",
       "offers": {
         "@type": "Offer",
-        "price": "0",
+        "name": "Plano Standard Gratuito",
+        "price": "0.00",
         "priceCurrency": "BRL"
       },
       "featureList": [
-        "Comparativo Mensal de Folha de Pagamento (Mês Anterior vs. Mês Atual)",
-        "Detecção de Funcionários Fantasmas em Faturas de Benefícios Corporativos",
-        "Alerta de Variações Salariais Atípicas e Inconsistências de Proventos/Descontos",
-        "Normalização Inteligente de CPF com Recuperação de Zeros à Esquerda",
-        "Exportação de Relatório Executivo Excel em 5 Abas Formatadas com Células Pintadas"
+        "Auditoria de folha de pagamento no Excel (mês anterior vs mês atual)",
+        "Batimento de encargos (INSS, FGTS, IRRF, horas extras)",
+        "Conciliação de cadastro ativo do RH contra fatura de plano de saúde e benefícios para detectar funcionários fantasmas demitidos",
+        "Normalização inteligente de CPF com recuperação de zeros à esquerda",
+        "Exportação de Relatório Executivo Excel em 5 abas formatadas com células pintadas"
       ]
     }
     </script>
@@ -76,7 +77,7 @@
         {
           "@type": "ListItem",
           "position": 1,
-          "name": "Home",
+          "name": "ValidAí",
           "item": "https://validai.app.br/"
         },
         {
@@ -84,6 +85,64 @@
           "position": 2,
           "name": "Auditoria de Folha e RH",
           "item": "https://validai.app.br/auditoria-rh"
+        }
+      ]
+    }
+    </script>
+
+    <!-- Schema.org JSON-LD: FAQPage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Como funciona o comparativo mensal de folha de pagamento no Excel?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Para realizar a auditoria de folha de pagamento no excel (mês anterior vs mês atual), o sistema cruza as duas bases usando o CPF ou Matrícula como chave unificadora. Ele identifica automaticamente admissões, desligamentos e realiza o batimento de encargos (INSS, FGTS, IRRF, horas extras), proventos e descontos colaborador por colaborador."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Como detectar colaboradores desligados cobrados na fatura de plano de saúde e benefícios?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No modo Ativos no RH vs. Benefícios, a ferramenta executa a conciliação de cadastro ativo do RH contra fatura de plano de saúde e benefícios para detectar funcionários fantasmas demitidos (VR, VA, seguro de vida e odontológico), apontando imediatamente qualquer CPF faturado que não pertença mais ao quadro ativo da empresa."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Como funciona o Alerta de Variação Salarial Atípica (> X%)?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Você define um percentual de tolerância no Passo 2 (padrão de 10%). Quando uma rubrica monetária como Salário Base, Total de Proventos, INSS, FGTS, IRRF ou Horas Extras sofrer variação superior a esse limite para o mesmo colaborador entre os dois meses, o registro é destacado com alerta crítico no dashboard e na planilha Excel."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Como é feita a normalização de CPFs para evitar erros do Excel?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "O Excel frequentemente converte números de CPF para formato numérico inteiro, omitindo os zeros à esquerda (ex: transformando 048.123.456-78 em 4812345678). O ValidAí limpa pontos e traços e recupera automaticamente os zeros à esquerda até 11 dígitos, garantindo 100% de precisão nos cruzamentos de DP."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Quais formatos de arquivo são suportados para importar a folha ou faturas de benefícios?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Você pode carregar planilhas Microsoft Excel (.xlsx e .xls) e arquivos .csv exportados de qualquer sistema de folha (TOTVS, Senior, ADP, Domínio, Contmatic, eSocial). O relatório final é gerado em .xlsx com 5 abas executivas e células pintadas."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Meus dados de colaboradores e salários estão seguros conforme a LGPD?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sim, total segurança e sigilo corporativo. O processamento das planilhas de folha e RH ocorre exclusivamente em memória volátil na sessão temporária, sem armazenamento em banco de dados permanente e em estrita conformidade com a Lei Geral de Proteção de Dados (LGPD)."
+          }
         }
       ]
     }
@@ -218,7 +277,7 @@
             </div>
 
             <!-- Alerta de erro de upload -->
-            <div id="rh-upload-alert" class="alert-box alert-error" style="display: none; margin-top: 16px;">
+            <div id="rh-upload-alert" class="alert-box alert-error" style="display: none; margin-top: 16px;" data-nosnippet>
                 <div class="alert-icon-wrapper">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"/>
@@ -834,28 +893,28 @@
             <div class="seo-faq-list">
                 <details class="seo-faq-item">
                     <summary class="seo-faq-question">
-                        <span>Como funciona o comparativo mensal de folha de pagamento?</span>
+                        <span>Como funciona o comparativo mensal de folha de pagamento no Excel?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        O sistema cruza a folha do mês anterior contra a folha do mês atual usando o CPF ou Matrícula como chave unificadora. Ele identifica automaticamente quem foi admitido (exclusivo do mês atual), quem foi desligado (exclusivo do mês anterior) e calcula a variação individual de cada provento e desconto, alertando quando houver aumento ou queda salarial atípica.
+                        Para realizar a <strong>auditoria de folha de pagamento no excel (mês anterior vs mês atual)</strong>, o sistema cruza as duas bases usando o CPF ou Matrícula como chave unificadora. Ele identifica automaticamente admissões, desligamentos e realiza o <strong>batimento de encargos (INSS, FGTS, IRRF, horas extras)</strong>, proventos e descontos colaborador por colaborador.
                     </div>
                 </details>
 
                 <details class="seo-faq-item">
                     <summary class="seo-faq-question">
-                        <span>Como detectar colaboradores desligados que continuam cobrados na fatura de benefícios?</span>
+                        <span>Como detectar colaboradores desligados cobrados na fatura de plano de saúde e benefícios?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        No modo <strong>Ativos no RH vs. Fatura de Benefícios</strong>, envie a lista oficial de colaboradores ativos da empresa de um lado e o arquivo faturado pela operadora de saúde, seguro ou vale do outro. Qualquer CPF presente na fatura que não conste na lista de ativos do RH é imediatamente sinalizado como <em>Cobrança Indevida / Funcionário Fantasma</em> para estorno financeiro imediato.
+                        No modo <strong>Ativos no RH vs. Benefícios</strong>, a ferramenta executa a <strong>conciliação de cadastro ativo do RH contra fatura de plano de saúde e benefícios para detectar funcionários fantasmas demitidos</strong> (VR, VA, seguro de vida e odontológico), apontando imediatamente qualquer CPF faturado que não pertença mais ao quadro ativo da empresa.
                     </div>
                 </details>
 
                 <details class="seo-faq-item">
                     <summary class="seo-faq-question">
-                        <span>Como funciona o Alerta de Variação Salarial Atípica (> X%)?</span>
+                        <span>Como funciona o Alerta de Variação Salarial Atípica (&gt; X%)?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        Você define um percentual de tolerância no Passo 2 (padrão de 10%). Quando uma coluna monetária como Salário Base, Total de Proventos, Horas Extras ou Valor de Benefício sofrer um reajuste proporcional positivo ou negativo superior a esse limite para o mesmo colaborador entre os dois meses, o sistema marca o registro com alerta crítico no dashboard e na planilha Excel para conferência da equipe de DP.
+                        Você define um percentual de tolerância no Passo 2 (padrão de 10%). Quando uma rubrica monetária como Salário Base, Total de Proventos, INSS, FGTS, IRRF ou Horas Extras sofrer variação superior a esse limite para o mesmo colaborador entre os dois meses, o registro é destacado com alerta crítico no dashboard e na planilha Excel.
                     </div>
                 </details>
 
@@ -864,25 +923,25 @@
                         <span>Como é feita a normalização de CPFs para evitar erros do Excel?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        O Excel frequentemente converte números de CPF para formato numérico inteiro, comendo os zeros à esquerda (ex: transformando <code>048.123.456-78</code> em <code>4812345678</code>). O ValidAí limpa pontos e traços e preenche automaticamente com zeros à esquerda até 11 dígitos (<code>.zfill(11)</code>), garantindo 100% de precisão nos cruzamentos.
+                        O Excel frequentemente converte números de CPF para formato numérico inteiro, omitindo os zeros à esquerda (ex: transformando <code>048.123.456-78</code> em <code>4812345678</code>). O ValidAí limpa pontos e traços e recupera automaticamente os zeros à esquerda até 11 dígitos, garantindo 100% de precisão nos cruzamentos de DP.
                     </div>
                 </details>
 
                 <details class="seo-faq-item">
                     <summary class="seo-faq-question">
-                        <span>Quais formatos de arquivo são suportados para importar a folha ou benefícios?</span>
+                        <span>Quais formatos de arquivo são suportados para importar a folha ou faturas de benefícios?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        Você pode carregar arquivos Microsoft Excel (<code>.xlsx</code> e <code>.xls</code>) e arquivos de valores separados por vírgula (<code>.csv</code> com detecção automática de delimitadores e codificação UTF-8 ou Latin-1). O relatório auditado final é gerado em formato <code>.xlsx</code> com abas separadas por tipo de divergência.
+                        Você pode carregar planilhas Microsoft Excel (<code>.xlsx</code> e <code>.xls</code>) e arquivos <code>.csv</code> exportados de qualquer sistema de folha (TOTVS, Senior, ADP, Domínio, Contmatic, eSocial). O relatório final é gerado em <code>.xlsx</code> com 5 abas executivas e células pintadas.
                     </div>
                 </details>
 
                 <details class="seo-faq-item">
                     <summary class="seo-faq-question">
-                        <span>Meus dados de colaboradores e salários estão seguros?</span>
+                        <span>Meus dados de colaboradores e salários estão seguros conforme a LGPD?</span>
                     </summary>
                     <div class="seo-faq-answer">
-                        Sim, total segurança e sigilo. O processamento das planilhas de folha e RH é feito em memória na sessão temporária, sem armazenamento em banco de dados permanente e em estrita conformidade com a Lei Geral de Proteção de Dados (LGPD).
+                        Sim, total segurança e sigilo corporativo. O processamento das planilhas de folha e RH ocorre exclusivamente em memória volátil na sessão temporária, sem armazenamento em banco de dados permanente e em estrita conformidade com a Lei Geral de Proteção de Dados (LGPD).
                     </div>
                 </details>
             </div>
@@ -906,7 +965,7 @@
     </main>
 
     <!-- Modal de Limpeza e Seleção de Mapeamento -->
-    <div id="modal-clear-mapping" class="modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-clear-title">
+    <div id="modal-clear-mapping" class="modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-clear-title" data-nosnippet>
         <div class="modal-card">
             <div class="modal-header">
                 <div class="modal-header-icon-wrap">
@@ -997,7 +1056,7 @@
     </div>
 
     <!-- Portal do Dropdown Pesquisável de Colunas -->
-    <div id="mapping-dropdown-portal" class="mapping-dropdown-portal" style="display: none;">
+    <div id="mapping-dropdown-portal" class="mapping-dropdown-portal" style="display: none;" data-nosnippet>
         <div class="dropdown-search-wrapper">
             <svg class="splitc-icon input-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="7"/>

@@ -73,8 +73,18 @@ def add_cache_and_compression(response):
     if request.path == '/health':
         return response
 
-    # Sinalização explícita de idioma nativo (pt-BR)
+    # Sinalização explícita de idioma nativo (pt-BR) e HTTP Link hreflang para páginas HTML públicas
     response.headers['Content-Language'] = 'pt-BR'
+    if (
+        response.status_code == 200
+        and response.mimetype == 'text/html'
+        and not request.path.startswith(('/login', '/cadastro', '/checkout', '/auth/', '/webhook/', '/api/'))
+    ):
+        canonical_href = f"{SITE_DOMAIN}{request.path}"
+        response.headers['Link'] = (
+            f'<{canonical_href}>; rel="alternate"; hreflang="pt-br", '
+            f'<{canonical_href}>; rel="alternate"; hreflang="x-default"'
+        )
 
     # Blindagem de indexação em rotas transacionais/privadas (noindex, nofollow)
     if request.path.startswith(('/login', '/cadastro', '/checkout', '/auth/', '/webhook/')):
@@ -220,44 +230,43 @@ SEO_METADATA = {
         'title': 'ValidAí | Comparador e Validador de Planilhas Excel e CSV Online',
         'description': 'Compare, audite e valide duas planilhas Excel (.xlsx, .xls) ou CSV gratuitamente. Encontre divergências célula por célula e baixe o relatório pintado.',
         'robots': 'index, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
     },
     '/validador-texto': {
         'title': 'Comparador e Validador de Textos Online | ValidAí',
         'description': 'Compare dois blocos de texto lado a lado e identifique diferenças, adições e remoções instantaneamente com precisão.',
         'robots': 'index, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
     },
     '/validador-cadastros': {
         'title': 'Higienizador de Cadastros: Validar CPF, CNPJ, E-mail e Duplicados | ValidAí',
         'description': 'Limpe e padronize suas bases de dados. Valide CPF/CNPJ, e-mails e remova linhas duplicadas de planilhas automaticamente.',
         'robots': 'index, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
     },
     '/validador-xml': {
         'title': 'Conciliador de Notas Fiscais (XML NFe/NFSe vs Excel) | ValidAí',
         'description': 'Cruze dados de arquivos XML de Notas Fiscais (NFe e NFSe) contra planilhas de controle no Excel de forma automatizada.',
         'robots': 'index, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
     },
     '/como-usar': {
         'title': 'Como Usar o ValidAí | Guia Completo de Validação e Auditoria de Dados',
         'description': 'Aprenda passo a passo como comparar planilhas, higienizar cadastros e conciliar notas fiscais no ValidAí.',
         'robots': 'index, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
     },
     '/conciliador-taxas': {
         'title': 'Conciliador de Taxas e Extratos (.OFX vs Vendas) | ValidAí',
         'description': 'Audite taxas de maquininhas (Stone, Cielo, Rede) e repasses de marketplaces contra extratos bancários .OFX.',
         'robots': 'index, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
     },
-    # Rotas "Em Breve" protegidas contra desperdício de Crawl Budget e Soft 404
     '/auditoria-rh': {
         'title': 'Auditoria de Folha e RH | ValidAí',
         'description': 'Batimento automatizado de folha de pagamento (mês anterior vs. atual) e conciliação de ativos do RH contra faturas de benefícios corporativos.',
         'robots': 'index, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png',
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png',
         'module_name': 'Auditoria de Folha e RH',
         'module_sub': 'Batimento de folha de pagamento, proventos, descontos e benefícios corporativos.'
     },
@@ -265,43 +274,44 @@ SEO_METADATA = {
         'title': 'Política de Privacidade | ValidAí',
         'description': 'Entenda como o ValidAí trata e protege seus dados conforme a LGPD. Processamento seguro na memória e privacidade total de arquivos.',
         'robots': 'index, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
     },
     '/termos': {
         'title': 'Termos de Uso | ValidAí',
         'description': 'Termos e condições gerais de uso da plataforma ValidAí para validação de dados, arquivos e cadastros corporativos.',
         'robots': 'index, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
     },
     '/sobre': {
         'title': 'Sobre o ValidAí | Quem Somos e Nossa Missão',
         'description': 'Conheça a história e a missão do ValidAí: simplificar a validação e higienização de arquivos, planilhas e cadastros corporativos no Brasil.',
         'robots': 'index, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
     },
     '/planos': {
         'title': 'Planos e Preços | ValidAí - Validador de Arquivos e Dados',
-        'description': 'Conheça os planos do ValidAí. Validações gratuitas no plano Standard ou desbloqueie arquivos completos e sem limites nos planos Plus (R$ 4,99) e Pro (R$ 9,99).',
+        'description': 'Conheça os planos do ValidAí: Standard (Gratuito) com validações diárias sem cadastro, Plus (R$ 4,99) e Pro (R$ 9,99) com arquivos completos, zero anúncios e sem limites.',
         'robots': 'index, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
     },
     '/login': {
         'title': 'Entrar na Conta | ValidAí',
         'description': 'Acesse sua conta no ValidAí para gerenciar seu plano e histórico de validações.',
         'robots': 'noindex, nofollow',
-        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
     },
     '/cadastro': {
         'title': 'Criar Conta Gratuita | ValidAí',
         'description': 'Crie sua conta no ValidAí para validar planilhas, cadastros e notas fiscais.',
         'robots': 'noindex, nofollow',
-        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
     },
+    # Rotas "Em Breve" protegidas contra desperdício de Crawl Budget e Soft 404
     '/validador-json': {
         'title': 'Comparador de JSON / APIs - Em Breve | ValidAí',
         'description': 'Identifique diferenças estruturais, chaves ausentes e divergências de tipagem entre payloads JSON e retornos de APIs.',
         'robots': 'noindex, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png',
+        'og_image': f'{SITE_DOMAIN}/static/images/logo.png',
         'module_name': 'Comparador de JSON / APIs',
         'module_sub': 'Análise de diferenças estruturais entre payloads JSON, webhooks e objetos aninhados.'
     }
@@ -735,7 +745,7 @@ def ads_txt():
 
 @app.route('/sitemap.xml')
 def sitemap_xml():
-    lastmod_date = "2026-10-21"
+    lastmod_date = "2026-10-24"
     urls = [
         ('/', '1.0', 'weekly'),
         ('/validador-texto', '0.9', 'weekly'),

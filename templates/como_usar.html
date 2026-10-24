@@ -6,15 +6,15 @@
     <title data-i18n="guide_page_title">{{ seo.title }}</title>
     <meta name="description" content="{{ seo.description }}">
     <meta name="robots" content="{{ seo.robots }}">
-    <link rel="canonical" href="https://validai.app.br{{ request.path }}">
+    <link rel="canonical" href="{{ seo.canonical_url }}">
     <meta http-equiv="content-language" content="pt-BR">
-    <link rel="alternate" hreflang="pt-br" href="https://validai.app.br{{ request.path }}">
-    <link rel="alternate" hreflang="x-default" href="https://validai.app.br{{ request.path }}">
+    <link rel="alternate" hreflang="pt-br" href="{{ seo.canonical_url }}">
+    <link rel="alternate" hreflang="x-default" href="{{ seo.canonical_url }}">
 
     <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
     <meta property="og:title" content="{{ seo.title }}">
     <meta property="og:description" content="{{ seo.description }}">
-    <meta property="og:url" content="https://validai.app.br{{ request.path }}">
+    <meta property="og:url" content="{{ seo.canonical_url }}">
     <meta property="og:type" content="website">
     <meta property="og:image" content="{{ seo.og_image }}">
     <meta property="og:locale" content="pt_BR">
@@ -46,18 +46,21 @@
       "url": "https://validai.app.br/como-usar",
       "description": "Aprenda passo a passo como comparar planilhas, higienizar cadastros e conciliar notas fiscais no ValidAí.",
       "applicationCategory": "BusinessApplication",
-      "operatingSystem": "All",
+      "operatingSystem": "Web, Windows, macOS, Linux, Android, iOS",
       "inLanguage": "pt-BR",
       "offers": {
         "@type": "Offer",
-        "price": "0",
+        "name": "Plano Standard Gratuito",
+        "price": "0.00",
         "priceCurrency": "BRL"
       },
       "featureList": [
         "Comparador e Validador de Planilhas Excel (.xlsx, .xls) e CSV",
         "Comparador e Validador de Textos e Documentos Online (.docx, .pdf, .txt)",
         "Higienizador de Cadastros (Validação de CPF, CNPJ, E-mail e Duplicados)",
-        "Conciliador de Notas Fiscais (XML NFe/NFSe vs Planilha Financeira Excel)"
+        "Conciliador de Notas Fiscais (XML NFe/NFSe vs Planilha Financeira Excel)",
+        "Conciliador de Taxas e Extratos (.OFX vs Vendas)",
+        "Auditoria de Folha de Pagamento e Benefícios de RH"
       ]
     }
     </script>
@@ -71,7 +74,7 @@
         {
           "@type": "ListItem",
           "position": 1,
-          "name": "Home",
+          "name": "ValidAí",
           "item": "https://validai.app.br/"
         },
         {
