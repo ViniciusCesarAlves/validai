@@ -1037,7 +1037,7 @@
             }
 
             const link = document.createElement('a');
-            link.download = 'painel-conciliacao-taxas.png';
+            link.download = 'Relatorio_ValidAi_Graficos.png';
             link.href = outCanvas.toDataURL('image/png');
             document.body.appendChild(link);
             link.click();

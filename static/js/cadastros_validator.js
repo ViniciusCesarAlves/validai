@@ -958,7 +958,7 @@
             }
 
             const link = document.createElement('a');
-            link.download = 'painel-cadastros-validai.png';
+            link.download = 'Relatorio_ValidAi_Graficos.png';
             link.href = outCanvas.toDataURL('image/png');
             document.body.appendChild(link);
             link.click();

@@ -1,4 +1,38 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Verificação Pós-Checkout do Mercado Pago na URL
+    try {
+        const urlParams = new URLSearchParams(window.location.search || '');
+        const mpStatus = (urlParams.get('status') || '').toLowerCase();
+        const mpCollectionStatus = (urlParams.get('collection_status') || '').toLowerCase();
+        const mpFeedback = (urlParams.get('feedback') || '').toLowerCase();
+        const mpPagamento = (urlParams.get('pagamento') || '').toLowerCase();
+
+        if (
+            mpStatus === 'approved' ||
+            mpCollectionStatus === 'approved' ||
+            mpFeedback === 'success' ||
+            (mpPagamento === 'sucesso' && mpStatus !== 'rejected' && mpStatus !== 'null')
+        ) {
+            const mpBanner = document.getElementById('mp-checkout-success-banner');
+            if (mpBanner) {
+                mpBanner.style.display = 'flex';
+            }
+            const btnCloseMp = document.getElementById('btn-close-mp-success');
+            if (btnCloseMp && mpBanner) {
+                btnCloseMp.addEventListener('click', () => {
+                    try {
+                        mpBanner.style.display = 'none';
+                    } catch (_) {}
+                });
+            }
+            if (window.history && typeof window.history.replaceState === 'function') {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+    } catch (mpErr) {
+        console.warn('Aviso ao verificar retorno de checkout:', mpErr);
+    }
+
     // Estado da Aplicação
     const state = {
         sessionId: null,
@@ -19,7 +53,9 @@ document.addEventListener('DOMContentLoaded', () => {
         colsDisplayA: [],
         colsDisplayB: [],
         selectedSheetsA: [],
-        selectedSheetsB: []
+        selectedSheetsB: [],
+        userHeaderLineA: null,
+        userHeaderLineB: null
     };
 
     // Tema gerenciado centralmente por header.html
@@ -64,10 +100,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Elementos DOM - Seletor de Aba e Cabeçalho no Passo 2 (Múltiplas Abas)
     const step2SheetsConfig = document.getElementById('step2-sheets-config');
+    const step2CardA = document.getElementById('step2-card-a');
+    const step2CardB = document.getElementById('step2-card-b');
     const step2FilenameA = document.getElementById('step2-filename-a');
     const step2FilenameB = document.getElementById('step2-filename-b');
-    const step2SheetSelectA = document.getElementById('step2-sheet-select-a');
-    const step2SheetSelectB = document.getElementById('step2-sheet-select-b');
+    const step2MultiselectA = document.getElementById('step2-multiselect-a');
+    const step2MultiselectB = document.getElementById('step2-multiselect-b');
+    const step2SheetTriggerA = document.getElementById('step2-sheet-trigger-a');
+    const step2SheetTriggerB = document.getElementById('step2-sheet-trigger-b');
+    const step2SheetLabelA = document.getElementById('step2-sheet-label-a');
+    const step2SheetLabelB = document.getElementById('step2-sheet-label-b');
+    const step2SheetDropdownA = document.getElementById('step2-sheet-dropdown-a');
+    const step2SheetDropdownB = document.getElementById('step2-sheet-dropdown-b');
+    const step2SelectAllVisA = document.getElementById('step2-select-all-vis-a');
+    const step2SelectAllVisB = document.getElementById('step2-select-all-vis-b');
+    const step2DeselectAllA = document.getElementById('step2-deselect-all-a');
+    const step2DeselectAllB = document.getElementById('step2-deselect-all-b');
+    const step2SheetOptionsA = document.getElementById('step2-sheet-options-a');
+    const step2SheetOptionsB = document.getElementById('step2-sheet-options-b');
     const step2HeaderLineA = document.getElementById('step2-header-line-a');
     const step2HeaderLineB = document.getElementById('step2-header-line-b');
     const step2SheetLoading = document.getElementById('step2-sheet-loading');
@@ -159,6 +209,117 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    const BTN_STEPPER_STAGES = [
+        '⏳ Lendo e normalizando células...',
+        '🔍 Cruzando chaves e identificadores...',
+        '📊 Consolidando divergências e KPIs...',
+        '✨ Finalizando relatório...'
+    ];
+
+    function startBtnStepperLoading(button, fallbackDefaultText = '') {
+        try {
+            if (!button) return;
+            if (button._stepperIntervalId) {
+                clearInterval(button._stepperIntervalId);
+                button._stepperIntervalId = null;
+            }
+            const textSpan = button.querySelector('.btn-text');
+            const spinner = button.querySelector('.spinner');
+            const icon = button.querySelector('.btn-circle-icon');
+
+            if (textSpan && !textSpan.dataset.stepperOriginal) {
+                textSpan.dataset.stepperOriginal = textSpan.textContent || fallbackDefaultText;
+            }
+            button.disabled = true;
+            if (spinner) spinner.style.display = 'inline-block';
+            if (icon) icon.style.display = 'none';
+
+            let stepIndex = 0;
+            if (textSpan) {
+                textSpan.style.transition = 'opacity 0.18s ease';
+                textSpan.textContent = BTN_STEPPER_STAGES[0];
+            }
+
+            button._stepperIntervalId = setInterval(() => {
+                try {
+                    if (!textSpan || !button.disabled) return;
+                    stepIndex = Math.min(stepIndex + 1, BTN_STEPPER_STAGES.length - 1);
+                    textSpan.style.opacity = '0.65';
+                    setTimeout(() => {
+                        try {
+                            if (button.disabled && textSpan) {
+                                textSpan.textContent = BTN_STEPPER_STAGES[stepIndex];
+                                textSpan.style.opacity = '1';
+                            }
+                        } catch (_) {}
+                    }, 90);
+                } catch (stepErr) {
+                    console.warn('Erro ao avançar stepper do botão:', stepErr);
+                }
+            }, 900);
+        } catch (err) {
+            console.warn('Erro ao iniciar stepper do botão:', err);
+        }
+    }
+
+    function stopBtnStepperLoading(button, fallbackDefaultText = '') {
+        try {
+            if (!button) return;
+            if (button._stepperIntervalId) {
+                clearInterval(button._stepperIntervalId);
+                button._stepperIntervalId = null;
+            }
+            const textSpan = button.querySelector('.btn-text');
+            const spinner = button.querySelector('.spinner');
+            const icon = button.querySelector('.btn-circle-icon');
+
+            button.disabled = false;
+            if (textSpan) {
+                textSpan.style.opacity = '1';
+                textSpan.textContent = textSpan.dataset.stepperOriginal || fallbackDefaultText || textSpan.textContent;
+                delete textSpan.dataset.stepperOriginal;
+            }
+            if (spinner) spinner.style.display = 'none';
+            if (icon) icon.style.display = 'inline-flex';
+        } catch (err) {
+            console.warn('Erro ao restaurar estado do botão:', err);
+        }
+    }
+
+    function showValidaiToast(message, type = 'success') {
+        try {
+            if (!message) return;
+            let toastEl = document.getElementById('validai-quick-toast');
+            if (!toastEl) {
+                toastEl = document.createElement('div');
+                toastEl.id = 'validai-quick-toast';
+                toastEl.className = 'validai-quick-toast';
+                toastEl.setAttribute('role', 'status');
+                toastEl.setAttribute('aria-live', 'polite');
+                document.body.appendChild(toastEl);
+            }
+            toastEl.classList.remove('toast-info', 'show');
+            if (type === 'info') {
+                toastEl.classList.add('toast-info');
+            }
+            toastEl.textContent = message;
+
+            if (toastEl._hideTimer) {
+                clearTimeout(toastEl._hideTimer);
+            }
+            requestAnimationFrame(() => {
+                toastEl.classList.add('show');
+            });
+            toastEl._hideTimer = setTimeout(() => {
+                try {
+                    toastEl.classList.remove('show');
+                } catch (_) {}
+            }, 3400);
+        } catch (err) {
+            console.warn('Erro ao exibir toast:', err);
+        }
+    }
+
     function escapeHtml(str) {
         if (str === null || str === undefined) return '';
         return String(str)
@@ -188,8 +349,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (configPanel) {
             configPanel.style.display = 'block';
         }
+        const savedHeaderLine = isSingle ? singleState.userHeaderLine : (suffix === 'a' ? state.userHeaderLineA : state.userHeaderLineB);
         if (headerLineInput) {
-            headerLineInput.value = 1;
+            if (savedHeaderLine !== null && savedHeaderLine !== undefined) {
+                headerLineInput.value = savedHeaderLine;
+            } else {
+                headerLineInput.value = 1;
+            }
+            if (!headerLineInput.hasAttribute('data-has-listener')) {
+                headerLineInput.setAttribute('data-has-listener', 'true');
+                headerLineInput.addEventListener('input', (e) => {
+                    const val = parseInt(e.target.value, 10);
+                    if (!isNaN(val) && val >= 1) {
+                        if (isSingle) singleState.userHeaderLine = val;
+                        else if (suffix === 'a') state.userHeaderLineA = val;
+                        else if (suffix === 'b') state.userHeaderLineB = val;
+                    }
+                });
+            }
         }
 
         const ext = file.name.split('.').pop().toLowerCase();
@@ -292,10 +469,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     label.classList.add('active');
                 } else {
-                    if (cur.length <= 1) {
-                        chk.checked = true;
-                        return;
-                    }
                     cur = cur.filter(s => s !== sheet.name);
                     label.classList.remove('active');
                 }
@@ -341,6 +514,65 @@ document.addEventListener('DOMContentLoaded', () => {
                 chipsContainer.appendChild(createChipElement(sheet, false));
             }
         });
+
+        // Atalho "Selecionar Todas as Visíveis" / "Desmarcar Todas" (Passo 1)
+        const isSingle = (suffix === 'single');
+        const bulkContainer = document.getElementById(isSingle ? 'single-sheets-bulk' : ('sheets-bulk-' + suffix));
+        const btnSelectAll = document.getElementById(isSingle ? 'single-btn-select-all' : ('btn-select-all-' + suffix));
+        const btnDeselectAll = document.getElementById(isSingle ? 'single-btn-deselect-all' : ('btn-deselect-all-' + suffix));
+
+        if (bulkContainer) {
+            if (toRenderVisible.length >= 2) {
+                bulkContainer.style.display = 'inline-flex';
+
+                if (btnSelectAll) {
+                    btnSelectAll.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const visNames = toRenderVisible.map(s => s.name);
+                        let cur = [...getSelected()];
+                        visNames.forEach(name => {
+                            if (!cur.includes(name)) cur.push(name);
+                        });
+                        setSelected(cur);
+
+                        if (chipsContainer) {
+                            chipsContainer.querySelectorAll('.sheet-chip').forEach(lbl => {
+                                const inp = lbl.querySelector('input[type="checkbox"]');
+                                if (inp && visNames.includes(inp.value)) {
+                                    inp.checked = true;
+                                    lbl.classList.add('active');
+                                }
+                            });
+                        }
+                        updateHint();
+                    };
+                }
+
+                if (btnDeselectAll) {
+                    btnDeselectAll.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const visNames = toRenderVisible.map(s => s.name);
+                        let cur = getSelected().filter(name => !visNames.includes(name));
+                        setSelected(cur);
+
+                        if (chipsContainer) {
+                            chipsContainer.querySelectorAll('.sheet-chip').forEach(lbl => {
+                                const inp = lbl.querySelector('input[type="checkbox"]');
+                                if (inp && visNames.includes(inp.value)) {
+                                    inp.checked = false;
+                                    lbl.classList.remove('active');
+                                }
+                            });
+                        }
+                        updateHint();
+                    };
+                }
+            } else {
+                bulkContainer.style.display = 'none';
+            }
+        }
 
         if (hiddenArea && btnToggleHidden && hiddenCount && hiddenChips) {
             if (toRenderHidden.length > 0) {
@@ -418,6 +650,19 @@ document.addEventListener('DOMContentLoaded', () => {
         metaBox.style.display = 'inline-flex';
         dropzone.classList.add('file-loaded');
 
+        if (fileKey === 'fileA') {
+            state.userHeaderLineA = null;
+            state.selectedSheetsA = [];
+            if (step2HeaderLineA) step2HeaderLineA.value = 1;
+        } else if (fileKey === 'fileB') {
+            state.userHeaderLineB = null;
+            state.selectedSheetsB = [];
+            if (step2HeaderLineB) step2HeaderLineB.value = 1;
+        }
+
+        const paywallNotice = document.getElementById('step1-paywall-notice');
+        if (paywallNotice) paywallNotice.style.display = 'none';
+
         // Se ambos os arquivos foram selecionados, habilita o botão
         if (state.fileA && state.fileB) {
             btnReadHeaders.disabled = false;
@@ -432,6 +677,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------------------------------
     if (btnSheetsTryExample) {
         btnSheetsTryExample.addEventListener('click', async () => {
+            const paywallNotice = document.getElementById('step1-paywall-notice');
+            if (paywallNotice) paywallNotice.style.display = 'none';
+
             btnSheetsTryExample.disabled = true;
             const originalHtml = btnSheetsTryExample.innerHTML;
             btnSheetsTryExample.innerHTML = '<span class="spinner" style="display: inline-block;"></span> Carregando Exemplo...';
@@ -448,7 +696,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                // Atualizar dropzones com os arquivos de demonstração
+                // Atualizar dropzones com os arquivos de demonstração (limpos e simétricos no Passo 1)
                 filenameA.textContent = data.filename_a || 'Base_Vendas_ERP_Anterior.xlsx';
                 filesizeA.textContent = '14.2 KB';
                 fileMetaA.style.display = 'inline-flex';
@@ -459,30 +707,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 fileMetaB.style.display = 'inline-flex';
                 dropzoneB.classList.add('file-loaded');
 
-                const configA = document.getElementById('file-config-a');
-                const configB = document.getElementById('file-config-b');
-                if (configA) configA.style.display = 'block';
-                if (configB) configB.style.display = 'block';
-                const lineA = document.getElementById('header-line-a');
-                const lineB = document.getElementById('header-line-b');
-                if (lineA) lineA.value = 1;
-                if (lineB) lineB.value = 1;
+                state.userHeaderLineA = null;
+                state.userHeaderLineB = null;
+                if (step2HeaderLineA) step2HeaderLineA.value = 1;
+                if (step2HeaderLineB) step2HeaderLineB.value = 1;
                 state.selectedSheetsA = ['Vendas_ERP'];
                 state.selectedSheetsB = ['Vendas_ERP'];
-                ['a', 'b'].forEach(sfx => {
-                    const pnl = document.getElementById('sheets-panel-' + sfx);
-                    const chp = document.getElementById('sheets-chips-' + sfx);
-                    const hnt = document.getElementById('sheets-hint-' + sfx);
-                    const hid = document.getElementById('hidden-area-' + sfx);
-                    if (pnl) pnl.style.display = 'block';
-                    if (hid) hid.style.display = 'none';
-                    if (hnt) hnt.textContent = 'Vendas_ERP';
-                    if (chp) {
-                        chp.innerHTML = '<label class="sheet-chip active" style="pointer-events:none;"><input type="checkbox" checked disabled><span>Vendas_ERP</span></label>';
-                    }
-                });
 
-                btnReadHeaders.disabled = false;
+                btnReadHeaders.disabled = !(state.fileA && state.fileB);
 
                 state.sessionId = data.session_id;
                 state.columnsA = data.cols_a;
@@ -554,8 +786,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData();
         formData.append('file_a', state.fileA);
         formData.append('file_b', state.fileB);
-        formData.append('header_line_a', 1);
-        formData.append('header_line_b', 1);
+        const hlA = (state.userHeaderLineA !== null && state.userHeaderLineA !== undefined)
+            ? state.userHeaderLineA
+            : 1;
+        const hlB = (state.userHeaderLineB !== null && state.userHeaderLineB !== undefined)
+            ? state.userHeaderLineB
+            : 1;
+        formData.append('header_line_a', hlA);
+        formData.append('header_line_b', hlB);
+        if (state.selectedSheetsA && state.selectedSheetsA.length > 0) {
+            formData.append('sheets_a', JSON.stringify(state.selectedSheetsA));
+        }
+        if (state.selectedSheetsB && state.selectedSheetsB.length > 0) {
+            formData.append('sheets_b', JSON.stringify(state.selectedSheetsB));
+        }
 
         try {
             const response = await fetch('/api/upload-headers', {
@@ -569,6 +813,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert(data.error || 'Erro ao processar planilhas.');
                 setBtnLoading(btnReadHeaders, false);
                 return;
+            }
+
+            // Paywall Proativo e Transparente no Passo 1 (Limite de 500 linhas no plano Standard)
+            const rowsA = Number(data.rows_a_count) || 0;
+            const rowsB = Number(data.rows_b_count) || 0;
+            const maxRows = Math.max(rowsA, rowsB);
+            const userPlan = window.VALIDAI_USER_PLAN || (document.body && document.body.getAttribute('data-user-plan')) || 'standard';
+            const paywallNotice = document.getElementById('step1-paywall-notice');
+            const paywallCount = document.getElementById('step1-paywall-rows-count');
+
+            if (userPlan === 'standard' && maxRows > 500) {
+                if (paywallCount) {
+                    paywallCount.textContent = maxRows.toLocaleString('pt-BR');
+                }
+                if (paywallNotice) {
+                    paywallNotice.style.display = 'flex';
+                }
+            } else if (paywallNotice) {
+                paywallNotice.style.display = 'none';
             }
 
             const alertUnnamed = document.getElementById('alert-unnamed-cols');
@@ -1444,7 +1707,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ----------------------------------------------------
-    // SELETOR DE ABA E CABEÇALHO NO PASSO 2 (MÚLTIPLAS ABAS)
+    // SELETOR MULTI-SELECT DE ABAS E CABEÇALHO NO PASSO 2
     // ----------------------------------------------------
     let step2ShowHiddenA = false;
     let step2ShowHiddenB = false;
@@ -1452,149 +1715,354 @@ document.addEventListener('DOMContentLoaded', () => {
     let step2SheetsDataB = [];
     let step2DefaultSheetA = null;
     let step2DefaultSheetB = null;
+    let step2ReloadTimer = null;
+    let isReloadingStep2 = false;
+    let pendingReloadStep2 = false;
+
+    function normalizeStep2SheetSelection(val, sheetsInfo) {
+        try {
+            if (!Array.isArray(sheetsInfo) || sheetsInfo.length === 0) {
+                return [];
+            }
+            const validNames = sheetsInfo.map(s => s.name);
+            if (Array.isArray(val) && val.length > 0) {
+                const filtered = val.filter(n => validNames.includes(n));
+                if (filtered.length > 0) return filtered;
+            } else if (typeof val === 'string' && val.trim() !== '') {
+                if (validNames.includes(val)) return [val];
+            }
+            const firstVis = sheetsInfo.find(s => s.visible !== false);
+            return firstVis ? [firstVis.name] : [sheetsInfo[0].name];
+        } catch (err) {
+            console.warn('Erro ao normalizar abas selecionadas:', err);
+            return [];
+        }
+    }
+
+    function getStep2SelectedSheets(suffix) {
+        return suffix === 'a' ? (state.selectedSheetsA || []) : (state.selectedSheetsB || []);
+    }
+
+    function setStep2SelectedSheets(suffix, list, sheetsInfo) {
+        const orderMap = new Map((sheetsInfo || []).map((s, idx) => [s.name, idx]));
+        const uniqueOrdered = Array.from(new Set(list || [])).sort((x, y) => {
+            const ix = orderMap.has(x) ? orderMap.get(x) : 9999;
+            const iy = orderMap.has(y) ? orderMap.get(y) : 9999;
+            return ix - iy;
+        });
+        if (suffix === 'a') {
+            state.selectedSheetsA = uniqueOrdered;
+        } else {
+            state.selectedSheetsB = uniqueOrdered;
+        }
+    }
+
+    function closeStep2Dropdown(suffix) {
+        try {
+            const isA = (suffix === 'a');
+            const trigger = isA ? step2SheetTriggerA : step2SheetTriggerB;
+            const dropdown = isA ? step2SheetDropdownA : step2SheetDropdownB;
+            const card = isA ? step2CardA : step2CardB;
+            if (dropdown) dropdown.style.display = 'none';
+            if (trigger) {
+                trigger.classList.remove('active');
+                trigger.setAttribute('aria-expanded', 'false');
+            }
+            if (card) card.classList.remove('has-open-dropdown');
+        } catch (err) {
+            console.warn('Erro ao fechar dropdown de abas:', err);
+        }
+    }
+
+    function closeAllStep2Dropdowns() {
+        closeStep2Dropdown('a');
+        closeStep2Dropdown('b');
+    }
+
+    function toggleStep2Dropdown(suffix) {
+        try {
+            const isA = (suffix === 'a');
+            const trigger = isA ? step2SheetTriggerA : step2SheetTriggerB;
+            const dropdown = isA ? step2SheetDropdownA : step2SheetDropdownB;
+            const card = isA ? step2CardA : step2CardB;
+            if (!trigger || !dropdown || trigger.disabled || trigger.classList.contains('is-disabled')) {
+                return;
+            }
+            const isOpen = dropdown.style.display !== 'none';
+            closeStep2Dropdown(isA ? 'b' : 'a');
+            if (isOpen) {
+                closeStep2Dropdown(suffix);
+            } else {
+                dropdown.style.display = 'flex';
+                trigger.classList.add('active');
+                trigger.setAttribute('aria-expanded', 'true');
+                if (card) card.classList.add('has-open-dropdown');
+            }
+        } catch (err) {
+            console.warn('Erro ao alternar dropdown de abas:', err);
+        }
+    }
+
+    function updateStep2TriggerLabel(suffix) {
+        try {
+            const isA = (suffix === 'a');
+            const trigger = isA ? step2SheetTriggerA : step2SheetTriggerB;
+            const labelEl = isA ? step2SheetLabelA : step2SheetLabelB;
+            const sheets = isA ? step2SheetsDataA : step2SheetsDataB;
+            if (!trigger || !labelEl) return;
+
+            if (!sheets || sheets.length <= 1) {
+                labelEl.textContent = 'Arquivo único / CSV';
+                trigger.title = 'Arquivo único / CSV';
+                trigger.classList.remove('is-placeholder');
+                return;
+            }
+
+            const selected = getStep2SelectedSheets(suffix);
+            if (selected.length === 0) {
+                labelEl.textContent = 'Nenhuma aba selecionada';
+                trigger.title = 'Selecione ao menos uma aba para validar';
+                trigger.classList.add('is-placeholder');
+            } else if (selected.length === 1) {
+                labelEl.textContent = selected[0];
+                trigger.title = selected[0];
+                trigger.classList.remove('is-placeholder');
+            } else if (selected.length === 2) {
+                const summary = `${selected[0]}, ${selected[1]} (2 selecionadas)`;
+                labelEl.textContent = summary;
+                trigger.title = selected.join(', ');
+                trigger.classList.remove('is-placeholder');
+            } else {
+                const summary = `${selected[0]}, ${selected[1]}... (${selected.length} selecionadas)`;
+                labelEl.textContent = summary;
+                trigger.title = selected.join(', ');
+                trigger.classList.remove('is-placeholder');
+            }
+        } catch (err) {
+            console.warn('Erro ao atualizar resumo de abas:', err);
+        }
+    }
 
     function renderStep2SheetOptions(suffix) {
-        const isA = (suffix === 'a');
-        const selectEl = isA ? step2SheetSelectA : step2SheetSelectB;
-        const btnToggle = isA ? document.getElementById('btn-toggle-hidden-step2-a') : document.getElementById('btn-toggle-hidden-step2-b');
-        const countSpan = isA ? document.getElementById('step2-hidden-count-a') : document.getElementById('step2-hidden-count-b');
-        const sheets = isA ? step2SheetsDataA : step2SheetsDataB;
-        const showHidden = isA ? step2ShowHiddenA : step2ShowHiddenB;
-        const defaultName = isA ? step2DefaultSheetA : step2DefaultSheetB;
+        try {
+            const isA = (suffix === 'a');
+            const trigger = isA ? step2SheetTriggerA : step2SheetTriggerB;
+            const optionsContainer = isA ? step2SheetOptionsA : step2SheetOptionsB;
+            const btnToggle = document.getElementById(isA ? 'btn-toggle-hidden-step2-a' : 'btn-toggle-hidden-step2-b');
+            const countSpan = document.getElementById(isA ? 'step2-hidden-count-a' : 'step2-hidden-count-b');
+            const sheets = isA ? step2SheetsDataA : step2SheetsDataB;
+            const showHidden = isA ? step2ShowHiddenA : step2ShowHiddenB;
 
-        if (!selectEl) return;
+            if (!trigger || !optionsContainer) return;
 
-        if (!sheets || sheets.length === 0) {
-            selectEl.innerHTML = '<option value="">Arquivo único / CSV</option>';
-            selectEl.disabled = true;
-            if (btnToggle) btnToggle.style.display = 'none';
-            return;
-        }
-
-        const visibleSheets = sheets.filter(s => s.visible !== false);
-        const hiddenSheets = sheets.filter(s => s.visible === false);
-
-        // Configuração do botão de alternância de abas ocultas
-        if (btnToggle) {
-            if (hiddenSheets.length > 0) {
-                btnToggle.style.display = 'inline-flex';
-                if (countSpan) countSpan.textContent = hiddenSheets.length;
-                btnToggle.classList.toggle('is-active', !!showHidden);
-                btnToggle.setAttribute('aria-pressed', showHidden ? 'true' : 'false');
-                btnToggle.setAttribute('title', showHidden ? 'Ocultar abas ocultas' : 'Mostrar abas ocultas');
-            } else {
-                btnToggle.style.display = 'none';
-                btnToggle.classList.remove('is-active');
+            // Arquivo CSV ou Excel de aba única -> indicador fixo e desabilitado
+            if (!sheets || sheets.length <= 1) {
+                closeStep2Dropdown(suffix);
+                optionsContainer.innerHTML = '';
+                trigger.disabled = true;
+                trigger.classList.add('is-disabled');
+                trigger.setAttribute('aria-disabled', 'true');
+                if (sheets && sheets.length === 1) {
+                    setStep2SelectedSheets(suffix, [sheets[0].name], sheets);
+                } else {
+                    setStep2SelectedSheets(suffix, [], []);
+                }
+                if (btnToggle) {
+                    btnToggle.style.display = 'none';
+                    btnToggle.classList.remove('is-active');
+                }
+                updateStep2TriggerLabel(suffix);
+                return;
             }
+
+            trigger.disabled = false;
+            trigger.classList.remove('is-disabled');
+            trigger.removeAttribute('aria-disabled');
+
+            const visibleSheets = sheets.filter(s => s.visible !== false);
+            const hiddenSheets = sheets.filter(s => s.visible === false);
+
+            // Configuração do botão toggle de abas ocultas
+            if (btnToggle) {
+                if (hiddenSheets.length > 0) {
+                    btnToggle.style.display = 'inline-flex';
+                    if (countSpan) countSpan.textContent = hiddenSheets.length;
+                    btnToggle.classList.toggle('is-active', !!showHidden);
+                    btnToggle.setAttribute('aria-pressed', showHidden ? 'true' : 'false');
+                    btnToggle.setAttribute('title', showHidden ? 'Ocultar abas ocultas' : 'Mostrar abas ocultas');
+                } else {
+                    btnToggle.style.display = 'none';
+                    btnToggle.classList.remove('is-active');
+                }
+            }
+
+            optionsContainer.innerHTML = '';
+
+            function appendSheetCheckboxItem(sheetObj) {
+                const isHidden = sheetObj.visible === false;
+                const isChecked = getStep2SelectedSheets(suffix).includes(sheetObj.name);
+
+                const lbl = document.createElement('label');
+                lbl.className = 'step2-sheet-option' + (isChecked ? ' selected' : '');
+                lbl.setAttribute('role', 'option');
+                lbl.setAttribute('aria-selected', isChecked ? 'true' : 'false');
+
+                const chk = document.createElement('input');
+                chk.type = 'checkbox';
+                chk.value = sheetObj.name;
+                chk.checked = isChecked;
+
+                chk.addEventListener('change', (e) => {
+                    e.stopPropagation();
+                    try {
+                        let cur = [...getStep2SelectedSheets(suffix)];
+                        if (chk.checked) {
+                            if (!cur.includes(sheetObj.name)) cur.push(sheetObj.name);
+                            lbl.classList.add('selected');
+                            lbl.setAttribute('aria-selected', 'true');
+                        } else {
+                            cur = cur.filter(n => n !== sheetObj.name);
+                            lbl.classList.remove('selected');
+                            lbl.setAttribute('aria-selected', 'false');
+                        }
+                        setStep2SelectedSheets(suffix, cur, sheets);
+                        updateStep2TriggerLabel(suffix);
+                        if (cur.length > 0) {
+                            scheduleReloadHeadersStep2();
+                        }
+                    } catch (innerErr) {
+                        console.warn('Erro ao selecionar aba:', innerErr);
+                    }
+                });
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'step2-sheet-option-name';
+                nameSpan.textContent = sheetObj.name;
+                nameSpan.title = sheetObj.name;
+
+                lbl.appendChild(chk);
+                lbl.appendChild(nameSpan);
+
+                if (isHidden) {
+                    const badge = document.createElement('span');
+                    badge.className = 'sheet-badge-oculta';
+                    badge.textContent = 'Oculta';
+                    lbl.appendChild(badge);
+                }
+
+                lbl.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+
+                optionsContainer.appendChild(lbl);
+            }
+
+            if (showHidden && hiddenSheets.length > 0 && visibleSheets.length > 0) {
+                const visHeader = document.createElement('div');
+                visHeader.className = 'step2-sheet-group-label';
+                visHeader.textContent = 'Abas Visíveis';
+                optionsContainer.appendChild(visHeader);
+                visibleSheets.forEach(s => appendSheetCheckboxItem(s));
+
+                const hidHeader = document.createElement('div');
+                hidHeader.className = 'step2-sheet-group-label';
+                hidHeader.textContent = 'Abas Ocultas no Excel';
+                optionsContainer.appendChild(hidHeader);
+                hiddenSheets.forEach(s => appendSheetCheckboxItem(s));
+            } else {
+                const listToRender = showHidden
+                    ? [...visibleSheets, ...hiddenSheets]
+                    : (visibleSheets.length > 0 ? visibleSheets : sheets);
+                listToRender.forEach(s => appendSheetCheckboxItem(s));
+            }
+
+            updateStep2TriggerLabel(suffix);
+        } catch (err) {
+            console.error('Erro ao renderizar opções de abas no Passo 2:', err);
         }
-
-        const currentVal = selectEl.value;
-        selectEl.innerHTML = '';
-
-        // Por padrão (showHidden = false), lista apenas abas visíveis!
-        const sheetsToRender = showHidden
-            ? [...visibleSheets, ...hiddenSheets]
-            : (visibleSheets.length > 0 ? visibleSheets : sheets);
-
-        // Determina qual aba deve ficar selecionada:
-        let target = '';
-        if (currentVal && sheetsToRender.some(s => s.name === currentVal)) {
-            target = currentVal;
-        } else if (defaultName && sheetsToRender.some(s => s.name === defaultName && s.visible !== false)) {
-            target = defaultName;
-        } else {
-            const firstVis = sheetsToRender.find(s => s.visible !== false);
-            target = firstVis ? firstVis.name : (sheetsToRender[0] ? sheetsToRender[0].name : '');
-        }
-
-        if (showHidden && hiddenSheets.length > 0 && visibleSheets.length > 0) {
-            const grpVis = document.createElement('optgroup');
-            grpVis.label = 'Abas Visíveis';
-            visibleSheets.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s.name;
-                opt.textContent = s.name;
-                if (s.name === target) opt.selected = true;
-                grpVis.appendChild(opt);
-            });
-            selectEl.appendChild(grpVis);
-
-            const grpHid = document.createElement('optgroup');
-            grpHid.label = 'Abas Ocultas no Excel';
-            hiddenSheets.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s.name;
-                opt.textContent = s.name + ' (Oculta)';
-                if (s.name === target) opt.selected = true;
-                grpHid.appendChild(opt);
-            });
-            selectEl.appendChild(grpHid);
-        } else {
-            sheetsToRender.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s.name;
-                opt.textContent = s.name + (s.visible === false ? ' (Oculta)' : '');
-                if (s.name === target) opt.selected = true;
-                selectEl.appendChild(opt);
-            });
-        }
-
-        selectEl.disabled = false;
-        selectEl.value = target;
     }
 
     function setupStep2Sheets(data) {
-        if (!step2SheetsConfig) return;
+        try {
+            if (!step2SheetsConfig) return;
+            closeAllStep2Dropdowns();
 
-        if (!data || !data.has_multiple_sheets) {
-            step2SheetsConfig.style.display = 'none';
-            return;
-        }
+            step2SheetsDataA = (data && data.sheets_info_a) ? data.sheets_info_a : [];
+            step2SheetsDataB = (data && data.sheets_info_b) ? data.sheets_info_b : [];
+            step2DefaultSheetA = data ? data.default_sheet_a : null;
+            step2DefaultSheetB = data ? data.default_sheet_b : null;
 
-        step2SheetsConfig.style.display = 'block';
+            setStep2SelectedSheets('a', normalizeStep2SheetSelection(step2DefaultSheetA, step2SheetsDataA), step2SheetsDataA);
+            setStep2SelectedSheets('b', normalizeStep2SheetSelection(step2DefaultSheetB, step2SheetsDataB), step2SheetsDataB);
 
-        if (step2FilenameA) {
-            step2FilenameA.textContent = data.filename_a || 'Base Antiga';
-        }
-        if (step2FilenameB) {
-            step2FilenameB.textContent = data.filename_b || 'Base Nova';
-        }
+            if (!data || !data.has_multiple_sheets) {
+                step2SheetsConfig.style.display = 'none';
+                return;
+            }
 
-        // Reseta estado para ocultar abas ocultas por padrão
-        step2ShowHiddenA = false;
-        step2ShowHiddenB = false;
-        step2SheetsDataA = data.sheets_info_a || [];
-        step2SheetsDataB = data.sheets_info_b || [];
-        step2DefaultSheetA = data.default_sheet_a;
-        step2DefaultSheetB = data.default_sheet_b;
+            step2SheetsConfig.style.display = 'block';
 
-        renderStep2SheetOptions('a');
-        renderStep2SheetOptions('b');
+            if (step2FilenameA) {
+                step2FilenameA.textContent = data.filename_a || 'Base Antiga';
+                step2FilenameA.title = data.filename_a || 'Base Antiga';
+            }
+            if (step2FilenameB) {
+                step2FilenameB.textContent = data.filename_b || 'Base Nova';
+                step2FilenameB.title = data.filename_b || 'Base Nova';
+            }
 
-        if (step2HeaderLineA) {
-            step2HeaderLineA.value = data.header_line_a || 1;
-        }
-        if (step2HeaderLineB) {
-            step2HeaderLineB.value = data.header_line_b || 1;
+            // Oculta abas ocultas por padrão ao abrir nova sessão
+            step2ShowHiddenA = false;
+            step2ShowHiddenB = false;
+
+            renderStep2SheetOptions('a');
+            renderStep2SheetOptions('b');
+
+            if (step2HeaderLineA) {
+                step2HeaderLineA.value = (state.userHeaderLineA !== null && state.userHeaderLineA !== undefined)
+                    ? state.userHeaderLineA
+                    : (data.header_line_a || 1);
+            }
+            if (step2HeaderLineB) {
+                step2HeaderLineB.value = (state.userHeaderLineB !== null && state.userHeaderLineB !== undefined)
+                    ? state.userHeaderLineB
+                    : (data.header_line_b || 1);
+            }
+        } catch (err) {
+            console.error('Erro ao configurar abas no Passo 2:', err);
         }
     }
 
-    let isReloadingStep2 = false;
+    function scheduleReloadHeadersStep2(delayMs = 200) {
+        if (step2ReloadTimer) {
+            clearTimeout(step2ReloadTimer);
+        }
+        step2ReloadTimer = setTimeout(() => {
+            step2ReloadTimer = null;
+            reloadHeadersStep2();
+        }, delayMs);
+    }
 
     async function reloadHeadersStep2() {
-        if (!state.sessionId || isReloadingStep2) return;
+        if (!state.sessionId) return;
 
-        const sheetA = step2SheetSelectA ? step2SheetSelectA.value : null;
-        const sheetB = step2SheetSelectB ? step2SheetSelectB.value : null;
+        // Se algum arquivo possui múltiplas abas e está temporariamente com 0 marcadas, aguarda o usuário marcar ao menos 1 aba
+        if (step2SheetsDataA.length > 1 && getStep2SelectedSheets('a').length === 0) return;
+        if (step2SheetsDataB.length > 1 && getStep2SelectedSheets('b').length === 0) return;
+
+        if (isReloadingStep2) {
+            pendingReloadStep2 = true;
+            return;
+        }
+
+        const sheetsA = getStep2SelectedSheets('a');
+        const sheetsB = getStep2SelectedSheets('b');
         const headerLineA = step2HeaderLineA ? (parseInt(step2HeaderLineA.value, 10) || 1) : 1;
         const headerLineB = step2HeaderLineB ? (parseInt(step2HeaderLineB.value, 10) || 1) : 1;
 
         isReloadingStep2 = true;
+        pendingReloadStep2 = false;
         if (step2SheetLoading) step2SheetLoading.style.display = 'inline-flex';
-        if (step2SheetSelectA) step2SheetSelectA.disabled = true;
-        if (step2SheetSelectB) step2SheetSelectB.disabled = true;
-        if (step2HeaderLineA) step2HeaderLineA.disabled = true;
-        if (step2HeaderLineB) step2HeaderLineB.disabled = true;
 
         try {
             const resp = await fetch('/api/change-sheet', {
@@ -1602,8 +2070,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     session_id: state.sessionId,
-                    sheet_a: sheetA,
-                    sheet_b: sheetB,
+                    sheets_a: sheetsA,
+                    sheets_b: sheetsB,
                     header_line_a: headerLineA,
                     header_line_b: headerLineB
                 })
@@ -1612,6 +2080,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await resp.json();
             if (!resp.ok) {
                 throw new Error(data.error || 'Erro ao alternar aba ou cabeçalho.');
+            }
+
+            // Atualiza aviso proativo de limite de 500 linhas (ex: após concatenação de múltiplas abas)
+            const rowsA = Number(data.rows_a_count) || 0;
+            const rowsB = Number(data.rows_b_count) || 0;
+            const maxRows = Math.max(rowsA, rowsB);
+            const userPlan = window.VALIDAI_USER_PLAN || (document.body && document.body.getAttribute('data-user-plan')) || 'standard';
+            const paywallNotice = document.getElementById('step1-paywall-notice');
+            const paywallCount = document.getElementById('step1-paywall-rows-count');
+            if (userPlan === 'standard' && maxRows > 500) {
+                if (paywallCount) paywallCount.textContent = maxRows.toLocaleString('pt-BR');
+                if (paywallNotice) paywallNotice.style.display = 'flex';
+            } else if (paywallNotice) {
+                paywallNotice.style.display = 'none';
             }
 
             // Atualiza colunas e mapeamento no estado
@@ -1674,66 +2156,207 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (err) {
             console.error(err);
-            alert('Falha ao atualizar colunas da aba selecionada: ' + err.message);
+            alert('Falha ao atualizar colunas das abas selecionadas: ' + err.message);
         } finally {
             isReloadingStep2 = false;
             if (step2SheetLoading) step2SheetLoading.style.display = 'none';
-            if (step2SheetSelectA && step2SheetSelectA.options.length > 1) {
-                step2SheetSelectA.disabled = false;
+            if (pendingReloadStep2) {
+                pendingReloadStep2 = false;
+                reloadHeadersStep2();
             }
-            if (step2SheetSelectB && step2SheetSelectB.options.length > 1) {
-                step2SheetSelectB.disabled = false;
-            }
-            if (step2HeaderLineA) step2HeaderLineA.disabled = false;
-            if (step2HeaderLineB) step2HeaderLineB.disabled = false;
         }
     }
 
-    const btnToggleHiddenStep2A = document.getElementById('btn-toggle-hidden-step2-a');
-    const btnToggleHiddenStep2B = document.getElementById('btn-toggle-hidden-step2-b');
+    function bindStep2MultiselectEvents(suffix) {
+        try {
+            const isA = (suffix === 'a');
+            const trigger = isA ? step2SheetTriggerA : step2SheetTriggerB;
+            const dropdown = isA ? step2SheetDropdownA : step2SheetDropdownB;
+            const btnSelectAllVis = isA ? step2SelectAllVisA : step2SelectAllVisB;
+            const btnDeselectAll = isA ? step2DeselectAllA : step2DeselectAllB;
+            const optionsContainer = isA ? step2SheetOptionsA : step2SheetOptionsB;
+            const btnToggleHidden = document.getElementById(isA ? 'btn-toggle-hidden-step2-a' : 'btn-toggle-hidden-step2-b');
 
-    if (btnToggleHiddenStep2A) {
-        btnToggleHiddenStep2A.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            step2ShowHiddenA = !step2ShowHiddenA;
-            const prevVal = step2SheetSelectA ? step2SheetSelectA.value : '';
-            renderStep2SheetOptions('a');
-            if (step2SheetSelectA && step2SheetSelectA.value !== prevVal) {
-                reloadHeadersStep2();
+            if (trigger) {
+                trigger.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleStep2Dropdown(suffix);
+                });
             }
-        });
-    }
 
-    if (btnToggleHiddenStep2B) {
-        btnToggleHiddenStep2B.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            step2ShowHiddenB = !step2ShowHiddenB;
-            const prevVal = step2SheetSelectB ? step2SheetSelectB.value : '';
-            renderStep2SheetOptions('b');
-            if (step2SheetSelectB && step2SheetSelectB.value !== prevVal) {
-                reloadHeadersStep2();
+            if (dropdown) {
+                dropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
             }
-        });
+
+            if (btnSelectAllVis) {
+                btnSelectAllVis.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    try {
+                        const sheets = isA ? step2SheetsDataA : step2SheetsDataB;
+                        const visList = sheets.filter(s => s.visible !== false);
+                        const targetVis = (visList.length > 0 ? visList : sheets).map(s => s.name);
+                        const prev = getStep2SelectedSheets(suffix);
+                        const merged = [...prev];
+                        targetVis.forEach(n => {
+                            if (!merged.includes(n)) merged.push(n);
+                        });
+                        setStep2SelectedSheets(suffix, merged, sheets);
+
+                        if (optionsContainer) {
+                            optionsContainer.querySelectorAll('.step2-sheet-option').forEach(lbl => {
+                                const inp = lbl.querySelector('input[type="checkbox"]');
+                                if (inp && getStep2SelectedSheets(suffix).includes(inp.value)) {
+                                    inp.checked = true;
+                                    lbl.classList.add('selected');
+                                    lbl.setAttribute('aria-selected', 'true');
+                                }
+                            });
+                        }
+                        updateStep2TriggerLabel(suffix);
+                        const next = getStep2SelectedSheets(suffix);
+                        if (next.length > 0 && JSON.stringify(prev) !== JSON.stringify(next)) {
+                            scheduleReloadHeadersStep2();
+                        }
+                    } catch (err) {
+                        console.warn('Erro ao marcar todas as abas visíveis:', err);
+                    }
+                });
+            }
+
+            if (btnDeselectAll) {
+                btnDeselectAll.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    try {
+                        const sheets = isA ? step2SheetsDataA : step2SheetsDataB;
+                        setStep2SelectedSheets(suffix, [], sheets);
+                        if (optionsContainer) {
+                            optionsContainer.querySelectorAll('.step2-sheet-option').forEach(lbl => {
+                                const inp = lbl.querySelector('input[type="checkbox"]');
+                                if (inp) inp.checked = false;
+                                lbl.classList.remove('selected');
+                                lbl.setAttribute('aria-selected', 'false');
+                            });
+                        }
+                        updateStep2TriggerLabel(suffix);
+                    } catch (err) {
+                        console.warn('Erro ao desmarcar abas:', err);
+                    }
+                });
+            }
+
+            if (btnToggleHidden) {
+                btnToggleHidden.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    try {
+                        if (isA) {
+                            step2ShowHiddenA = !step2ShowHiddenA;
+                        } else {
+                            step2ShowHiddenB = !step2ShowHiddenB;
+                        }
+                        const nowShowing = isA ? step2ShowHiddenA : step2ShowHiddenB;
+                        const sheets = isA ? step2SheetsDataA : step2SheetsDataB;
+                        const prev = [...getStep2SelectedSheets(suffix)];
+
+                        // Se ocultou as abas ocultas, remove eventuais abas ocultas da seleção ativa
+                        if (!nowShowing && sheets.length > 1) {
+                            const hiddenNames = sheets.filter(s => s.visible === false).map(s => s.name);
+                            let filtered = prev.filter(n => !hiddenNames.includes(n));
+                            if (filtered.length === 0) {
+                                const defName = isA ? step2DefaultSheetA : step2DefaultSheetB;
+                                filtered = normalizeStep2SheetSelection(defName, sheets);
+                            }
+                            setStep2SelectedSheets(suffix, filtered, sheets);
+                        }
+
+                        renderStep2SheetOptions(suffix);
+                        const next = getStep2SelectedSheets(suffix);
+                        if (next.length > 0 && JSON.stringify(prev) !== JSON.stringify(next)) {
+                            scheduleReloadHeadersStep2();
+                        }
+                    } catch (err) {
+                        console.warn('Erro ao alternar visibilidade de abas ocultas:', err);
+                    }
+                });
+            }
+        } catch (err) {
+            console.error('Erro ao inicializar eventos do multi-select no Passo 2:', err);
+        }
     }
 
-    if (step2SheetSelectA) {
-        step2SheetSelectA.addEventListener('change', () => reloadHeadersStep2());
-    }
-    if (step2SheetSelectB) {
-        step2SheetSelectB.addEventListener('change', () => reloadHeadersStep2());
-    }
+    bindStep2MultiselectEvents('a');
+    bindStep2MultiselectEvents('b');
+
+    // Fechar dropdowns do Passo 2 ao clicar fora ou pressionar Escape
+    document.addEventListener('click', (e) => {
+        try {
+            if (step2MultiselectA && !step2MultiselectA.contains(e.target)) {
+                closeStep2Dropdown('a');
+            }
+            if (step2MultiselectB && !step2MultiselectB.contains(e.target)) {
+                closeStep2Dropdown('b');
+            }
+        } catch (err) {
+            console.warn('Erro ao processar clique externo do dropdown:', err);
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeAllStep2Dropdowns();
+        }
+    });
+
     if (step2HeaderLineA) {
-        step2HeaderLineA.addEventListener('change', () => reloadHeadersStep2());
+        step2HeaderLineA.addEventListener('input', (e) => {
+            const v = parseInt(e.target.value, 10);
+            if (!isNaN(v) && v >= 1) {
+                state.userHeaderLineA = v;
+            }
+        });
+        step2HeaderLineA.addEventListener('change', () => {
+            const v = parseInt(step2HeaderLineA.value, 10);
+            if (!isNaN(v) && v >= 1) {
+                state.userHeaderLineA = v;
+            }
+            scheduleReloadHeadersStep2(50);
+        });
     }
     if (step2HeaderLineB) {
-        step2HeaderLineB.addEventListener('change', () => reloadHeadersStep2());
+        step2HeaderLineB.addEventListener('input', (e) => {
+            const v = parseInt(e.target.value, 10);
+            if (!isNaN(v) && v >= 1) {
+                state.userHeaderLineB = v;
+            }
+        });
+        step2HeaderLineB.addEventListener('change', () => {
+            const v = parseInt(step2HeaderLineB.value, 10);
+            if (!isNaN(v) && v >= 1) {
+                state.userHeaderLineB = v;
+            }
+            scheduleReloadHeadersStep2(50);
+        });
     }
 
     // PASSO 2 -> PASSO 3: RODAR VALIDAÇÃO
     // ----------------------------------------------------
     btnRunCompare.addEventListener('click', async () => {
+        if (step2SheetsDataA.length > 1 && getStep2SelectedSheets('a').length === 0) {
+            alert('Por favor, selecione ao menos uma aba na Base Antiga para validar.');
+            if (step2SheetTriggerA) step2SheetTriggerA.focus();
+            return;
+        }
+        if (step2SheetsDataB.length > 1 && getStep2SelectedSheets('b').length === 0) {
+            alert('Por favor, selecione ao menos uma aba na Base Nova para validar.');
+            if (step2SheetTriggerB) step2SheetTriggerB.focus();
+            return;
+        }
+
         // Assegurar sincronização do mapeamento
         const finalMapping = {};
         state.mappingList.forEach(item => {
@@ -1758,7 +2381,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const pkB = state.mapping[pk] || pk;
 
-        setBtnLoading(btnRunCompare, true, 'Validando e comparando células...');
+        closeAllStep2Dropdowns();
+        startBtnStepperLoading(btnRunCompare, 'Rodar Validação Completa');
 
         const payload = {
             session_id: state.sessionId,
@@ -1770,10 +2394,10 @@ document.addEventListener('DOMContentLoaded', () => {
             ignore_case: normCase.checked,
             trim_spaces: normTrim.checked,
             column_mapping: state.mapping,
-            header_line_a: (step2HeaderLineA && step2HeaderLineA.value) ? (parseInt(step2HeaderLineA.value, 10) || 1) : (parseInt(document.getElementById('header-line-a')?.value || '1', 10) || 1),
-            header_line_b: (step2HeaderLineB && step2HeaderLineB.value) ? (parseInt(step2HeaderLineB.value, 10) || 1) : (parseInt(document.getElementById('header-line-b')?.value || '1', 10) || 1),
-            sheets_a: (step2SheetSelectA && step2SheetSelectA.value) ? step2SheetSelectA.value : state.selectedSheetsA,
-            sheets_b: (step2SheetSelectB && step2SheetSelectB.value) ? step2SheetSelectB.value : state.selectedSheetsB
+            header_line_a: (step2HeaderLineA && step2HeaderLineA.value) ? (parseInt(step2HeaderLineA.value, 10) || 1) : (state.userHeaderLineA || 1),
+            header_line_b: (step2HeaderLineB && step2HeaderLineB.value) ? (parseInt(step2HeaderLineB.value, 10) || 1) : (state.userHeaderLineB || 1),
+            sheets_a: getStep2SelectedSheets('a'),
+            sheets_b: getStep2SelectedSheets('b')
         };
 
         try {
@@ -1787,7 +2411,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!response.ok) {
                 alert(data.error || 'Erro durante a validação.');
-                setBtnLoading(btnRunCompare, false);
+                stopBtnStepperLoading(btnRunCompare, 'Rodar Validação Completa');
                 return;
             }
 
@@ -1808,7 +2432,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(err);
             alert('Erro ao executar a validação: ' + err.message);
         } finally {
-            setBtnLoading(btnRunCompare, false);
+            stopBtnStepperLoading(btnRunCompare, 'Rodar Validação Completa');
         }
     });
 
@@ -1839,6 +2463,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (kpiRowsOnlyA) kpiRowsOnlyA.textContent = (s.only_in_a_count || 0).toLocaleString(numLocale);
         if (kpiRowsOnlyB) kpiRowsOnlyB.textContent = (s.only_in_b_count || 0).toLocaleString(numLocale);
+
+        // Card de Destaque Executivo: Tempo Estimado Economizado (Passo 3)
+        const timeSavedCard = document.getElementById('step3-time-saved-card');
+        const timeSavedVal = document.getElementById('step3-time-saved-val');
+        if (timeSavedCard && timeSavedVal) {
+            try {
+                const rowsCompared = Number(s.matched_keys_count || s.total_rows_a || 0);
+                const colsCompared = Number(s.total_columns_compared || (state.columnsA ? state.columnsA.length : 0) || 1);
+                const totalCells = rowsCompared * colsCompared;
+                const savedMinutes = Math.max(15, Math.round(totalCells / 20));
+
+                let timeDisplay = '';
+                if (savedMinutes < 60) {
+                    timeDisplay = `~${savedMinutes} minutos`;
+                } else {
+                    const hours = Math.floor(savedMinutes / 60);
+                    const mins = savedMinutes % 60;
+                    timeDisplay = mins > 0 ? `~${hours}h ${mins < 10 ? '0' : ''}${mins}min` : `~${hours}h`;
+                }
+
+                timeSavedVal.textContent = timeDisplay;
+                timeSavedCard.style.display = 'flex';
+            } catch (tErr) {
+                console.warn('Erro ao calcular tempo economizado:', tErr);
+                timeSavedCard.style.display = 'none';
+            }
+        }
 
         if (s.is_identical) {
             // Sucesso Total
@@ -2262,7 +2913,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Dispara download
             const link = document.createElement('a');
-            link.download = filename || 'painel-validai.png';
+            link.download = filename || 'Relatorio_ValidAi_Graficos.png';
             link.href = outCanvas.toDataURL('image/png');
             document.body.appendChild(link);
             link.click();
@@ -2277,7 +2928,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnExportSheets.addEventListener('click', () => {
             exportChartsDashboardToPng({
                 title: 'Validador de Planilhas • Proporção & Colunas Divergentes',
-                filename: 'painel-comparacao-planilhas-validai.png',
+                filename: 'Relatorio_ValidAi_Graficos.png',
                 chart1: chartRecordsProportionInstance,
                 chart2: chartDiffColsInstance,
                 empty2Text: '100% de conformidade nas colunas analisadas'
@@ -2654,7 +3305,8 @@ document.addEventListener('DOMContentLoaded', () => {
         reportId: null,
         summary: null,
         previewRows: [],
-        selectedSheets: []
+        selectedSheets: [],
+        userHeaderLine: null
     };
 
     // Upload & Drag-and-drop
@@ -2704,6 +3356,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         singleState.file = file;
+        singleState.userHeaderLine = null;
+        const sLine = document.getElementById('single-header-line');
+        if (sLine) sLine.value = 1;
+
         singleFilename.textContent = file.name;
         singleFilesize.textContent = (file.size / 1024).toFixed(1) + ' KB';
         singleFileMeta.style.display = 'inline-flex';
@@ -3036,6 +3692,134 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Pacotes Inteligentes de 1 Clique (Auditar 1 Base)
+    const presetPackCadastral = document.getElementById('preset-pack-cadastral');
+    const presetPackFinanceiro = document.getElementById('preset-pack-financeiro');
+
+    function normalizeAuditColName(colName) {
+        try {
+            return String(colName || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toUpperCase()
+                .trim();
+        } catch (_) {
+            return String(colName || '').toUpperCase().trim();
+        }
+    }
+
+    function addSinglePresetRuleSafe(col, ruleType, descText) {
+        try {
+            if (!col || !ruleType || !Array.isArray(singleState.rules)) return false;
+            const already = singleState.rules.some(r => r.col === col && r.rule_type === ruleType);
+            if (already) return false;
+            singleState.rules.push({
+                id: Date.now() + Math.random().toString(36).substr(2, 5),
+                col: col,
+                rule_type: ruleType,
+                desc: descText
+            });
+            return true;
+        } catch (err) {
+            console.warn('Erro ao adicionar regra de preset:', err);
+            return false;
+        }
+    }
+
+    if (presetPackCadastral) {
+        presetPackCadastral.addEventListener('click', () => {
+            try {
+                const cols = Array.isArray(singleState.cols) ? singleState.cols : [];
+                let addedCount = 0;
+                let matchedAnyCol = false;
+
+                cols.forEach(col => {
+                    const norm = normalizeAuditColName(col);
+                    const tokens = norm.split(/[^A-Z0-9]+/).filter(Boolean);
+
+                    const isDocOrId = (
+                        tokens.includes('ID') ||
+                        tokens.includes('DOC') ||
+                        norm.includes('CPF') ||
+                        norm.includes('CNPJ') ||
+                        norm.includes('DOCUMENTO') ||
+                        norm.includes('MATRICULA') ||
+                        norm.includes('CODIGO')
+                    );
+
+                    const isCpfCnpjNomeEmail = (
+                        norm.includes('CPF') ||
+                        norm.includes('CNPJ') ||
+                        norm.includes('NOME') ||
+                        norm.includes('RAZAO') ||
+                        norm.includes('EMAIL') ||
+                        norm.includes('E-MAIL')
+                    );
+
+                    if (isDocOrId) {
+                        matchedAnyCol = true;
+                        if (addSinglePresetRuleSafe(col, 'duplicate', `Verificar Duplicatas na coluna '${col}'`)) {
+                            addedCount++;
+                        }
+                    }
+
+                    if (isCpfCnpjNomeEmail) {
+                        matchedAnyCol = true;
+                        if (addSinglePresetRuleSafe(col, 'not_empty', `Campo Obrigatório em '${col}'`)) {
+                            addedCount++;
+                        }
+                    }
+                });
+
+                if (addedCount > 0) {
+                    renderSingleRulesList();
+                    showValidaiToast(`⚡ Pacote Cadastral aplicado! ${addedCount} regra(s) adicionada(s).`, 'success');
+                } else if (matchedAnyCol) {
+                    showValidaiToast('✅ As regras do Pacote Cadastral já estão ativas na auditoria.', 'info');
+                } else {
+                    showValidaiToast('⚠️ Nenhuma coluna cadastral (ID, CPF, CNPJ, Nome ou E-mail) detectada automaticamente.', 'info');
+                }
+            } catch (err) {
+                console.error('Erro ao aplicar Pacote Cadastral:', err);
+            }
+        });
+    }
+
+    if (presetPackFinanceiro) {
+        presetPackFinanceiro.addEventListener('click', () => {
+            try {
+                const cols = Array.isArray(singleState.cols) ? singleState.cols : [];
+                const finTerms = ['VALOR', 'PRECO', 'TOTAL', 'SALDO', 'VLR', 'MONTANTE', 'LIQUIDO', 'BRUTO'];
+                let addedCount = 0;
+                let matchedAnyCol = false;
+
+                cols.forEach(col => {
+                    const norm = normalizeAuditColName(col);
+                    if (finTerms.some(term => norm.includes(term))) {
+                        matchedAnyCol = true;
+                        if (addSinglePresetRuleSafe(col, 'not_empty', `Campo Obrigatório em '${col}'`)) {
+                            addedCount++;
+                        }
+                        if (addSinglePresetRuleSafe(col, 'only_numbers', `Apenas Números em '${col}'`)) {
+                            addedCount++;
+                        }
+                    }
+                });
+
+                if (addedCount > 0) {
+                    renderSingleRulesList();
+                    showValidaiToast(`💰 Pacote Financeiro aplicado! ${addedCount} regra(s) adicionada(s).`, 'success');
+                } else if (matchedAnyCol) {
+                    showValidaiToast('✅ As regras do Pacote Financeiro já estão ativas na auditoria.', 'info');
+                } else {
+                    showValidaiToast('⚠️ Nenhuma coluna financeira (Valor, Preço, Total ou Saldo) detectada automaticamente.', 'info');
+                }
+            } catch (err) {
+                console.error('Erro ao aplicar Pacote Financeiro:', err);
+            }
+        });
+    }
+
     // Presets rápidos
     if (presetIdDuplicates) {
         presetIdDuplicates.addEventListener('click', () => {
@@ -3110,11 +3894,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const btnText = btnSingleRunAudit.querySelector('.btn-text');
-            const spinner = btnSingleRunAudit.querySelector('.spinner');
-            btnSingleRunAudit.disabled = true;
-            btnText.textContent = 'Processando auditoria...';
-            spinner.style.display = 'inline-block';
+            startBtnStepperLoading(btnSingleRunAudit, 'Executar Auditoria de Dados');
 
             try {
                 const res = await fetch('/api/single/audit', {
@@ -3145,9 +3925,10 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (err) {
                 alert(err.message);
             } finally {
-                btnSingleRunAudit.disabled = false;
-                btnText.textContent = 'Executar Auditoria de Dados';
-                spinner.style.display = 'none';
+                stopBtnStepperLoading(btnSingleRunAudit, 'Executar Auditoria de Dados');
+                if (!singleState.rules || singleState.rules.length === 0) {
+                    btnSingleRunAudit.disabled = true;
+                }
             }
         });
     }
@@ -3181,6 +3962,33 @@ document.addEventListener('DOMContentLoaded', () => {
         singleKpiCellsErrors.textContent = s.total_errors.toLocaleString('pt-BR');
         singleKpiRulesCount.textContent = s.rules_count;
         singleKpiConformityRate.textContent = `${s.conformity_rate}%`;
+
+        // Card de Destaque Executivo: Tempo Estimado Economizado (Single)
+        const singleTimeSavedCard = document.getElementById('single-time-saved-card');
+        const singleTimeSavedVal = document.getElementById('single-time-saved-val');
+        if (singleTimeSavedCard && singleTimeSavedVal) {
+            try {
+                const totalRows = Number(s.total_rows || 0);
+                const totalCols = Number(s.total_columns || (singleState.cols ? singleState.cols.length : 0) || 1);
+                const totalCells = totalRows * totalCols;
+                const savedMinutes = Math.max(15, Math.round(totalCells / 20));
+
+                let timeDisplay = '';
+                if (savedMinutes < 60) {
+                    timeDisplay = `~${savedMinutes} minutos`;
+                } else {
+                    const hours = Math.floor(savedMinutes / 60);
+                    const mins = savedMinutes % 60;
+                    timeDisplay = mins > 0 ? `~${hours}h ${mins < 10 ? '0' : ''}${mins}min` : `~${hours}h`;
+                }
+
+                singleTimeSavedVal.textContent = timeDisplay;
+                singleTimeSavedCard.style.display = 'flex';
+            } catch (tErr) {
+                console.warn('Erro ao calcular tempo economizado (single):', tErr);
+                singleTimeSavedCard.style.display = 'none';
+            }
+        }
 
         // Badges nas abas
         singleBadgeIssues.textContent = s.invalid_rows.toLocaleString('pt-BR');

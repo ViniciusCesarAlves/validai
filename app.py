@@ -4,6 +4,8 @@ import json
 import gzip
 import logging
 import gc
+import time
+import shutil
 from dotenv import load_dotenv
 
 # Carrega variáveis de ambiente do .env
@@ -123,6 +125,93 @@ os.makedirs(REPORT_DIR, exist_ok=True)
 SESSIONS = {}
 REPORTS = {}
 
+
+def cleanup_old_temp_files(max_age_seconds=3600):
+    """
+    Remove arquivos e pastas temporárias em UPLOAD_DIR e REPORT_DIR com idade > max_age_seconds (padrão: 1 hora),
+    além de purgar sessões e relatórios antigos da memória para preservar o disco efêmero e a RAM no Render.
+    """
+    now = time.time()
+
+    # 1. Limpeza de subpastas e arquivos em UPLOAD_DIR
+    if os.path.exists(UPLOAD_DIR):
+        try:
+            for item in os.listdir(UPLOAD_DIR):
+                item_path = os.path.join(UPLOAD_DIR, item)
+                try:
+                    mtime = os.path.getmtime(item_path)
+                    if (now - mtime) > max_age_seconds:
+                        if os.path.isdir(item_path):
+                            shutil.rmtree(item_path, ignore_errors=True)
+                        else:
+                            os.remove(item_path)
+                except Exception as err:
+                    logger.warning(f"Erro ao limpar item temporário em UPLOAD_DIR ({item}): {err}")
+        except Exception as e:
+            logger.warning(f"Erro ao listar UPLOAD_DIR para limpeza: {e}")
+
+    # 2. Limpeza de arquivos em REPORT_DIR
+    if os.path.exists(REPORT_DIR):
+        try:
+            for item in os.listdir(REPORT_DIR):
+                item_path = os.path.join(REPORT_DIR, item)
+                try:
+                    mtime = os.path.getmtime(item_path)
+                    if (now - mtime) > max_age_seconds:
+                        if os.path.isdir(item_path):
+                            shutil.rmtree(item_path, ignore_errors=True)
+                        else:
+                            os.remove(item_path)
+                except Exception as err:
+                    logger.warning(f"Erro ao limpar relatório temporário em REPORT_DIR ({item}): {err}")
+        except Exception as e:
+            logger.warning(f"Erro ao listar REPORT_DIR para limpeza: {e}")
+
+    # 3. Purga em memória: SESSIONS
+    try:
+        for sid in list(SESSIONS.keys()):
+            sess_info = SESSIONS.get(sid)
+            if not sess_info:
+                SESSIONS.pop(sid, None)
+                continue
+            created_at = sess_info.get('created_at')
+            if created_at is None:
+                folder = os.path.join(UPLOAD_DIR, sid)
+                if os.path.exists(folder):
+                    try:
+                        created_at = os.path.getmtime(folder)
+                    except Exception:
+                        created_at = 0
+                else:
+                    created_at = 0
+            if (now - created_at) > max_age_seconds:
+                SESSIONS.pop(sid, None)
+    except Exception as e:
+        logger.warning(f"Erro ao purgar SESSIONS antigas: {e}")
+
+    # 4. Purga em memória: REPORTS
+    try:
+        for rid in list(REPORTS.keys()):
+            rep_info = REPORTS.get(rid)
+            if not rep_info:
+                REPORTS.pop(rid, None)
+                continue
+            created_at = rep_info.get('created_at')
+            if created_at is None:
+                rep_path = rep_info.get('path')
+                if rep_path and os.path.exists(rep_path):
+                    try:
+                        created_at = os.path.getmtime(rep_path)
+                    except Exception:
+                        created_at = 0
+                else:
+                    created_at = 0
+            if (now - created_at) > max_age_seconds:
+                REPORTS.pop(rid, None)
+    except Exception as e:
+        logger.warning(f"Erro ao purgar REPORTS antigos: {e}")
+
+
 SITE_DOMAIN = "https://validai.app.br"
 
 # Sistema Centralizado de Metadados SEO por Rota
@@ -131,44 +220,44 @@ SEO_METADATA = {
         'title': 'ValidAí | Comparador e Validador de Planilhas Excel e CSV Online',
         'description': 'Compare, audite e valide duas planilhas Excel (.xlsx, .xls) ou CSV gratuitamente. Encontre divergências célula por célula e baixe o relatório pintado.',
         'robots': 'index, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
     },
     '/validador-texto': {
         'title': 'Comparador e Validador de Textos Online | ValidAí',
         'description': 'Compare dois blocos de texto lado a lado e identifique diferenças, adições e remoções instantaneamente com precisão.',
         'robots': 'index, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
     },
     '/validador-cadastros': {
         'title': 'Higienizador de Cadastros: Validar CPF, CNPJ, E-mail e Duplicados | ValidAí',
         'description': 'Limpe e padronize suas bases de dados. Valide CPF/CNPJ, e-mails e remova linhas duplicadas de planilhas automaticamente.',
         'robots': 'index, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
     },
     '/validador-xml': {
         'title': 'Conciliador de Notas Fiscais (XML NFe/NFSe vs Excel) | ValidAí',
         'description': 'Cruze dados de arquivos XML de Notas Fiscais (NFe e NFSe) contra planilhas de controle no Excel de forma automatizada.',
         'robots': 'index, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
     },
     '/como-usar': {
         'title': 'Como Usar o ValidAí | Guia Completo de Validação e Auditoria de Dados',
         'description': 'Aprenda passo a passo como comparar planilhas, higienizar cadastros e conciliar notas fiscais no ValidAí.',
         'robots': 'index, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
     },
     '/conciliador-taxas': {
         'title': 'Conciliador de Taxas e Extratos (.OFX vs Vendas) | ValidAí',
         'description': 'Audite taxas de maquininhas (Stone, Cielo, Rede) e repasses de marketplaces contra extratos bancários .OFX.',
         'robots': 'index, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
     },
     # Rotas "Em Breve" protegidas contra desperdício de Crawl Budget e Soft 404
     '/auditoria-rh': {
         'title': 'Auditoria de Folha e RH | ValidAí',
         'description': 'Batimento automatizado de folha de pagamento (mês anterior vs. atual) e conciliação de ativos do RH contra faturas de benefícios corporativos.',
         'robots': 'index, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/logo.png',
+        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png',
         'module_name': 'Auditoria de Folha e RH',
         'module_sub': 'Batimento de folha de pagamento, proventos, descontos e benefícios corporativos.'
     },
@@ -176,43 +265,43 @@ SEO_METADATA = {
         'title': 'Política de Privacidade | ValidAí',
         'description': 'Entenda como o ValidAí trata e protege seus dados conforme a LGPD. Processamento seguro na memória e privacidade total de arquivos.',
         'robots': 'index, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
     },
     '/termos': {
         'title': 'Termos de Uso | ValidAí',
         'description': 'Termos e condições gerais de uso da plataforma ValidAí para validação de dados, arquivos e cadastros corporativos.',
         'robots': 'index, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
     },
     '/sobre': {
         'title': 'Sobre o ValidAí | Quem Somos e Nossa Missão',
         'description': 'Conheça a história e a missão do ValidAí: simplificar a validação e higienização de arquivos, planilhas e cadastros corporativos no Brasil.',
         'robots': 'index, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
     },
     '/planos': {
         'title': 'Planos e Preços | ValidAí - Validador de Arquivos e Dados',
-        'description': 'Conheça os planos do ValidAí. Validações gratuitas diárias ou planos Standard e Pro com arquivos ilimitados e suporte prioritário.',
+        'description': 'Conheça os planos do ValidAí. Validações gratuitas no plano Standard ou desbloqueie arquivos completos e sem limites nos planos Plus (R$ 4,99) e Pro (R$ 9,99).',
         'robots': 'index, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
     },
     '/login': {
         'title': 'Entrar na Conta | ValidAí',
         'description': 'Acesse sua conta no ValidAí para gerenciar seu plano e histórico de validações.',
         'robots': 'noindex, nofollow',
-        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
     },
     '/cadastro': {
         'title': 'Criar Conta Gratuita | ValidAí',
         'description': 'Crie sua conta no ValidAí para validar planilhas, cadastros e notas fiscais.',
         'robots': 'noindex, nofollow',
-        'og_image': f'{SITE_DOMAIN}/static/images/logo.png'
+        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png'
     },
     '/validador-json': {
         'title': 'Comparador de JSON / APIs - Em Breve | ValidAí',
         'description': 'Identifique diferenças estruturais, chaves ausentes e divergências de tipagem entre payloads JSON e retornos de APIs.',
         'robots': 'noindex, follow',
-        'og_image': f'{SITE_DOMAIN}/static/images/logo.png',
+        'og_image': f'{SITE_DOMAIN}/static/images/og-banner.png',
         'module_name': 'Comparador de JSON / APIs',
         'module_sub': 'Análise de diferenças estruturais entre payloads JSON, webhooks e objetos aninhados.'
     }
@@ -692,6 +781,7 @@ def inspect_spreadsheet_route():
 
 @app.route('/api/upload-headers', methods=['POST'])
 def upload_headers():
+    cleanup_old_temp_files()
     try:
         file_a = request.files.get('file_a')
         file_b = request.files.get('file_b')
@@ -785,6 +875,8 @@ def upload_headers():
 
     except HTTPException:
         raise
+    except ValueError as ve:
+        return jsonify({'error': str(ve)}), 400
     except Exception as e:
         return jsonify({'error': f'Falha ao processar arquivos: {str(e)}'}), 500
 
@@ -856,8 +948,10 @@ def change_sheet():
         if sess.get('is_sample'):
             return jsonify({'error': 'A alteração de abas não se aplica a planilhas de exemplo fixas.'}), 400
 
-        sheet_a = data.get('sheet_a') or sess.get('sheets_a')
-        sheet_b = data.get('sheet_b') or sess.get('sheets_b')
+        raw_a = data.get('sheets_a') if 'sheets_a' in data else data.get('sheet_a')
+        raw_b = data.get('sheets_b') if 'sheets_b' in data else data.get('sheet_b')
+        sheet_a = raw_a if raw_a else sess.get('sheets_a')
+        sheet_b = raw_b if raw_b else sess.get('sheets_b')
         header_line_a = data.get('header_line_a', sess.get('header_line_a', 1))
         header_line_b = data.get('header_line_b', sess.get('header_line_b', 1))
 
@@ -896,6 +990,8 @@ def change_sheet():
             'header_line_a': int(header_line_a) if str(header_line_a).isdigit() else 1,
             'header_line_b': int(header_line_b) if str(header_line_b).isdigit() else 1
         })
+    except ValueError as ve:
+        return jsonify({'error': str(ve)}), 400
     except Exception as e:
         return jsonify({'error': f'Falha ao alternar aba/cabeçalho: {str(e)}'}), 500
 
@@ -943,8 +1039,10 @@ def compare():
 
         header_line_a = data.get('header_line_a', sess.get('header_line_a', 1))
         header_line_b = data.get('header_line_b', sess.get('header_line_b', 1))
-        sheets_a = data.get('sheets_a', sess.get('sheets_a'))
-        sheets_b = data.get('sheets_b', sess.get('sheets_b'))
+        raw_sheets_a = data.get('sheets_a')
+        raw_sheets_b = data.get('sheets_b')
+        sheets_a = raw_sheets_a if raw_sheets_a else sess.get('sheets_a')
+        sheets_b = raw_sheets_b if raw_sheets_b else sess.get('sheets_b')
 
         df_a = comparator.read_tabular_file(sess['path_a'], sess['filename_a'], header_line=header_line_a, sheet_names=sheets_a)
         df_b = comparator.read_tabular_file(sess['path_b'], sess['filename_b'], header_line=header_line_b, sheet_names=sheets_b)
@@ -1018,6 +1116,8 @@ def compare():
             'columns_with_differences': summary['columns_with_differences']
         })
 
+    except ValueError as ve:
+        return jsonify({'error': str(ve)}), 400
     except Exception as e:
         return jsonify({'error': f'Erro na comparação: {str(e)}'}), 500
 
@@ -1040,6 +1140,7 @@ def download_report(report_id):
 
 @app.route('/api/single/upload-headers', methods=['POST'])
 def single_upload_headers():
+    cleanup_old_temp_files()
     try:
         file = request.files.get('file')
         if not file:
@@ -1091,6 +1192,8 @@ def single_upload_headers():
 
     except HTTPException:
         raise
+    except ValueError as ve:
+        return jsonify({'error': str(ve)}), 400
     except Exception as e:
         return jsonify({'error': f'Falha ao carregar arquivo: {str(e)}'}), 500
 
@@ -1160,6 +1263,8 @@ def single_audit():
             'cols': cols
         })
 
+    except ValueError as ve:
+        return jsonify({'error': str(ve)}), 400
     except Exception as e:
         return jsonify({'error': f'Erro ao executar auditoria: {str(e)}'}), 500
 
@@ -1312,6 +1417,7 @@ def download_text_pdf_report(report_id):
 
 @app.route('/api/cadastros/upload-headers', methods=['POST'])
 def cadastros_upload_headers():
+    cleanup_old_temp_files()
     try:
         file = request.files.get('file')
         if not file:
@@ -1389,6 +1495,8 @@ def cadastros_upload_headers():
 
     except HTTPException:
         raise
+    except ValueError as ve:
+        return jsonify({'error': str(ve)}), 400
     except Exception as e:
         return jsonify({'error': f'Falha ao carregar base de cadastros: {str(e)}'}), 500
 
@@ -1590,6 +1698,7 @@ def cadastros_download_audit(report_id):
 
 @app.route('/api/xml/upload', methods=['POST'])
 def xml_upload():
+    cleanup_old_temp_files()
     try:
         xml_files = request.files.getlist('xml_files')
         sheet_file = request.files.get('sheet_file')
@@ -1654,6 +1763,8 @@ def xml_upload():
 
     except HTTPException:
         raise
+    except ValueError as ve:
+        return jsonify({'error': str(ve)}), 400
     except Exception as e:
         return jsonify({'error': f'Erro ao processar arquivos: {str(e)}'}), 500
 
@@ -1818,6 +1929,7 @@ def xml_download_mirror(report_id):
 
 @app.route('/api/ofx/upload', methods=['POST'])
 def ofx_upload():
+    cleanup_old_temp_files()
     try:
         ofx_files = request.files.getlist('ofx_files')
         sheet_file = request.files.get('sheet_file')
@@ -1880,6 +1992,8 @@ def ofx_upload():
 
     except HTTPException:
         raise
+    except ValueError as ve:
+        return jsonify({'error': str(ve)}), 400
     except Exception as e:
         return jsonify({'error': f'Erro ao processar arquivos OFX e planilha: {str(e)}'}), 500
 
@@ -2047,6 +2161,7 @@ def ofx_download_mirror(report_id):
 
 @app.route('/api/rh/upload-headers', methods=['POST'])
 def rh_upload_headers():
+    cleanup_old_temp_files()
     try:
         file_ref = request.files.get('file_ref')
         file_audit = request.files.get('file_audit')
@@ -2112,6 +2227,8 @@ def rh_upload_headers():
 
     except HTTPException:
         raise
+    except ValueError as ve:
+        return jsonify({'error': str(ve)}), 400
     except Exception as e:
         return jsonify({'error': f'Falha ao ler arquivos de RH: {str(e)}'}), 500
 

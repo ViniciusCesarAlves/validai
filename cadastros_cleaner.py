@@ -818,6 +818,11 @@ def generate_clean_excel(df_clean, output_path):
                 max_len = max(max_len, len(str(val)))
         ws.column_dimensions[col_letter].width = min(max(max_len + 4, 14), 50)
 
+    try:
+        ws.auto_filter.ref = ws.dimensions
+    except Exception:
+        pass
+
     wb.save(output_path)
 
 def generate_audit_excel(df_audit, summary, invalid_docs, duplicates, suspicious_contacts, row_cell_errors, output_path):
@@ -998,6 +1003,11 @@ def generate_audit_excel(df_audit, summary, invalid_docs, duplicates, suspicious
         col_letter = get_column_letter(col_idx)
         ws_data.column_dimensions[col_letter].width = max(len(str(col_name)) + 4, 15)
 
+    try:
+        ws_data.auto_filter.ref = ws_data.dimensions
+    except Exception:
+        pass
+
     # ==========================================
     # ABA 3: APENAS INCONSISTÊNCIAS E DUPLICADOS
     # ==========================================
@@ -1042,6 +1052,11 @@ def generate_audit_excel(df_audit, summary, invalid_docs, duplicates, suspicious
     ws_err.column_dimensions['B'].width = 26
     ws_err.column_dimensions['C'].width = 50
     ws_err.column_dimensions['D'].width = 40
+
+    try:
+        ws_err.auto_filter.ref = ws_err.dimensions
+    except Exception:
+        pass
 
     wb.save(output_path)
 

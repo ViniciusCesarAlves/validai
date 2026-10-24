@@ -18,13 +18,13 @@
     <meta property="og:title" content="ValidAí | Comparador e Validador de Planilhas Excel e CSV Online">
     <meta property="og:description" content="Compare, audite e valide duas planilhas Excel (.xlsx, .xls) ou CSV gratuitamente. Encontre divergências célula por célula e baixe o relatório pintado.">
     <meta property="og:url" content="https://validai.app.br{{ request.path }}">
-    <meta property="og:image" content="https://validai.app.br/static/images/logo.png">
+    <meta property="og:image" content="https://validai.app.br/static/images/og-banner.png">
 
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="ValidAí | Comparador e Validador de Planilhas Excel e CSV Online">
     <meta name="twitter:description" content="Compare, audite e valide duas planilhas Excel (.xlsx, .xls) ou CSV gratuitamente. Encontre divergências célula por célula e baixe o relatório pintado.">
-    <meta name="twitter:image" content="https://validai.app.br/static/images/logo.png">
+    <meta name="twitter:image" content="https://validai.app.br/static/images/og-banner.png">
     <link rel="icon" href="/favicon.ico" sizes="48x48">
     <link rel="icon" type="image/png" href="/static/images/favicon-48x48.png" sizes="48x48">
     <link rel="icon" type="image/png" href="/static/images/favicon-96x96.png" sizes="96x96">
@@ -194,12 +194,25 @@
       ]
     }
     </script>
+    <script>
+        window.VALIDAI_USER_PLAN = "{{ user_summary.plan|default('standard') }}";
+    </script>
 </head>
-<body>
+<body data-user-plan="{{ user_summary.plan|default('standard') }}">
 
     {% include 'partials/header.html' %}
 
     <main class="container main-content">
+
+        <!-- Banner Comemorativo Pós-Checkout Mercado Pago -->
+        <div id="mp-checkout-success-banner" class="mp-checkout-success-banner" role="status" aria-live="polite" style="display: none;">
+            <div class="mp-checkout-success-content">
+                <span class="mp-checkout-success-text">
+                    🎉 Pagamento Aprovado com Sucesso! Seu plano foi atualizado. Aproveite limites ampliados de linhas, validações completas e auditorias ilimitadas.
+                </span>
+            </div>
+            <button type="button" id="btn-close-mp-success" class="mp-checkout-success-close" aria-label="Fechar aviso de pagamento aprovado" title="Fechar">&times;</button>
+        </div>
 
         <!-- Cabeçalho Semântico de Apresentação (H1 SEO On-Page) -->
         <div class="seo-page-header">
@@ -325,6 +338,20 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Paywall Proativo e Transparente no Passo 1 (Alerta elegante quando linhas > 500 no plano Standard) -->
+            <div id="step1-paywall-notice" class="proactive-paywall-notice" style="display: none;" data-nosnippet>
+                <div class="proactive-paywall-left">
+                    <span class="proactive-paywall-icon" aria-hidden="true">⚡</span>
+                    <span class="proactive-paywall-text">
+                        Sua planilha possui <strong id="step1-paywall-rows-count">0</strong> linhas. No plano Standard gratuito, validaremos as primeiras 500 linhas. Deseja analisar a base inteira sem cortes?
+                    </span>
+                </div>
+                <a href="/planos" class="proactive-paywall-btn" id="step1-paywall-upgrade-btn" title="Desbloquear com Plano Plus">
+                    <span>Desbloquear com Plano Plus por R$ 4,99</span>
+                    <span class="proactive-paywall-arrow" aria-hidden="true">→</span>
+                </a>
+            </div>
         </section>
 
         <!-- ETAPA 2: Configuração de Chaves e Tolerâncias (Oculto até ler arquivos) -->
@@ -355,17 +382,30 @@
 
                 <div class="step2-sheets-grid">
                     <!-- Base Antiga -->
-                    <div class="step2-sheet-card">
+                    <div class="step2-sheet-card" id="step2-card-a">
                         <div class="step2-card-top">
                             <span class="step2-base-tag tag-antiga">Base Antiga</span>
                             <span id="step2-filename-a" class="step2-filename-text" title="Nome do arquivo da Base Antiga">arquivo.xlsx</span>
                         </div>
                         <div class="step2-card-body">
                             <div class="step2-control-group">
-                                <label for="step2-sheet-select-a" class="step2-control-label" data-i18n="sheets_step2_tab_label">Aba a validar:</label>
-                                <select id="step2-sheet-select-a" class="form-select step2-select" aria-label="Selecionar aba da Base Antiga">
-                                    <!-- Abas preenchidas dinamicamente -->
-                                </select>
+                                <span class="step2-control-label" data-i18n="sheets_step2_tab_label">Aba a validar:</span>
+                                <div class="step2-multiselect" id="step2-multiselect-a">
+                                    <button type="button" class="step2-multiselect-trigger" id="step2-sheet-trigger-a" aria-haspopup="listbox" aria-expanded="false" aria-label="Selecionar abas da Base Antiga">
+                                        <span class="step2-multiselect-label" id="step2-sheet-label-a">Selecionar abas...</span>
+                                        <span class="step2-multiselect-arrow" aria-hidden="true">▾</span>
+                                    </button>
+                                    <div class="step2-multiselect-dropdown" id="step2-sheet-dropdown-a" style="display: none;">
+                                        <div class="step2-multiselect-actions" id="step2-sheet-actions-a">
+                                            <button type="button" class="btn-sheet-bulk" id="step2-select-all-vis-a">[✓ Marcar Todas as Visíveis]</button>
+                                            <span class="bulk-divider">|</span>
+                                            <button type="button" class="btn-sheet-bulk" id="step2-deselect-all-a">[Desmarcar Todas]</button>
+                                        </div>
+                                        <div class="step2-multiselect-options" id="step2-sheet-options-a" role="listbox" aria-multiselectable="true">
+                                            <!-- Checkboxes preenchidos dinamicamente -->
+                                        </div>
+                                    </div>
+                                </div>
                                 <button type="button" class="btn-toggle-step2-hidden" id="btn-toggle-hidden-step2-a" style="display: none;" aria-pressed="false" title="Mostrar abas ocultas">
                                     <svg class="step2-eye-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -389,17 +429,30 @@
                     </div>
 
                     <!-- Base Nova -->
-                    <div class="step2-sheet-card">
+                    <div class="step2-sheet-card" id="step2-card-b">
                         <div class="step2-card-top">
                             <span class="step2-base-tag tag-nova">Base Nova</span>
                             <span id="step2-filename-b" class="step2-filename-text" title="Nome do arquivo da Base Nova">arquivo.xlsx</span>
                         </div>
                         <div class="step2-card-body">
                             <div class="step2-control-group">
-                                <label for="step2-sheet-select-b" class="step2-control-label" data-i18n="sheets_step2_tab_label">Aba a validar:</label>
-                                <select id="step2-sheet-select-b" class="form-select step2-select" aria-label="Selecionar aba da Base Nova">
-                                    <!-- Abas preenchidas dinamicamente -->
-                                </select>
+                                <span class="step2-control-label" data-i18n="sheets_step2_tab_label">Aba a validar:</span>
+                                <div class="step2-multiselect" id="step2-multiselect-b">
+                                    <button type="button" class="step2-multiselect-trigger" id="step2-sheet-trigger-b" aria-haspopup="listbox" aria-expanded="false" aria-label="Selecionar abas da Base Nova">
+                                        <span class="step2-multiselect-label" id="step2-sheet-label-b">Selecionar abas...</span>
+                                        <span class="step2-multiselect-arrow" aria-hidden="true">▾</span>
+                                    </button>
+                                    <div class="step2-multiselect-dropdown" id="step2-sheet-dropdown-b" style="display: none;">
+                                        <div class="step2-multiselect-actions" id="step2-sheet-actions-b">
+                                            <button type="button" class="btn-sheet-bulk" id="step2-select-all-vis-b">[✓ Marcar Todas as Visíveis]</button>
+                                            <span class="bulk-divider">|</span>
+                                            <button type="button" class="btn-sheet-bulk" id="step2-deselect-all-b">[Desmarcar Todas]</button>
+                                        </div>
+                                        <div class="step2-multiselect-options" id="step2-sheet-options-b" role="listbox" aria-multiselectable="true">
+                                            <!-- Checkboxes preenchidos dinamicamente -->
+                                        </div>
+                                    </div>
+                                </div>
                                 <button type="button" class="btn-toggle-step2-hidden" id="btn-toggle-hidden-step2-b" style="display: none;" aria-pressed="false" title="Mostrar abas ocultas">
                                     <svg class="step2-eye-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -428,7 +481,7 @@
             <div id="alert-unnamed-cols" class="alert-unnamed-banner" style="display: none;" data-nosnippet>
                 <div class="alert-unnamed-icon">💡</div>
                 <div class="alert-unnamed-content">
-                    <strong>Notamos colunas sem nome ('Unnamed').</strong> Se o cabeçalho da sua planilha não estiver na Linha 1, altere o campo "Linha do Cabeçalho" no Passo 1 e clique em "Ler Cabeçalhos e Continuar" novamente.
+                    <strong>Notamos colunas sem nome ('Unnamed').</strong> Se o cabeçalho da sua planilha não estiver na Linha 1, altere o campo "Linha do cabeçalho" no card acima para recarregar as colunas automaticamente.
                 </div>
             </div>
 
@@ -621,6 +674,17 @@
                 <div>
                     <h2 data-i18n="sheets_step3_title">Resultado da Validação</h2>
                     <p class="subtext" data-i18n="sheets_step3_desc">Relatório consolidado e divergências célula por célula.</p>
+                </div>
+            </div>
+
+            <!-- Card de Destaque Executivo: Tempo Estimado Economizado -->
+            <div class="time-saved-executive-card" id="step3-time-saved-card" style="display: none;" data-nosnippet>
+                <div class="time-saved-icon-wrap" aria-hidden="true">⏱️</div>
+                <div class="time-saved-info">
+                    <span class="time-saved-title">Tempo estimado economizado:</span>
+                    <span class="time-saved-desc">
+                        Você poupou cerca de <strong id="step3-time-saved-val">~15 minutos</strong> de conferência manual no Excel nesta auditoria.
+                    </span>
                 </div>
             </div>
 
@@ -932,6 +996,36 @@
                 </div>
             </div>
 
+            <!-- Seção de Cross-Sell Inteligente: Próximos Passos Recomendados -->
+            <div class="step3-cross-sell-section" id="step3-cross-sell" data-nosnippet>
+                <div class="cross-sell-header">
+                    <span class="cross-sell-badge">Próximos Passos Recomendados</span>
+                    <h3 class="cross-sell-heading">Potencialize a Auditoria dos seus Dados</h3>
+                </div>
+                <div class="cross-sell-cards-grid">
+                    <div class="cross-sell-card">
+                        <div class="cross-sell-card-content">
+                            <span class="cross-sell-icon" aria-hidden="true">📋</span>
+                            <p class="cross-sell-text">Precisa validar os CPFs, CNPJs ou contatos dessa mesma base?</p>
+                        </div>
+                        <a href="/validador-cadastros" class="cross-sell-action-btn" title="Ir para Higienizador de Cadastros">
+                            <span>Ir para Higienizador de Cadastros</span>
+                            <span class="cross-sell-arrow" aria-hidden="true">→</span>
+                        </a>
+                    </div>
+                    <div class="cross-sell-card">
+                        <div class="cross-sell-card-content">
+                            <span class="cross-sell-icon" aria-hidden="true">📑</span>
+                            <p class="cross-sell-text">Deseja cruzar as Notas Fiscais desta planilha contra XMLs da SEFAZ?</p>
+                        </div>
+                        <a href="/validador-xml" class="cross-sell-action-btn" title="Ir para Conciliador de XML">
+                            <span>Ir para Conciliador de XML</span>
+                            <span class="cross-sell-arrow" aria-hidden="true">→</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             <div class="action-footer">
                 <button type="button" class="btn btn-pill-outline" id="btn-restart">
                     <span class="btn-text" data-i18n="btn_restart">Fazer Nova Validação</span>
@@ -1020,7 +1114,14 @@
                                 </div>
                                 <div class="file-sheets-panel" id="single-sheets-panel" style="display: none;">
                                     <div class="file-sheets-header">
-                                        <span class="file-sheets-title">Abas para auditar:</span>
+                                        <div class="file-sheets-title-row">
+                                            <span class="file-sheets-title">Abas para comparar:</span>
+                                            <div class="file-sheets-bulk" id="single-sheets-bulk" style="display: none;">
+                                                <button type="button" class="btn-sheet-bulk" id="single-btn-select-all" title="Marcar todas as abas visíveis">[✓ Marcar Todas as Visíveis]</button>
+                                                <span class="bulk-divider">|</span>
+                                                <button type="button" class="btn-sheet-bulk" id="single-btn-deselect-all" title="Desmarcar todas as abas">[Desmarcar Todas]</button>
+                                            </div>
+                                        </div>
                                         <span class="file-sheets-hint" id="single-sheets-hint">1 aba selecionada</span>
                                     </div>
                                     <div class="file-sheets-chips" id="single-sheets-chips">
@@ -1372,6 +1473,19 @@
 
                 <!-- Lista de Regras Configuradas -->
                 <div class="single-rules-list-section">
+                    <!-- Pacotes Inteligentes de Auditoria em 1 Clique -->
+                    <div class="audit-smart-packs-bar" role="group" aria-label="Presets rápidos de auditoria em 1 clique">
+                        <span class="smart-packs-label">Presets Rápidos em 1 Clique:</span>
+                        <div class="smart-packs-buttons">
+                            <button type="button" class="btn-smart-pack pack-cadastral" id="preset-pack-cadastral" title="Detecta colunas de ID, CPF, CNPJ, Nome e E-mail e adiciona regras de Campo Obrigatório e Duplicatas automaticamente">
+                                ⚡ Pacote Cadastral
+                            </button>
+                            <button type="button" class="btn-smart-pack pack-financeiro" id="preset-pack-financeiro" title="Detecta colunas monetárias (Valor, Preço, Total, Saldo) e adiciona regras de Campo Obrigatório e Apenas Números">
+                                💰 Pacote Financeiro
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="rules-list-header">
                         <div class="rules-list-title-wrap">
                             <h3>Regras Ativas para Auditoria</h3>
@@ -1428,6 +1542,17 @@
                     <div>
                         <h2>Resultado da Auditoria Interna</h2>
                         <p class="subtext">Relatório consolidado e divergências célula por célula da planilha.</p>
+                    </div>
+                </div>
+
+                <!-- Card de Destaque Executivo: Tempo Estimado Economizado (Single) -->
+                <div class="time-saved-executive-card" id="single-time-saved-card" style="display: none;" data-nosnippet>
+                    <div class="time-saved-icon-wrap" aria-hidden="true">⏱️</div>
+                    <div class="time-saved-info">
+                        <span class="time-saved-title">Tempo estimado economizado:</span>
+                        <span class="time-saved-desc">
+                            Você poupou cerca de <strong id="single-time-saved-val">~15 minutos</strong> de conferência manual no Excel nesta auditoria.
+                        </span>
                     </div>
                 </div>
 
@@ -1593,6 +1718,36 @@
                     </div>
                     <div id="single-freq-container" class="single-freq-grid">
                         <!-- Rankings de repetição renderizados dinamicamente -->
+                    </div>
+                </div>
+
+                <!-- Seção de Cross-Sell Inteligente: Próximos Passos Recomendados -->
+                <div class="step3-cross-sell-section" id="single-cross-sell" data-nosnippet>
+                    <div class="cross-sell-header">
+                        <span class="cross-sell-badge">Próximos Passos Recomendados</span>
+                        <h3 class="cross-sell-heading">Potencialize a Auditoria dos seus Dados</h3>
+                    </div>
+                    <div class="cross-sell-cards-grid">
+                        <div class="cross-sell-card">
+                            <div class="cross-sell-card-content">
+                                <span class="cross-sell-icon" aria-hidden="true">📋</span>
+                                <p class="cross-sell-text">Precisa validar os CPFs, CNPJs ou contatos dessa mesma base?</p>
+                            </div>
+                            <a href="/validador-cadastros" class="cross-sell-action-btn" title="Ir para Higienizador de Cadastros">
+                                <span>Ir para Higienizador de Cadastros</span>
+                                <span class="cross-sell-arrow" aria-hidden="true">→</span>
+                            </a>
+                        </div>
+                        <div class="cross-sell-card">
+                            <div class="cross-sell-card-content">
+                                <span class="cross-sell-icon" aria-hidden="true">📑</span>
+                                <p class="cross-sell-text">Deseja cruzar as Notas Fiscais desta planilha contra XMLs da SEFAZ?</p>
+                            </div>
+                            <a href="/validador-xml" class="cross-sell-action-btn" title="Ir para Conciliador de XML">
+                                <span>Ir para Conciliador de XML</span>
+                                <span class="cross-sell-arrow" aria-hidden="true">→</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
 

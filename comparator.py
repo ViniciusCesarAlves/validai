@@ -1,5 +1,7 @@
 import os
 import re
+import zipfile
+import traceback
 import unicodedata
 from difflib import SequenceMatcher
 from datetime import datetime, date
@@ -8,7 +10,14 @@ import numpy as np
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
+from openpyxl.utils.exceptions import InvalidFileException
 from openpyxl.drawing.image import Image as OpenpyxlImage
+
+ENCRYPTED_FILE_MESSAGE = (
+    "🔒 O arquivo enviado parece estar protegido por senha ou criptografado. "
+    "Para que o ValidAí possa auditar os dados em memória de forma segura, "
+    "abra o arquivo no Excel, salve uma cópia desprotegida (sem senha) e faça o envio novamente."
+)
 
 def normalize_column_name(col: str) -> str:
     """Normaliza nome de coluna: sem acentos, sem espaços extras, uppercase e substitui caracteres especiais por _."""
@@ -188,35 +197,84 @@ def read_tabular_file(file_path_or_buffer, filename: str, header_line: int = 1, 
             parsed_sheets = [str(s) for s in sheet_names if s]
 
     if ext in ['xlsx', 'xls', 'xlsm']:
-        info = inspect_spreadsheet_file(file_path_or_buffer, filename)
-        available_sheet_names = [s['name'] for s in info.get('sheets', [])]
-        default_target = info.get('default_sheet') or (available_sheet_names[0] if available_sheet_names else None)
-
-        valid_sheets = []
-        if parsed_sheets:
-            for s in parsed_sheets:
-                if s in available_sheet_names:
-                    valid_sheets.append(s)
-
-        if valid_sheets and len(valid_sheets) > 1:
-            dfs = []
-            for s in valid_sheets:
+        try:
+            # Verifica previamente assinatura OLE2 com pacote criptografado (comum em .xlsx com senha do Excel)
+            try:
+                head_bytes = b""
+                if isinstance(file_path_or_buffer, (str, os.PathLike)) and os.path.exists(file_path_or_buffer):
+                    with open(file_path_or_buffer, 'rb') as f_chk:
+                        head_bytes = f_chk.read(16384)
+                elif hasattr(file_path_or_buffer, 'read') and hasattr(file_path_or_buffer, 'seek'):
+                    file_path_or_buffer.seek(0)
+                    raw_chunk = file_path_or_buffer.read(16384)
+                    if isinstance(raw_chunk, bytes):
+                        head_bytes = raw_chunk
+                    file_path_or_buffer.seek(0)
+                if head_bytes.startswith(b'\xd0\xcf\x11\xe0') and (
+                    b'EncryptedPackage' in head_bytes
+                    or b'E\x00n\x00c\x00r\x00y\x00p\x00t\x00e\x00d\x00P\x00a\x00c\x00k\x00a\x00g\x00e' in head_bytes
+                    or ext in ['xlsx', 'xlsm']
+                ):
+                    raise ValueError(ENCRYPTED_FILE_MESSAGE)
+            except ValueError:
+                raise
+            except Exception:
                 if hasattr(file_path_or_buffer, 'seek'):
                     file_path_or_buffer.seek(0)
-                dfs.append(pd.read_excel(file_path_or_buffer, sheet_name=s, header=header_idx))
-            df = pd.concat(dfs, ignore_index=True)
-        elif valid_sheets and len(valid_sheets) == 1:
-            if hasattr(file_path_or_buffer, 'seek'):
-                file_path_or_buffer.seek(0)
-            df = pd.read_excel(file_path_or_buffer, sheet_name=valid_sheets[0], header=header_idx)
-        else:
-            # Não informou aba ou a aba solicitada não existe: usa aba padrão visível
-            if hasattr(file_path_or_buffer, 'seek'):
-                file_path_or_buffer.seek(0)
-            if default_target:
-                df = pd.read_excel(file_path_or_buffer, sheet_name=default_target, header=header_idx)
+
+            info = inspect_spreadsheet_file(file_path_or_buffer, filename)
+            available_sheet_names = [s['name'] for s in info.get('sheets', [])]
+            default_target = info.get('default_sheet') or (available_sheet_names[0] if available_sheet_names else None)
+
+            valid_sheets = []
+            if parsed_sheets:
+                for s in parsed_sheets:
+                    if s in available_sheet_names:
+                        valid_sheets.append(s)
+
+            if valid_sheets and len(valid_sheets) > 1:
+                dfs = []
+                for s in valid_sheets:
+                    if hasattr(file_path_or_buffer, 'seek'):
+                        file_path_or_buffer.seek(0)
+                    dfs.append(pd.read_excel(file_path_or_buffer, sheet_name=s, header=header_idx))
+                df = pd.concat(dfs, ignore_index=True)
+            elif valid_sheets and len(valid_sheets) == 1:
+                if hasattr(file_path_or_buffer, 'seek'):
+                    file_path_or_buffer.seek(0)
+                df = pd.read_excel(file_path_or_buffer, sheet_name=valid_sheets[0], header=header_idx)
             else:
-                df = pd.read_excel(file_path_or_buffer, header=header_idx)
+                # Não informou aba ou a aba solicitada não existe: usa aba padrão visível
+                if hasattr(file_path_or_buffer, 'seek'):
+                    file_path_or_buffer.seek(0)
+                if default_target:
+                    df = pd.read_excel(file_path_or_buffer, sheet_name=default_target, header=header_idx)
+                else:
+                    df = pd.read_excel(file_path_or_buffer, header=header_idx)
+        except ValueError as ve:
+            if "🔒" in str(ve):
+                raise
+            err_context = f"{str(ve)} {traceback.format_exc()}".lower()
+            if any(term in err_context for term in (
+                'encrypted', 'password', 'senha', 'criptograf',
+                'workbook is encrypted', "can't find workbook in ole2",
+                'not a zip file', 'badzipfile', 'file is not a recognized excel file',
+                'excel file format cannot be determined'
+            )):
+                raise ValueError(ENCRYPTED_FILE_MESSAGE) from ve
+            raise
+        except (InvalidFileException, zipfile.BadZipFile) as exc:
+            raise ValueError(ENCRYPTED_FILE_MESSAGE) from exc
+        except Exception as exc:
+            err_context = f"{str(exc)} {traceback.format_exc()}".lower()
+            if any(term in err_context for term in (
+                'encrypted', 'password', 'senha', 'criptograf',
+                'workbook is encrypted', "can't find workbook in ole2",
+                'encryptedpackage', 'not a zip file', 'badzipfile',
+                'invalidfileexception'
+            )):
+                raise ValueError(ENCRYPTED_FILE_MESSAGE) from exc
+            raise
     elif ext == 'csv':
         encodings = ['utf-8-sig', 'utf-8', 'latin1', 'cp1252', 'iso-8859-1']
         df = None
@@ -1083,6 +1141,12 @@ def generate_excel_diff_report(summary: dict, diff_records: list,
 
                 diff_row_idx += 1
 
+        try:
+            if diff_row_idx > 2:
+                ws_diff.auto_filter.ref = ws_diff.dimensions
+        except Exception:
+            pass
+
         if truncated:
             ws_diff.cell(row=diff_row_idx, column=1, value=f"* Exibindo as primeiras {max_excel_diff_rows} células divergentes para manter a performance do arquivo Excel.").font = Font(name="Calibri", italic=True, color="64748B")
 
@@ -1155,6 +1219,12 @@ def generate_excel_diff_report(summary: dict, diff_records: list,
 
             curr_row += 1
 
+        try:
+            if curr_row > 2:
+                ws_fin.auto_filter.ref = f"A1:H{curr_row - 1}"
+        except Exception:
+            pass
+
         # Linha de Totais Gerais Consolidados
         c_tot_lbl = ws_fin.cell(row=curr_row, column=1, value="TOTAL GERAL DOS PARES MONETÁRIOS")
         ws_fin.merge_cells(start_row=curr_row, start_column=1, end_row=curr_row, end_column=2)
@@ -1213,6 +1283,11 @@ def generate_excel_diff_report(summary: dict, diff_records: list,
                 c.font = font_normal
                 c.border = border_thin
 
+        try:
+            ws_only_a.auto_filter.ref = ws_only_a.dimensions
+        except Exception:
+            pass
+
     # -----------------------------
     # 5. ABA: APENAS NA BASE NOVA
     # -----------------------------
@@ -1234,6 +1309,11 @@ def generate_excel_diff_report(summary: dict, diff_records: list,
                 c = ws_only_b.cell(row=row_num, column=col_num, value=str(val) if not pd.isna(val) else "")
                 c.font = font_normal
                 c.border = border_thin
+
+        try:
+            ws_only_b.auto_filter.ref = ws_only_b.dimensions
+        except Exception:
+            pass
 
     wb.save(output_path)
     return output_path
