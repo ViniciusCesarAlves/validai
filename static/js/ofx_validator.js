@@ -627,13 +627,13 @@
 
                 let badgeHtml = '';
                 if (item.status === 'CONCILIADO') {
-                    badgeHtml = `<span class="status-badge-ok">✔ Conciliado</span>`;
+                    badgeHtml = `<span class="status-badge-ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1.5px; margin-right: 4px;"><polyline points="20 6 9 17 4 12"></polyline></svg>Conciliado</span>`;
                 } else if (item.status === 'TAXA_A_MAIOR') {
-                    badgeHtml = `<span class="status-badge-diff">✘ Taxa a Maior</span>`;
+                    badgeHtml = `<span class="status-badge-diff"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1.5px; margin-right: 4px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>Taxa a Maior</span>`;
                 } else if (item.status === 'NAO_REPASSADO') {
-                    badgeHtml = `<span class="status-badge-warning">⚠ Não Repassado</span>`;
+                    badgeHtml = `<span class="status-badge-warning"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1.5px; margin-right: 4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>Não Repassado</span>`;
                 } else if (item.status === 'CREDITO_SEM_VENDA') {
-                    badgeHtml = `<span class="status-badge-info">ℹ Crédito Avulso</span>`;
+                    badgeHtml = `<span class="status-badge-info"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1.5px; margin-right: 4px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>Crédito Avulso</span>`;
                 } else {
                     badgeHtml = `<span class="status-badge-diff">${escapeHtml(item.status_label)}</span>`;
                 }

@@ -210,10 +210,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const BTN_STEPPER_STAGES = [
-        '⏳ Lendo e normalizando células...',
-        '🔍 Cruzando chaves e identificadores...',
-        '📊 Consolidando divergências e KPIs...',
-        '✨ Finalizando relatório...'
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 7px; flex-shrink: 0;" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Lendo e normalizando células...',
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 7px; flex-shrink: 0;" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>Cruzando chaves e identificadores...',
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 7px; flex-shrink: 0;" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>Consolidando divergências e KPIs...',
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 7px; flex-shrink: 0;" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>Finalizando relatório...'
     ];
 
     function startBtnStepperLoading(button, fallbackDefaultText = '') {
@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const icon = button.querySelector('.btn-circle-icon');
 
             if (textSpan && !textSpan.dataset.stepperOriginal) {
-                textSpan.dataset.stepperOriginal = textSpan.textContent || fallbackDefaultText;
+                textSpan.dataset.stepperOriginal = (textSpan.textContent || fallbackDefaultText).trim();
             }
             button.disabled = true;
             if (spinner) spinner.style.display = 'inline-block';
@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let stepIndex = 0;
             if (textSpan) {
                 textSpan.style.transition = 'opacity 0.18s ease';
-                textSpan.textContent = BTN_STEPPER_STAGES[0];
+                textSpan.innerHTML = BTN_STEPPER_STAGES[0];
             }
 
             button._stepperIntervalId = setInterval(() => {
@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => {
                         try {
                             if (button.disabled && textSpan) {
-                                textSpan.textContent = BTN_STEPPER_STAGES[stepIndex];
+                                textSpan.innerHTML = BTN_STEPPER_STAGES[stepIndex];
                                 textSpan.style.opacity = '1';
                             }
                         } catch (_) {}
@@ -3778,11 +3778,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (addedCount > 0) {
                     renderSingleRulesList();
-                    showValidaiToast(`⚡ Pacote Cadastral aplicado! ${addedCount} regra(s) adicionada(s).`, 'success');
+                    showValidaiToast(`Pacote Cadastral aplicado! ${addedCount} regra(s) adicionada(s).`, 'success');
                 } else if (matchedAnyCol) {
-                    showValidaiToast('✅ As regras do Pacote Cadastral já estão ativas na auditoria.', 'info');
+                    showValidaiToast('As regras do Pacote Cadastral já estão ativas na auditoria.', 'info');
                 } else {
-                    showValidaiToast('⚠️ Nenhuma coluna cadastral (ID, CPF, CNPJ, Nome ou E-mail) detectada automaticamente.', 'info');
+                    showValidaiToast('Nenhuma coluna cadastral (ID, CPF, CNPJ, Nome ou E-mail) detectada automaticamente.', 'info');
                 }
             } catch (err) {
                 console.error('Erro ao aplicar Pacote Cadastral:', err);
@@ -3813,11 +3813,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (addedCount > 0) {
                     renderSingleRulesList();
-                    showValidaiToast(`💰 Pacote Financeiro aplicado! ${addedCount} regra(s) adicionada(s).`, 'success');
+                    showValidaiToast(`Pacote Financeiro aplicado! ${addedCount} regra(s) adicionada(s).`, 'success');
                 } else if (matchedAnyCol) {
-                    showValidaiToast('✅ As regras do Pacote Financeiro já estão ativas na auditoria.', 'info');
+                    showValidaiToast('As regras do Pacote Financeiro já estão ativas na auditoria.', 'info');
                 } else {
-                    showValidaiToast('⚠️ Nenhuma coluna financeira (Valor, Preço, Total ou Saldo) detectada automaticamente.', 'info');
+                    showValidaiToast('Nenhuma coluna financeira (Valor, Preço, Total ou Saldo) detectada automaticamente.', 'info');
                 }
             } catch (err) {
                 console.error('Erro ao aplicar Pacote Financeiro:', err);

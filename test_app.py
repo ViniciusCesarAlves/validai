@@ -737,8 +737,8 @@ def test_full_pipeline():
     assert 'btn-rh-upload' in html_rh, "Botão Ler Bases ausente"
     assert 'btn-rh-try-example' in html_rh, "Botão Testar Exemplo ausente"
     assert 'btn-rh-download-audit' in html_rh, "Botão download auditoria RH ausente"
-    assert 'v3.3' in html_rh, "Tag de versão v3.3 ausente no rodapé"
-    print("[OK] Página /auditoria-rh renderizada com layout de 3 passos, dropzones e v3.3!")
+    assert 'v3.5' in html_rh, "Tag de versão v3.5 ausente no rodapé"
+    print("[OK] Página /auditoria-rh renderizada com layout de 3 passos, dropzones e v3.5!")
 
     # B. Teste de Exemplo - Modo Folha (Mês Anterior vs. Atual)
     res_ex_folha = client.post('/api/rh/load-example', json={'mode': 'folha'})
@@ -1047,8 +1047,8 @@ def test_full_pipeline():
     termos_html = res_termos.data.decode('utf-8')
     assert "Termos e Condições de Uso" in termos_html
     assert "Isenção" in termos_html or "isenção" in termos_html
-    assert "v3.3" in termos_html
-    print("[OK] /termos validada com regras de uso, isenção fiscal/operacional e versão v3.3!")
+    assert "v3.5" in termos_html
+    print("[OK] /termos validada com regras de uso, isenção fiscal/operacional e versão v3.5!")
 
     # 18.3 Rota /sobre
     res_sobre = client.get('/sobre')
