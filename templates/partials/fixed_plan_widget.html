@@ -591,15 +591,21 @@ body.dark-theme .fixed-plan-reset-note {
                     <span class="fixed-plan-card-eyebrow">SEU PLANO ATUAL</span>
                     <div class="fixed-plan-card-heading">
                         {% if user_summary.plan == 'pro' %}
-                            <span class="plan-card-icon plan-card-icon-pro">💎</span>
+                            <span class="plan-card-icon plan-card-icon-pro" aria-hidden="true">
+                                <svg class="splitc-icon splitc-icon-sm" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 18 3 22 9 12 22 2 9 6 3"/></svg>
+                            </span>
                             <strong class="plan-card-name">Plano Pro</strong>
                             <span class="plan-card-tag tag-pro">Ilimitado</span>
                         {% elif user_summary.plan == 'plus' %}
-                            <span class="plan-card-icon plan-card-icon-plus">⭐</span>
+                            <span class="plan-card-icon plan-card-icon-plus" aria-hidden="true">
+                                <svg class="splitc-icon splitc-icon-sm" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            </span>
                             <strong class="plan-card-name">Plano Plus</strong>
                             <span class="plan-card-tag tag-plus">R$ 4,99/mês</span>
                         {% else %}
-                            <span class="plan-card-icon plan-card-icon-std">⚡</span>
+                            <span class="plan-card-icon plan-card-icon-std" aria-hidden="true">
+                                <svg class="splitc-icon splitc-icon-sm" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                            </span>
                             <strong class="plan-card-name">Plano Standard</strong>
                             <span class="plan-card-tag tag-std">Gratuito</span>
                         {% endif %}
@@ -647,7 +653,9 @@ body.dark-theme .fixed-plan-reset-note {
                         {% elif user_summary.plan == 'plus' %}
                             <span class="plan-limit-counter"><strong id="widget-special-used">{{ user_summary.daily_special }}</strong> / 1 hoje</span>
                         {% else %}
-                            <span class="plan-limit-badge-locked">🔒 Teste de Exemplo</span>
+                            <span class="plan-limit-badge-locked">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-right: 3px;" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Teste de Exemplo
+                            </span>
                         {% endif %}
                     </div>
                     {% if user_summary.plan == 'standard' %}
@@ -695,12 +703,12 @@ body.dark-theme .fixed-plan-reset-note {
                 {% elif user_summary.plan == 'plus' %}
                     <a href="/planos" class="fixed-plan-cta-btn btn-cta-upgrade">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="6 3 18 3 22 9 12 22 2 9 6 3"/></svg>
-                        <span>Migrar para o Pro 💎</span>
+                        <span>Migrar para o Pro</span>
                     </a>
                 {% else %}
                     <a href="/planos" class="fixed-plan-cta-btn btn-cta-upgrade">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="6 3 18 3 22 9 12 22 2 9 6 3"/></svg>
-                        <span>Fazer Upgrade (a partir de R$ 4,99) 💎</span>
+                        <span>Fazer Upgrade (a partir de R$ 4,99)</span>
                     </a>
                 {% endif %}
                 <div class="fixed-plan-reset-note">
@@ -712,8 +720,14 @@ body.dark-theme .fixed-plan-reset-note {
 
         <!-- Pílula de Status (Quadrado Verde) -->
         <button type="button" class="fixed-plan-pill status-pill-{{ user_summary.plan }}" id="fixed-plan-pill-btn" aria-haspopup="dialog" aria-expanded="false" title="Clique para ver detalhes do plano e limites diários">
-            <span class="fixed-plan-pill-icon plan-icon-{{ user_summary.plan }}">
-                {% if user_summary.plan == 'pro' %}💎{% elif user_summary.plan == 'plus' %}⭐{% else %}⚡{% endif %}
+            <span class="fixed-plan-pill-icon plan-icon-{{ user_summary.plan }}" aria-hidden="true">
+                {% if user_summary.plan == 'pro' %}
+                    <svg class="splitc-icon splitc-icon-sm" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 18 3 22 9 12 22 2 9 6 3"/></svg>
+                {% elif user_summary.plan == 'plus' %}
+                    <svg class="splitc-icon splitc-icon-sm" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                {% else %}
+                    <svg class="splitc-icon splitc-icon-sm" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                {% endif %}
             </span>
             <div class="fixed-plan-pill-text">
                 <span class="fixed-plan-pill-title">Plano {{ user_summary.plan_name }}</span>

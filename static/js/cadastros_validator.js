@@ -495,10 +495,13 @@
         renderCadastrosCharts(data);
     }
 
+    const CHECK_EMPTY_SVG = '<svg class="splitc-icon splitc-icon-sm" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4FD580" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
+    const BULB_SUGGEST_SVG = '<svg class="splitc-icon splitc-icon-sm" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4FD580" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.9 1.2 1.5 1.5 2.5"></path><path d="M9 18h6"></path><path d="M10 22h4"></path></svg>';
+
     function renderTableDocs(items) {
         tbodyDocs.innerHTML = '';
         if (!items || items.length === 0) {
-            tbodyDocs.innerHTML = '<tr><td colspan="5" class="empty-table-msg" style="text-align: center; padding: 24px; color: var(--text-muted);">Nenhum CPF ou CNPJ inválido encontrado nesta base! ✨</td></tr>';
+            tbodyDocs.innerHTML = `<tr><td colspan="5" class="empty-table-msg" style="text-align: center; padding: 24px; color: var(--text-muted);">${CHECK_EMPTY_SVG}Nenhum CPF ou CNPJ inválido encontrado nesta base!</td></tr>`;
             return;
         }
 
@@ -518,7 +521,7 @@
     function renderTableDups(items) {
         tbodyDups.innerHTML = '';
         if (!items || items.length === 0) {
-            tbodyDups.innerHTML = '<tr><td colspan="5" class="empty-table-msg" style="text-align: center; padding: 24px; color: var(--text-muted);">Nenhum registro duplicado encontrado com os critérios escolhidos! ✨</td></tr>';
+            tbodyDups.innerHTML = `<tr><td colspan="5" class="empty-table-msg" style="text-align: center; padding: 24px; color: var(--text-muted);">${CHECK_EMPTY_SVG}Nenhum registro duplicado encontrado com os critérios escolhidos!</td></tr>`;
             return;
         }
 
@@ -539,7 +542,7 @@
     function renderTableContacts(items) {
         tbodyContacts.innerHTML = '';
         if (!items || items.length === 0) {
-            tbodyContacts.innerHTML = '<tr><td colspan="6" class="empty-table-msg" style="text-align: center; padding: 24px; color: var(--text-muted);">Nenhum e-mail ou telefone suspeito identificado! ✨</td></tr>';
+            tbodyContacts.innerHTML = `<tr><td colspan="6" class="empty-table-msg" style="text-align: center; padding: 24px; color: var(--text-muted);">${CHECK_EMPTY_SVG}Nenhum e-mail ou telefone suspeito identificado!</td></tr>`;
             return;
         }
 
@@ -551,7 +554,7 @@
                 <td style="text-align: center; white-space: nowrap;"><span class="status-badge-info">${item.type}</span></td>
                 <td><span class="key-code">${escapeHtml(item.original || '(vazio)')}</span></td>
                 <td><span class="status-badge-warning">${escapeHtml(item.issue)}</span></td>
-                <td>${item.suggestion ? `<span style="font-size: 12.5px; font-weight: 700; color: #16a34a;">💡 ${escapeHtml(item.suggestion)}</span>` : '<span style="color:#94a3af;">-</span>'}</td>
+                <td>${item.suggestion ? `<span style="font-size: 12.5px; font-weight: 700; color: #16a34a;">${BULB_SUGGEST_SVG}${escapeHtml(item.suggestion)}</span>` : '<span style="color:#94a3af;">-</span>'}</td>
             `;
             tbodyContacts.appendChild(tr);
         });

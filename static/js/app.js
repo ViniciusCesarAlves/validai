@@ -302,7 +302,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (type === 'info') {
                 toastEl.classList.add('toast-info');
             }
-            toastEl.textContent = message;
+            const cleanMsg = String(message).replace(/^[\u{1F300}-\u{1FAFF}\u2600-\u27BF\uFE0F]+\s*/u, '');
+            const iconSvg = type === 'info'
+                ? '<svg class="splitc-icon splitc-icon-sm" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4FD580" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;vertical-align:-3px;" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>'
+                : '<svg class="splitc-icon splitc-icon-sm" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4FD580" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;vertical-align:-3px;" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
+            toastEl.innerHTML = `${iconSvg}<span>${escapeHtml(cleanMsg)}</span>`;
 
             if (toastEl._hideTimer) {
                 clearTimeout(toastEl._hideTimer);
@@ -589,9 +593,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     e.stopPropagation();
                     const isShowing = (hiddenChips.style.display !== 'none');
                     hiddenChips.style.display = isShowing ? 'none' : 'flex';
+                    const eyeSvg = '<svg class="step2-eye-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg> ';
                     btnToggleHidden.innerHTML = isShowing
-                        ? '👁️ Mostrar abas ocultas (' + toRenderHidden.length + ')'
-                        : '👁️ Ocultar abas ocultas (' + toRenderHidden.length + ')';
+                        ? eyeSvg + 'Mostrar abas ocultas (' + toRenderHidden.length + ')'
+                        : eyeSvg + 'Ocultar abas ocultas (' + toRenderHidden.length + ')';
                 };
             } else {
                 hiddenArea.style.display = 'none';

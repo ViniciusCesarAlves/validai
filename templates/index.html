@@ -207,8 +207,12 @@
         <!-- Banner Comemorativo Pós-Checkout Mercado Pago -->
         <div id="mp-checkout-success-banner" class="mp-checkout-success-banner" role="status" aria-live="polite" style="display: none;">
             <div class="mp-checkout-success-content">
+                <svg class="splitc-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
                 <span class="mp-checkout-success-text">
-                    🎉 Pagamento Aprovado com Sucesso! Seu plano foi atualizado. Aproveite limites ampliados de linhas, validações completas e auditorias ilimitadas.
+                    Pagamento Aprovado com Sucesso! Seu plano foi atualizado. Aproveite limites ampliados de linhas, validações completas e auditorias ilimitadas.
                 </span>
             </div>
             <button type="button" id="btn-close-mp-success" class="mp-checkout-success-close" aria-label="Fechar aviso de pagamento aprovado" title="Fechar">&times;</button>
@@ -342,7 +346,11 @@
             <!-- Paywall Proativo e Transparente no Passo 1 (Alerta elegante quando linhas > 500 no plano Standard) -->
             <div id="step1-paywall-notice" class="proactive-paywall-notice" style="display: none;" data-nosnippet>
                 <div class="proactive-paywall-left">
-                    <span class="proactive-paywall-icon" aria-hidden="true">⚡</span>
+                    <span class="proactive-paywall-icon" aria-hidden="true">
+                        <svg class="splitc-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
+                    </span>
                     <span class="proactive-paywall-text">
                         Sua planilha possui <strong id="step1-paywall-rows-count">0</strong> linhas. No plano Standard gratuito, validaremos as primeiras 500 linhas. Deseja analisar a base inteira sem cortes?
                     </span>
@@ -479,7 +487,13 @@
 
             <!-- Aviso Inteligente de Colunas Unnamed -->
             <div id="alert-unnamed-cols" class="alert-unnamed-banner" style="display: none;" data-nosnippet>
-                <div class="alert-unnamed-icon">💡</div>
+                <div class="alert-unnamed-icon" aria-hidden="true">
+                    <svg class="splitc-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.9 1.2 1.5 1.5 2.5"/>
+                        <path d="M9 18h6"/>
+                        <path d="M10 22h4"/>
+                    </svg>
+                </div>
                 <div class="alert-unnamed-content">
                     <strong>Notamos colunas sem nome ('Unnamed').</strong> Se o cabeçalho da sua planilha não estiver na Linha 1, altere o campo "Linha do cabeçalho" no card acima para recarregar as colunas automaticamente.
                 </div>
@@ -679,7 +693,12 @@
 
             <!-- Card de Destaque Executivo: Tempo Estimado Economizado -->
             <div class="time-saved-executive-card" id="step3-time-saved-card" style="display: none;" data-nosnippet>
-                <div class="time-saved-icon-wrap" aria-hidden="true">⏱️</div>
+                <div class="time-saved-icon-wrap" aria-hidden="true">
+                    <svg class="splitc-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </div>
                 <div class="time-saved-info">
                     <span class="time-saved-title">Tempo estimado economizado:</span>
                     <span class="time-saved-desc">
@@ -764,7 +783,11 @@
                         <span data-i18n="chart_dashboard_title">Diagnóstico Visual da Comparação</span>
                     </div>
                     <button type="button" class="btn-export-chart" id="btn-export-charts-sheets" title="Baixar Painel em Imagem PNG">
-                        <span>📷</span>
+                        <svg class="splitc-icon splitc-icon-sm" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
                         <span data-i18n="chart_btn_export_png">Baixar Painel (PNG)</span>
                     </button>
                 </div>
@@ -1005,7 +1028,13 @@
                 <div class="cross-sell-cards-grid">
                     <div class="cross-sell-card">
                         <div class="cross-sell-card-content">
-                            <span class="cross-sell-icon" aria-hidden="true">📋</span>
+                            <span class="cross-sell-icon" aria-hidden="true">
+                                <svg class="splitc-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <polyline points="16 11 18 13 22 9"></polyline>
+                                </svg>
+                            </span>
                             <p class="cross-sell-text">Precisa validar os CPFs, CNPJs ou contatos dessa mesma base?</p>
                         </div>
                         <a href="/validador-cadastros" class="cross-sell-action-btn" title="Ir para Higienizador de Cadastros">
@@ -1015,7 +1044,14 @@
                     </div>
                     <div class="cross-sell-card">
                         <div class="cross-sell-card-content">
-                            <span class="cross-sell-icon" aria-hidden="true">📑</span>
+                            <span class="cross-sell-icon" aria-hidden="true">
+                                <svg class="splitc-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <polyline points="10 13 8 15 10 17"></polyline>
+                                    <polyline points="14 13 16 15 14 17"></polyline>
+                                </svg>
+                            </span>
                             <p class="cross-sell-text">Deseja cruzar as Notas Fiscais desta planilha contra XMLs da SEFAZ?</p>
                         </div>
                         <a href="/validador-xml" class="cross-sell-action-btn" title="Ir para Conciliador de XML">
@@ -1129,7 +1165,11 @@
                                     </div>
                                     <div class="file-hidden-sheets-area" id="single-hidden-area" style="display: none;">
                                         <button type="button" class="btn-toggle-hidden" id="single-btn-toggle-hidden">
-                                            👁️ Mostrar abas ocultas (<span id="single-hidden-count">0</span>)
+                                            <svg class="step2-eye-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                <circle cx="12" cy="12" r="3"></circle>
+                                            </svg>
+                                            Mostrar abas ocultas (<span id="single-hidden-count">0</span>)
                                         </button>
                                         <div class="file-hidden-chips" id="single-hidden-chips" style="display: none;">
                                             <!-- Chips de abas ocultas gerados dinamicamente via JS -->
@@ -1163,14 +1203,17 @@
                 <!-- Barra de Informações do Arquivo -->
                 <div class="single-file-info-bar">
                     <div class="single-info-pill">
+                        <svg class="splitc-icon splitc-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                         <span class="info-label">Arquivo:</span>
                         <strong class="info-val" id="single-info-name">planilha.xlsx</strong>
                     </div>
                     <div class="single-info-pill">
+                        <svg class="splitc-icon splitc-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="3.01"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
                         <span class="info-label">Total de Linhas:</span>
                         <strong class="info-val text-primary" id="single-info-rows">0</strong>
                     </div>
                     <div class="single-info-pill">
+                        <svg class="splitc-icon splitc-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
                         <span class="info-label">Total de Colunas:</span>
                         <strong class="info-val text-primary" id="single-info-cols">0</strong>
                     </div>
@@ -1180,7 +1223,7 @@
                 <div class="single-rule-builder-card">
                     <div class="rule-builder-header">
                         <div class="rule-builder-icon">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg class="splitc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <line x1="12" y1="8" x2="12" y2="16"></line>
                                 <line x1="8" y1="12" x2="16" y2="12"></line>
@@ -1475,19 +1518,37 @@
                 <div class="single-rules-list-section">
                     <!-- Pacotes Inteligentes de Auditoria em 1 Clique -->
                     <div class="audit-smart-packs-bar" role="group" aria-label="Presets rápidos de auditoria em 1 clique">
-                        <span class="smart-packs-label">Presets Rápidos em 1 Clique:</span>
+                        <span class="smart-packs-label">
+                            <svg class="splitc-icon splitc-icon-sm" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                            </svg>
+                            <span>Presets Rápidos em 1 Clique:</span>
+                        </span>
                         <div class="smart-packs-buttons">
                             <button type="button" class="btn-smart-pack pack-cadastral" id="preset-pack-cadastral" title="Detecta colunas de ID, CPF, CNPJ, Nome e E-mail e adiciona regras de Campo Obrigatório e Duplicatas automaticamente">
-                                ⚡ Pacote Cadastral
+                                <svg class="splitc-icon splitc-icon-sm" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <polyline points="16 11 18 13 22 9"></polyline>
+                                </svg>
+                                <span>Pacote Cadastral</span>
                             </button>
                             <button type="button" class="btn-smart-pack pack-financeiro" id="preset-pack-financeiro" title="Detecta colunas monetárias (Valor, Preço, Total, Saldo) e adiciona regras de Campo Obrigatório e Apenas Números">
-                                💰 Pacote Financeiro
+                                <svg class="splitc-icon splitc-icon-sm" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                                <span>Pacote Financeiro</span>
                             </button>
                         </div>
                     </div>
 
                     <div class="rules-list-header">
                         <div class="rules-list-title-wrap">
+                            <svg class="splitc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <polyline points="9 11 12 14 22 4"></polyline>
+                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                            </svg>
                             <h3>Regras Ativas para Auditoria</h3>
                             <span class="rules-count-badge" id="single-rules-count-badge">0 regras</span>
                         </div>
@@ -1547,7 +1608,12 @@
 
                 <!-- Card de Destaque Executivo: Tempo Estimado Economizado (Single) -->
                 <div class="time-saved-executive-card" id="single-time-saved-card" style="display: none;" data-nosnippet>
-                    <div class="time-saved-icon-wrap" aria-hidden="true">⏱️</div>
+                    <div class="time-saved-icon-wrap" aria-hidden="true">
+                        <svg class="splitc-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
                     <div class="time-saved-info">
                         <span class="time-saved-title">Tempo estimado economizado:</span>
                         <span class="time-saved-desc">
@@ -1730,7 +1796,13 @@
                     <div class="cross-sell-cards-grid">
                         <div class="cross-sell-card">
                             <div class="cross-sell-card-content">
-                                <span class="cross-sell-icon" aria-hidden="true">📋</span>
+                                <span class="cross-sell-icon" aria-hidden="true">
+                                    <svg class="splitc-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <polyline points="16 11 18 13 22 9"></polyline>
+                                    </svg>
+                                </span>
                                 <p class="cross-sell-text">Precisa validar os CPFs, CNPJs ou contatos dessa mesma base?</p>
                             </div>
                             <a href="/validador-cadastros" class="cross-sell-action-btn" title="Ir para Higienizador de Cadastros">
@@ -1740,7 +1812,14 @@
                         </div>
                         <div class="cross-sell-card">
                             <div class="cross-sell-card-content">
-                                <span class="cross-sell-icon" aria-hidden="true">📑</span>
+                                <span class="cross-sell-icon" aria-hidden="true">
+                                    <svg class="splitc-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                        <polyline points="10 13 8 15 10 17"></polyline>
+                                        <polyline points="14 13 16 15 14 17"></polyline>
+                                    </svg>
+                                </span>
                                 <p class="cross-sell-text">Deseja cruzar as Notas Fiscais desta planilha contra XMLs da SEFAZ?</p>
                             </div>
                             <a href="/validador-xml" class="cross-sell-action-btn" title="Ir para Conciliador de XML">

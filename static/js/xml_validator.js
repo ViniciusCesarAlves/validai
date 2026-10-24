@@ -516,12 +516,14 @@
         }
     }
 
+    const XML_EMPTY_CHECK_SVG = '<svg class="splitc-icon splitc-icon-sm" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4FD580" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
+
     function renderTableDivergences(items) {
         if (!tbodyDivs) return;
         tbodyDivs.innerHTML = '';
 
         if (!items || items.length === 0) {
-            tbodyDivs.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 28px; color: var(--text-muted); font-weight: 600;">✅ Nenhuma divergência de valor, imposto ou CNPJ encontrada nas notas conciliadas!</td></tr>';
+            tbodyDivs.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 28px; color: var(--text-muted); font-weight: 600;">${XML_EMPTY_CHECK_SVG}Nenhuma divergência de valor, imposto ou CNPJ encontrada nas notas conciliadas!</td></tr>`;
             return;
         }
 
@@ -548,7 +550,7 @@
         tbodyMissingExcel.innerHTML = '';
 
         if (!items || items.length === 0) {
-            tbodyMissingExcel.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 28px; color: var(--text-muted); font-weight: 600;">✅ Todos os XMLs da pasta foram devidamente localizados na planilha financeira!</td></tr>';
+            tbodyMissingExcel.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 28px; color: var(--text-muted); font-weight: 600;">${XML_EMPTY_CHECK_SVG}Todos os XMLs da pasta foram devidamente localizados na planilha financeira!</td></tr>`;
             return;
         }
 
@@ -573,7 +575,7 @@
         tbodyMissingFile.innerHTML = '';
 
         if (!items || items.length === 0) {
-            tbodyMissingFile.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 28px; color: var(--text-muted); font-weight: 600;">✅ Todos os lançamentos da planilha possuem arquivo .XML correspondente!</td></tr>';
+            tbodyMissingFile.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 28px; color: var(--text-muted); font-weight: 600;">${XML_EMPTY_CHECK_SVG}Todos os lançamentos da planilha possuem arquivo .XML correspondente!</td></tr>`;
             return;
         }
 
