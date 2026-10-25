@@ -887,6 +887,15 @@ def generate_audit_report(reconciled_data, output_path, logo_path=None):
         ws1.row_dimensions[cur_row].height = 24
         cur_row += 1
 
+    # Crédito Institucional no Rodapé do Resumo
+    cur_row += 1
+    credit_cell = ws1.cell(
+        row=cur_row,
+        column=1,
+        value="Relatório gerado automaticamente por ValidAí (https://validai.app.br) • Arquitetura e Inteligência de Dados por Vinícius Alves."
+    )
+    credit_cell.font = Font(name="Calibri", size=9, italic=True, color="64748B")
+
     ws1.column_dimensions["A"].width = 30
     ws1.column_dimensions["B"].width = 25
     ws1.column_dimensions["C"].width = 25

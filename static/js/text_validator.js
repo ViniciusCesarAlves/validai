@@ -407,6 +407,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Renderiza Gráficos Analíticos de Texto (Chart.js)
         renderTextCharts(data);
+
+        if (window.ValidAiTeaser && typeof window.ValidAiTeaser.apply === 'function') {
+            window.ValidAiTeaser.apply({
+                isTeaser: Boolean(data.is_teaser),
+                teaserInfo: data.teaser_info,
+                totalHidden: data.total_hidden_divergences || 0,
+                tbodies: [document.getElementById('text-diff-tbody')],
+                downloadBtns: [btnPdf]
+            });
+        }
     }
 
     // Helper para converter lista de segmentos [{text, type}] em HTML com <del> e <ins>

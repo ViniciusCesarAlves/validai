@@ -504,6 +504,16 @@
         // Renderiza Gráficos Analíticos de Conciliação Fiscal (Chart.js)
         renderXmlCharts(data);
 
+        if (window.ValidAiTeaser && typeof window.ValidAiTeaser.apply === 'function') {
+            window.ValidAiTeaser.apply({
+                isTeaser: Boolean(data.is_teaser),
+                teaserInfo: data.teaser_info,
+                totalHidden: data.total_hidden_divergences || 0,
+                tbodies: [tbodyDivs, tbodyMissingExcel, tbodyMissingFile],
+                downloadBtns: [btnDownloadAudit, btnDownloadMirror]
+            });
+        }
+
         // Ativa a primeira aba relevante
         if (data.divergences.length > 0) {
             activateTab('tab-xml-divs');
@@ -514,6 +524,14 @@
         } else {
             activateTab('tab-xml-mirror');
         }
+    }
+
+    function renderCnpjBtnXml(rawCnpj) {
+        const digits = String(rawCnpj || '').replace(/\D/g, '');
+        if (digits.length === 14) {
+            return `<button type="button" class="btn-cnpj-lookup" data-cnpj="${digits}" title="Consultar CNPJ na Receita / BrasilAPI"><svg class="splitc-icon splitc-icon-sm" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-1px;margin-right:3px;"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg><span>Consultar CNPJ</span></button>`;
+        }
+        return '';
     }
 
     const XML_EMPTY_CHECK_SVG = '<svg class="splitc-icon splitc-icon-sm" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4FD580" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
@@ -529,12 +547,13 @@
 
         items.forEach(item => {
             const tr = document.createElement('tr');
+            const cnpjBtn = renderCnpjBtnXml(item.emit_cnpj_xml);
             tr.innerHTML = `
                 <td style="text-align: center;"><span class="badge-line">${escapeHtml(item.excel_line)}</span></td>
                 <td><span class="key-code">NF ${escapeHtml(item.nNF)}</span></td>
                 <td>
                     <strong>${escapeHtml(item.emit_nome)}</strong>
-                    <div style="font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px;">CNPJ XML: ${escapeHtml(item.emit_cnpj_xml)}</div>
+                    <div style="font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px;">CNPJ XML: ${escapeHtml(item.emit_cnpj_xml)} ${cnpjBtn}</div>
                 </td>
                 <td style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: #16a34a; white-space: nowrap;">${escapeHtml(item.vNF_xml_fmt)}</td>
                 <td style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: #dc2626; white-space: nowrap;">${escapeHtml(item.val_planilha_fmt)}</td>
@@ -556,11 +575,12 @@
 
         items.forEach(item => {
             const tr = document.createElement('tr');
+            const cnpjBtn = renderCnpjBtnXml(item.emit_cnpj);
             tr.innerHTML = `
                 <td><span class="status-badge status-badge-info">${escapeHtml(item.tipo_doc)}</span></td>
                 <td><span class="key-code" style="color: #d97706; border-color: rgba(245, 158, 11, 0.4);">NF ${escapeHtml(item.nNF)}</span></td>
                 <td style="white-space: nowrap;">${escapeHtml(item.data_emissao)}</td>
-                <td><span class="key-code">${escapeHtml(item.emit_cnpj)}</span></td>
+                <td><span class="key-code">${escapeHtml(item.emit_cnpj)}</span>${cnpjBtn}</td>
                 <td><strong>${escapeHtml(item.emit_nome)}</strong></td>
                 <td style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: #d97706; white-space: nowrap;">${escapeHtml(item.vNF_fmt)}</td>
                 <td style="font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap;">${escapeHtml(item.total_impostos_fmt)}</td>

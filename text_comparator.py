@@ -885,5 +885,12 @@ def generate_pdf_diff_report(comparison_result: dict, output_path: str):
         ]))
         story.append(redline_table)
 
+    # Rodapé Institucional com Crédito de Arquitetura
+    story.append(Spacer(1, 14))
+    story.append(Paragraph(
+        '<i>Relatório gerado automaticamente por ValidAí (https://validai.app.br) • Arquitetura e Inteligência de Dados por Vinícius Alves.</i>',
+        style_subtitle
+    ))
+
     doc.build(story)
 

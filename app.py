@@ -720,6 +720,7 @@ def robots_txt():
         "User-agent: *\n"
         "Allow: /\n"
         "Allow: /ads.txt\n"
+        "Allow: /llms.txt\n"
         "Disallow: /api/\n"
         "Disallow: /health\n"
         "Disallow: /checkout/\n"
@@ -732,6 +733,66 @@ def robots_txt():
         f"Sitemap: {SITE_DOMAIN}/sitemap.xml\n"
     )
     return Response(content, mimetype='text/plain; charset=utf-8')
+
+
+@app.route('/manifest.json')
+def pwa_manifest():
+    manifest_path = os.path.join(app.root_path, 'static', 'manifest.json')
+    response = send_file(manifest_path, mimetype='application/manifest+json')
+    response.headers['Cache-Control'] = 'public, max-age=86400'
+    return response
+
+
+@app.route('/sw.js')
+def pwa_service_worker():
+    sw_path = os.path.join(app.root_path, 'static', 'sw.js')
+    response = send_file(sw_path, mimetype='application/javascript')
+    response.headers['Service-Worker-Allowed'] = '/'
+    response.headers['Cache-Control'] = 'no-cache'
+    return response
+
+
+@app.route('/llms.txt')
+def llms_txt():
+    content = (
+        "# ValidAí — Plataforma Brasileira de Auditoria, Conciliação e Validação Inteligente de Dados\n\n"
+        "> O ValidAí (https://validai.app.br) é a plataforma SaaS brasileira de referência para auditoria de planilhas, "
+        "conciliação financeira, conferência fiscal de NF-e, auditoria de folha de pagamento de RH, higienização de cadastros "
+        "(CPF/CNPJ) e comparação textual de contratos (PDF/Word). Fundado e arquitetado por Vinícius Alves.\n\n"
+        "## Módulos e Ferramentas Oficiais (6 Validadores Especializados)\n\n"
+        "1. **[Comparador e Validador de Planilhas Excel e CSV](https://validai.app.br/)**\n"
+        "   - Compara duas bases (.xlsx, .xls, .csv) célula por célula ou audita uma base única.\n"
+        "   - Suporta chaves compostas, união de múltiplas abas, tolerância financeira de centavos e normalização textual.\n"
+        "   - Exporta relatório Excel (.xlsx) com células pintadas (verde/amarelo/vermelho) e autofiltro ativo.\n\n"
+        "2. **[Auditoria de Folha de Pagamento e Benefícios de RH](https://validai.app.br/auditoria-rh)**\n"
+        "   - Cruza folha anterior vs. folha atual ou base de ativos do RH contra faturas de planos de saúde, VR e benefícios.\n"
+        "   - Identifica cobranças indevidas de desligados (fantasmas na fatura), variações salariais acima do limite e divergências de encargos (INSS/FGTS/IRRF).\n\n"
+        "3. **[Conciliador de Extratos Bancários (.OFX) e Taxas de Cartão](https://validai.app.br/conciliador-taxas)**\n"
+        "   - Concilia arquivos bancários .OFX e borderôs de adquirentes (Stone, Cielo, Rede, PagBank, Getnet, Mercado Pago) contra controles internos.\n"
+        "   - Audita taxas MDR contratadas vs. cobradas efetivamente e aponta perdas financeiras por transação.\n\n"
+        "4. **[Conciliador de Notas Fiscais Eletrônicas (XML NF-e vs. Planilha)](https://validai.app.br/validador-xml)**\n"
+        "   - Extrai dados fiscais de múltiplos XMLs de NF-e (modelo 55/65, chaves de 44 dígitos, CNPJ, CFOP, NCM, ICMS, IPI, PIS, COFINS) em lote (.xml ou .zip).\n"
+        "   - Cruza automaticamente contra o relatório do ERP ou SPED e permite consulta instantânea de CNPJ.\n\n"
+        "5. **[Validador e Higienizador de Cadastros em Lote (CPF, CNPJ, CEP, Contatos)](https://validai.app.br/validador-cadastros)**\n"
+        "   - Valida dígitos verificadores oficiais (Módulo 11) de CPF e CNPJ, padroniza telefones celulares para WhatsApp (E.164), limpa e-mails e formata CEPs.\n"
+        "   - Gera base higienizada pronta para importação em ERP/CRM e laudo de registros inválidos.\n\n"
+        "6. **[Comparador e Validador de Textos e Documentos (PDF, DOCX, TXT)](https://validai.app.br/validador-texto)**\n"
+        "   - Compara duas versões de contratos, minutas jurídicas ou relatórios com visualização Side-by-Side (Rich Text) e Redline Unificado.\n"
+        "   - Calcula índice de similaridade e gera laudo em PDF colorido com alterações destacadas.\n\n"
+        "## Segurança, Privacidade (LGPD) e Arquitetura\n\n"
+        "- **Conformidade LGPD (Lei nº 13.709/2018):** Processamento volátil em memória temporária com limpeza automática periódica e descarte imediato.\n"
+        "- **Planos e Acesso:** Plano Standard gratuito para uso diário; Passes Plus (R$ 4,99) e Pro (R$ 9,99) com liberação imediata via PIX ou Cartão por 30 dias sem renovação surpresa.\n"
+        "- **Documentação e Guias:**\n"
+        "  - Guia Passo a Passo: https://validai.app.br/como-usar\n"
+        "  - Planos e Preços: https://validai.app.br/planos\n"
+        "  - Sobre o ValidAí e Fundador (Vinícius Alves): https://validai.app.br/sobre\n"
+        "  - Política de Privacidade: https://validai.app.br/privacidade\n"
+        "  - Termos de Uso: https://validai.app.br/termos\n"
+    )
+    response = Response(content, mimetype='text/plain; charset=utf-8')
+    response.headers['Content-Type'] = 'text/plain; charset=utf-8'
+    response.headers['Cache-Control'] = 'public, max-age=86400'
+    return response
 
 
 @app.route('/ads.txt')
@@ -1057,7 +1118,7 @@ def compare():
         df_a = comparator.read_tabular_file(sess['path_a'], sess['filename_a'], header_line=header_line_a, sheet_names=sheets_a)
         df_b = comparator.read_tabular_file(sess['path_b'], sess['filename_b'], header_line=header_line_b, sheet_names=sheets_b)
 
-        # Validação de planos, cotas e limites de volume
+        # Validação de planos, cotas e limites de volume (com suporte a Teaser / Degustação)
         is_sample = bool(sess.get('is_sample') or data.get('is_sample'))
         row_count = max(len(df_a), len(df_b))
         col_count = max(len(df_a.columns), len(df_b.columns))
@@ -1067,10 +1128,13 @@ def compare():
             col_count=col_count,
             is_sample=is_sample
         )
+        is_teaser = False
         if not allowed:
-            del df_a, df_b
-            gc.collect()
-            return jsonify(err_resp), status_code
+            if row_count > 30000 or col_count > 100:
+                del df_a, df_b
+                gc.collect()
+                return jsonify(err_resp), status_code
+            is_teaser = True
 
         summary, diff_records, df_a_idx, df_b_idx, valid_cols_a, final_mapping, only_a, only_b = comparator.compare_datasets(
             df_a, df_b,
@@ -1104,23 +1168,35 @@ def compare():
 
         REPORTS[report_id] = {
             'path': report_path,
-            'filename': report_filename
+            'filename': report_filename,
+            'is_teaser': is_teaser,
+            'plan_error': err_resp if is_teaser else None
         }
 
         # Registra consumo de cota e coleta de lixo
-        record_validation_usage(tool_type='basic', is_sample=is_sample)
+        if not is_teaser:
+            record_validation_usage(tool_type='basic', is_sample=is_sample)
         del df_a, df_b
         gc.collect()
+
+        diff_preview = summary['sample_diff_records'][:3] if is_teaser else summary['sample_diff_records']
+        only_in_a_preview = summary.get('sample_only_in_a', [])[:3] if is_teaser else summary.get('sample_only_in_a', [])
+        only_in_b_preview = summary.get('sample_only_in_b', [])[:3] if is_teaser else summary.get('sample_only_in_b', [])
+        total_issues = summary.get('total_diff_records', 0) + summary.get('rows_only_in_a', 0) + summary.get('rows_only_in_b', 0)
+        total_hidden = max(0, total_issues - len(diff_preview)) if is_teaser else 0
 
         # Formata resposta com resumo e amostra de diferenças para tabela dinâmica
         return jsonify({
             'success': True,
             'report_id': report_id,
+            'is_teaser': is_teaser,
+            'teaser_info': err_resp if is_teaser else None,
+            'total_hidden_divergences': total_hidden,
             'summary': summary,
             'has_differences': not summary['is_identical'],
-            'diff_preview': summary['sample_diff_records'],
-            'only_in_a_preview': summary.get('sample_only_in_a', []),
-            'only_in_b_preview': summary.get('sample_only_in_b', []),
+            'diff_preview': diff_preview,
+            'only_in_a_preview': only_in_a_preview,
+            'only_in_b_preview': only_in_b_preview,
             'cols_display_a': summary.get('cols_display_a', []),
             'cols_display_b': summary.get('cols_display_b', []),
             'columns_with_differences': summary['columns_with_differences']
@@ -1131,12 +1207,37 @@ def compare():
     except Exception as e:
         return jsonify({'error': f'Erro na comparação: {str(e)}'}), 500
 
+
+def check_report_download_allowed(rep):
+    """Verifica se o download de um relatório gerado em modo Teaser está liberado."""
+    if not rep or not rep.get('is_teaser'):
+        return True, None, 200
+    user_summary = get_user_summary_for_ui()
+    current_plan = user_summary.get('plan', 'standard')
+    plan_err = rep.get('plan_error') or {}
+    req_plan = plan_err.get('required_plan', 'plus')
+    if current_plan == 'pro' or (current_plan == 'plus' and req_plan == 'plus'):
+        return True, None, 200
+    err_payload = dict(plan_err) if plan_err else {
+        'error': 'plan_limit',
+        'limit_type': 'teaser_locked',
+        'message': 'Desbloqueie o relatório completo e baixe a planilha pintada por apenas R$ 4,99 no PIX.',
+        'required_plan': req_plan
+    }
+    err_payload['error'] = 'plan_limit'
+    return False, err_payload, 403
+
+
 @app.route('/api/download-report/<report_id>', methods=['GET'])
 def download_report(report_id):
     if report_id not in REPORTS:
         return jsonify({'error': 'Relatório não encontrado.'}), 404
 
     rep = REPORTS[report_id]
+    dl_ok, dl_err, dl_status = check_report_download_allowed(rep)
+    if not dl_ok:
+        return jsonify(dl_err), dl_status
+
     return send_file(
         rep['path'],
         as_attachment=True,
@@ -1234,16 +1335,19 @@ def single_audit():
             col_count=col_count,
             is_sample=is_sample
         )
+        is_teaser = False
         if not allowed:
-            del df
-            gc.collect()
-            return jsonify(err_resp), status_code
+            if row_count > 30000 or col_count > 100:
+                del df
+                gc.collect()
+                return jsonify(err_resp), status_code
+            is_teaser = True
 
         summary, preview_rows, invalid_cells_by_row, cols = single_auditor.audit_single_dataset(
             df, rules, max_preview_rows=300
         )
 
-        # Gera o relatório Excel estilizado SplitC
+        # Gera o relatório Excel estilizado ValidAí
         report_id = str(uuid.uuid4())
         report_filename = f"Relatorio_Auditoria_{report_id[:8]}.xlsx"
         report_path = os.path.join(REPORT_DIR, report_filename)
@@ -1258,18 +1362,27 @@ def single_audit():
 
         REPORTS[report_id] = {
             'path': report_path,
-            'filename': report_filename
+            'filename': report_filename,
+            'is_teaser': is_teaser,
+            'plan_error': err_resp if is_teaser else None
         }
 
-        record_validation_usage(tool_type='basic', is_sample=is_sample)
+        if not is_teaser:
+            record_validation_usage(tool_type='basic', is_sample=is_sample)
         del df
         gc.collect()
+
+        out_preview = preview_rows[:3] if is_teaser else preview_rows
+        total_hidden = max(0, summary.get('invalid_rows', 0) - len(out_preview)) if is_teaser else 0
 
         return jsonify({
             'success': True,
             'report_id': report_id,
+            'is_teaser': is_teaser,
+            'teaser_info': err_resp if is_teaser else None,
+            'total_hidden_divergences': total_hidden,
             'summary': summary,
-            'preview_rows': preview_rows,
+            'preview_rows': out_preview,
             'cols': cols
         })
 
@@ -1350,7 +1463,7 @@ def text_compare():
             ignore_empty_lines = request.form.get('ignore_empty_lines', 'false').lower() == 'true'
             diff_granularity = request.form.get('diff_granularity', 'word')
 
-        # Validação de planos para textos/documentos
+        # Validação de planos para textos/documentos (com suporte a Teaser)
         is_sample = bool(data.get('is_sample') if request.is_json else request.form.get('is_sample', 'false').lower() == 'true')
         lines_count = max(len(text_a.splitlines()), len(text_b.splitlines()))
         allowed, err_resp, status_code = check_validation_permission(
@@ -1359,9 +1472,12 @@ def text_compare():
             col_count=1,
             is_sample=is_sample
         )
+        is_teaser = False
         if not allowed:
-            gc.collect()
-            return jsonify(err_resp), status_code
+            if lines_count > 30000:
+                gc.collect()
+                return jsonify(err_resp), status_code
+            is_teaser = True
 
         result = text_comparator.compare_texts(
             text_a=text_a,
@@ -1387,19 +1503,28 @@ def text_compare():
         REPORTS[report_id] = {
             'path': report_path,
             'filename': report_filename,
-            'mimetype': 'application/pdf'
+            'mimetype': 'application/pdf',
+            'is_teaser': is_teaser,
+            'plan_error': err_resp if is_teaser else None
         }
 
-        record_validation_usage(tool_type='basic', is_sample=is_sample)
+        if not is_teaser:
+            record_validation_usage(tool_type='basic', is_sample=is_sample)
         gc.collect()
+
+        out_diff_rows = result['diff_table_rows'][:3] if is_teaser else result['diff_table_rows']
+        total_hidden = max(0, len(result['diff_table_rows']) - len(out_diff_rows)) if is_teaser else 0
 
         return jsonify({
             'success': True,
             'report_id': report_id,
+            'is_teaser': is_teaser,
+            'teaser_info': err_resp if is_teaser else None,
+            'total_hidden_divergences': total_hidden,
             'summary': result['summary'],
-            'side_by_side_blocks': result['side_by_side_blocks'],
-            'redline_blocks': result['redline_blocks'],
-            'diff_table_rows': result['diff_table_rows'],
+            'side_by_side_blocks': result['side_by_side_blocks'][:3] if is_teaser else result['side_by_side_blocks'],
+            'redline_blocks': result['redline_blocks'][:3] if is_teaser else result['redline_blocks'],
+            'diff_table_rows': out_diff_rows,
             'stats_comparison': result['stats_comparison']
         })
 
@@ -1414,6 +1539,10 @@ def download_text_pdf_report(report_id):
         return jsonify({'error': 'Relatório PDF não encontrado.'}), 404
 
     rep = REPORTS[report_id]
+    dl_ok, dl_err, dl_status = check_report_download_allowed(rep)
+    if not dl_ok:
+        return jsonify(dl_err), dl_status
+
     return send_file(
         rep['path'],
         as_attachment=True,
@@ -1606,10 +1735,13 @@ def cadastros_process():
             col_count=col_count,
             is_sample=is_sample
         )
+        is_teaser = False
         if not allowed:
-            del df
-            gc.collect()
-            return jsonify(err_resp), status_code
+            if row_count > 30000 or col_count > 100:
+                del df
+                gc.collect()
+                return jsonify(err_resp), status_code
+            is_teaser = True
 
         options = {
             'col_doc': data.get('col_doc'),
@@ -1647,25 +1779,40 @@ def cadastros_process():
 
         REPORTS[f"cadastros_clean_{report_id}"] = {
             'path': clean_path,
-            'filename': clean_filename
+            'filename': clean_filename,
+            'is_teaser': is_teaser,
+            'plan_error': err_resp if is_teaser else None
         }
         REPORTS[f"cadastros_audit_{report_id}"] = {
             'path': audit_path,
-            'filename': audit_filename
+            'filename': audit_filename,
+            'is_teaser': is_teaser,
+            'plan_error': err_resp if is_teaser else None
         }
 
-        record_validation_usage(tool_type='special', is_sample=is_sample)
+        if not is_teaser:
+            record_validation_usage(tool_type='special', is_sample=is_sample)
         del df
         gc.collect()
+
+        inv_docs = results['invalid_docs'][:3] if is_teaser else results['invalid_docs']
+        dups = results['duplicates'][:3] if is_teaser else results['duplicates']
+        susp = results['suspicious_contacts'][:3] if is_teaser else results['suspicious_contacts']
+        prev_clean = results['preview_clean'][:3] if is_teaser else results['preview_clean']
+        total_issues = len(results['invalid_docs']) + len(results['duplicates']) + len(results['suspicious_contacts'])
+        total_hidden = max(0, total_issues - 3) if is_teaser else 0
 
         return jsonify({
             'success': True,
             'report_id': report_id,
+            'is_teaser': is_teaser,
+            'teaser_info': err_resp if is_teaser else None,
+            'total_hidden_divergences': total_hidden,
             'summary': results['summary'],
-            'invalid_docs': results['invalid_docs'],
-            'duplicates': results['duplicates'],
-            'suspicious_contacts': results['suspicious_contacts'],
-            'preview_clean': results['preview_clean'],
+            'invalid_docs': inv_docs,
+            'duplicates': dups,
+            'suspicious_contacts': susp,
+            'preview_clean': prev_clean,
             'clean_columns': results['clean_columns']
         })
 
@@ -1681,6 +1828,9 @@ def cadastros_process():
 def cadastros_download_clean(report_id):
     key = f"cadastros_clean_{report_id}"
     if key in REPORTS and os.path.exists(REPORTS[key]['path']):
+        dl_ok, dl_err, dl_status = check_report_download_allowed(REPORTS[key])
+        if not dl_ok:
+            return jsonify(dl_err), dl_status
         return send_file(
             REPORTS[key]['path'],
             as_attachment=True,
@@ -1693,6 +1843,9 @@ def cadastros_download_clean(report_id):
 def cadastros_download_audit(report_id):
     key = f"cadastros_audit_{report_id}"
     if key in REPORTS and os.path.exists(REPORTS[key]['path']):
+        dl_ok, dl_err, dl_status = check_report_download_allowed(REPORTS[key])
+        if not dl_ok:
+            return jsonify(dl_err), dl_status
         return send_file(
             REPORTS[key]['path'],
             as_attachment=True,
@@ -1835,7 +1988,7 @@ def xml_reconcile():
         df_sheet = comparator.read_tabular_file(sess['sheet_path'], sess['sheet_filename'])
         invoices = sess['invoices']
 
-        # Validação de planos para conciliação XML (Especial)
+        # Validação de planos para conciliação XML (Especial com suporte a Teaser)
         is_sample = bool(sess.get('is_sample') or data.get('is_sample'))
         row_count = max(len(df_sheet), len(invoices))
         col_count = len(df_sheet.columns)
@@ -1845,10 +1998,13 @@ def xml_reconcile():
             col_count=col_count,
             is_sample=is_sample
         )
+        is_teaser = False
         if not allowed:
-            del df_sheet
-            gc.collect()
-            return jsonify(err_resp), status_code
+            if row_count > 30000 or col_count > 100:
+                del df_sheet
+                gc.collect()
+                return jsonify(err_resp), status_code
+            is_teaser = True
 
         options = {
             'col_nf': data.get('col_nf'),
@@ -1877,25 +2033,40 @@ def xml_reconcile():
 
         REPORTS[f"xml_audit_{report_id}"] = {
             'path': audit_path,
-            'filename': audit_filename
+            'filename': audit_filename,
+            'is_teaser': is_teaser,
+            'plan_error': err_resp if is_teaser else None
         }
         REPORTS[f"xml_mirror_{report_id}"] = {
             'path': mirror_path,
-            'filename': mirror_filename
+            'filename': mirror_filename,
+            'is_teaser': is_teaser,
+            'plan_error': err_resp if is_teaser else None
         }
 
-        record_validation_usage(tool_type='special', is_sample=is_sample)
+        if not is_teaser:
+            record_validation_usage(tool_type='special', is_sample=is_sample)
         del df_sheet
         gc.collect()
+
+        divs = res['divergences'][:3] if is_teaser else res['divergences']
+        miss_excel = res['missing_in_excel'][:3] if is_teaser else res['missing_in_excel']
+        miss_xml = res['missing_xml'][:3] if is_teaser else res['missing_xml']
+        mirror_list = res['all_xml_mirror'][:3] if is_teaser else res['all_xml_mirror']
+        total_issues = len(res['divergences']) + len(res['missing_in_excel']) + len(res['missing_xml'])
+        total_hidden = max(0, total_issues - 3) if is_teaser else 0
 
         return jsonify({
             'success': True,
             'report_id': report_id,
+            'is_teaser': is_teaser,
+            'teaser_info': err_resp if is_teaser else None,
+            'total_hidden_divergences': total_hidden,
             'summary': res['summary'],
-            'divergences': res['divergences'],
-            'missing_in_excel': res['missing_in_excel'],
-            'missing_xml': res['missing_xml'],
-            'all_xml_mirror': res['all_xml_mirror']
+            'divergences': divs,
+            'missing_in_excel': miss_excel,
+            'missing_xml': miss_xml,
+            'all_xml_mirror': mirror_list
         })
 
     except ValueError as ve:
@@ -1911,6 +2082,9 @@ def xml_reconcile():
 def xml_download_audit(report_id):
     key = f"xml_audit_{report_id}"
     if key in REPORTS and os.path.exists(REPORTS[key]['path']):
+        dl_ok, dl_err, dl_status = check_report_download_allowed(REPORTS[key])
+        if not dl_ok:
+            return jsonify(dl_err), dl_status
         return send_file(
             REPORTS[key]['path'],
             as_attachment=True,
@@ -1924,6 +2098,9 @@ def xml_download_audit(report_id):
 def xml_download_mirror(report_id):
     key = f"xml_mirror_{report_id}"
     if key in REPORTS and os.path.exists(REPORTS[key]['path']):
+        dl_ok, dl_err, dl_status = check_report_download_allowed(REPORTS[key])
+        if not dl_ok:
+            return jsonify(dl_err), dl_status
         return send_file(
             REPORTS[key]['path'],
             as_attachment=True,
@@ -2061,7 +2238,7 @@ def ofx_reconcile():
         df_sales = comparator.read_tabular_file(sess['sheet_path'], sess['sheet_filename'])
         transactions = sess['transactions']
 
-        # Validação de planos para conciliação bancária OFX (Especial)
+        # Validação de planos para conciliação bancária OFX (Especial com suporte a Teaser)
         is_sample = bool(sess.get('is_sample') or data.get('is_sample'))
         row_count = max(len(df_sales), len(transactions))
         col_count = len(df_sales.columns)
@@ -2071,10 +2248,13 @@ def ofx_reconcile():
             col_count=col_count,
             is_sample=is_sample
         )
+        is_teaser = False
         if not allowed:
-            del df_sales
-            gc.collect()
-            return jsonify(err_resp), status_code
+            if row_count > 30000 or col_count > 100:
+                del df_sales
+                gc.collect()
+                return jsonify(err_resp), status_code
+            is_teaser = True
 
         col_id = data.get('col_id')
         col_gross_val = data.get('col_gross_val')
@@ -2111,25 +2291,36 @@ def ofx_reconcile():
 
         REPORTS[f"ofx_audit_{report_id}"] = {
             'path': audit_path,
-            'filename': audit_filename
+            'filename': audit_filename,
+            'is_teaser': is_teaser,
+            'plan_error': err_resp if is_teaser else None
         }
         REPORTS[f"ofx_mirror_{report_id}"] = {
             'path': mirror_path,
-            'filename': mirror_filename
+            'filename': mirror_filename,
+            'is_teaser': is_teaser,
+            'plan_error': err_resp if is_teaser else None
         }
 
         sess['last_result'] = res
         sess['last_report_id'] = report_id
 
-        record_validation_usage(tool_type='special', is_sample=is_sample)
+        if not is_teaser:
+            record_validation_usage(tool_type='special', is_sample=is_sample)
         del df_sales
         gc.collect()
+
+        out_items = res['items'][:3] if is_teaser else res['items']
+        total_hidden = max(0, len(res['items']) - len(out_items)) if is_teaser else 0
 
         return jsonify({
             'success': True,
             'report_id': report_id,
+            'is_teaser': is_teaser,
+            'teaser_info': err_resp if is_teaser else None,
+            'total_hidden_divergences': total_hidden,
             'kpis': res['kpis'],
-            'items': res['items']
+            'items': out_items
         })
 
     except ValueError as ve:
@@ -2142,6 +2333,9 @@ def ofx_reconcile():
 def ofx_download_audit(report_id):
     key = f"ofx_audit_{report_id}"
     if key in REPORTS and os.path.exists(REPORTS[key]['path']):
+        dl_ok, dl_err, dl_status = check_report_download_allowed(REPORTS[key])
+        if not dl_ok:
+            return jsonify(dl_err), dl_status
         return send_file(
             REPORTS[key]['path'],
             as_attachment=True,
@@ -2155,6 +2349,9 @@ def ofx_download_audit(report_id):
 def ofx_download_mirror(report_id):
     key = f"ofx_mirror_{report_id}"
     if key in REPORTS and os.path.exists(REPORTS[key]['path']):
+        dl_ok, dl_err, dl_status = check_report_download_allowed(REPORTS[key])
+        if not dl_ok:
+            return jsonify(dl_err), dl_status
         return send_file(
             REPORTS[key]['path'],
             as_attachment=True,
@@ -2315,7 +2512,7 @@ def rh_execute_audit():
         df_ref = comparator.read_tabular_file(sess['path_ref'], sess['filename_ref'])
         df_audit = comparator.read_tabular_file(sess['path_audit'], sess['filename_audit'])
 
-        # Validação de planos para auditoria de RH (Especial)
+        # Validação de planos para auditoria de RH (Especial com suporte a Teaser)
         is_sample = bool(sess.get('is_sample') or data.get('is_sample'))
         row_count = max(len(df_ref), len(df_audit))
         col_count = max(len(df_ref.columns), len(df_audit.columns))
@@ -2325,10 +2522,13 @@ def rh_execute_audit():
             col_count=col_count,
             is_sample=is_sample
         )
+        is_teaser = False
         if not allowed:
-            del df_ref, df_audit
-            gc.collect()
-            return jsonify(err_resp), status_code
+            if row_count > 30000 or col_count > 100:
+                del df_ref, df_audit
+                gc.collect()
+                return jsonify(err_resp), status_code
+            is_teaser = True
 
         options = {
             'mode': data.get('mode', sess.get('mode', 'folha')),
@@ -2358,25 +2558,38 @@ def rh_execute_audit():
 
         REPORTS[f"rh_audit_{report_id}"] = {
             'path': audit_path,
-            'filename': audit_filename
+            'filename': audit_filename,
+            'is_teaser': is_teaser,
+            'plan_error': err_resp if is_teaser else None
         }
 
         sess['last_result'] = res
         sess['last_report_id'] = report_id
 
-        record_validation_usage(tool_type='special', is_sample=is_sample)
+        if not is_teaser:
+            record_validation_usage(tool_type='special', is_sample=is_sample)
         del df_ref, df_audit
         gc.collect()
+
+        out_div = res['divergences'][:3] if is_teaser else res['divergences']
+        out_crit = res['critical_variations'][:3] if is_teaser else res['critical_variations']
+        out_ex1 = res['exclusive_ref'][:3] if is_teaser else res['exclusive_ref']
+        out_ex2 = res['exclusive_audit'][:3] if is_teaser else res['exclusive_audit']
+        total_issues = len(res['divergences']) + len(res['exclusive_ref']) + len(res['exclusive_audit'])
+        total_hidden = max(0, total_issues - 3) if is_teaser else 0
 
         return jsonify({
             'success': True,
             'report_id': report_id,
+            'is_teaser': is_teaser,
+            'teaser_info': err_resp if is_teaser else None,
+            'total_hidden_divergences': total_hidden,
             'kpis': res['kpis'],
             'financial_summary': res['financial_summary'],
-            'divergences': res['divergences'],
-            'critical_variations': res['critical_variations'],
-            'exclusive_ref': res['exclusive_ref'],
-            'exclusive_audit': res['exclusive_audit']
+            'divergences': out_div,
+            'critical_variations': out_crit,
+            'exclusive_ref': out_ex1,
+            'exclusive_audit': out_ex2
         })
 
     except ValueError as ve:
@@ -2389,6 +2602,9 @@ def rh_execute_audit():
 def rh_download_report(report_id):
     key = f"rh_audit_{report_id}"
     if key in REPORTS and os.path.exists(REPORTS[key]['path']):
+        dl_ok, dl_err, dl_status = check_report_download_allowed(REPORTS[key])
+        if not dl_ok:
+            return jsonify(dl_err), dl_status
         return send_file(
             REPORTS[key]['path'],
             as_attachment=True,

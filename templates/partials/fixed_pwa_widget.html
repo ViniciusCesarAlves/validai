@@ -1,0 +1,465 @@
+<!-- Widget Fixo no Canto Inferior Direito: Botão de Instalação PWA (App) -->
+<style>
+/* Estilos do Widget Fixo de Instalação PWA (Canto Inferior Direito) */
+.fixed-bottom-right-pwa-wrap {
+    position: fixed !important;
+    bottom: 24px !important;
+    right: 24px !important;
+    z-index: 950 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    font-family: 'Outfit', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    pointer-events: auto !important;
+}
+
+body.has-cookie-banner .fixed-bottom-right-pwa-wrap {
+    bottom: 96px !important;
+}
+
+/* Botão Âncora PWA - Padrão Espelhado ao Botão Planos */
+.fixed-pwa-anchor {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    height: 38px !important;
+    padding: 0 16px 0 14px !important;
+    border-radius: 9999px !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1.5px solid rgba(79, 213, 128, 0.6) !important;
+    box-shadow: 0 4px 16px rgba(79, 213, 128, 0.18), 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    color: #15803d !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    white-space: nowrap !important;
+    outline: none !important;
+    user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+.fixed-pwa-anchor .fixed-pwa-anchor-icon {
+    stroke: #16a34a;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.fixed-pwa-anchor .fixed-pwa-anchor-arrow {
+    stroke: #16a34a;
+    opacity: 0.7;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.fixed-pwa-anchor:hover {
+    background: linear-gradient(135deg, #4FD580 0%, #22c55e 100%) !important;
+    color: #052e16 !important;
+    border-color: #22c55e !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(79, 213, 128, 0.38) !important;
+}
+
+.fixed-pwa-anchor:hover .fixed-pwa-anchor-icon,
+.fixed-pwa-anchor:hover .fixed-pwa-anchor-arrow {
+    stroke: #052e16 !important;
+    opacity: 1 !important;
+}
+
+.fixed-pwa-anchor:hover .fixed-pwa-anchor-arrow {
+    transform: translateX(2px);
+}
+
+/* Modo Escuro */
+html[data-theme="dark"] .fixed-pwa-anchor,
+body.dark-theme .fixed-pwa-anchor {
+    background: rgba(23, 24, 32, 0.96) !important;
+    border-color: rgba(79, 213, 128, 0.45) !important;
+    color: #4FD580 !important;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45) !important;
+}
+
+html[data-theme="dark"] .fixed-pwa-anchor .fixed-pwa-anchor-icon,
+html[data-theme="dark"] .fixed-pwa-anchor .fixed-pwa-anchor-arrow,
+body.dark-theme .fixed-pwa-anchor .fixed-pwa-anchor-icon,
+body.dark-theme .fixed-pwa-anchor .fixed-pwa-anchor-arrow {
+    stroke: #4FD580;
+}
+
+html[data-theme="dark"] .fixed-pwa-anchor:hover,
+body.dark-theme .fixed-pwa-anchor:hover {
+    background: linear-gradient(135deg, #4FD580 0%, #22c55e 100%) !important;
+    color: #052e16 !important;
+    border-color: #4FD580 !important;
+    box-shadow: 0 6px 22px rgba(79, 213, 128, 0.45) !important;
+}
+
+html[data-theme="dark"] .fixed-pwa-anchor:hover .fixed-pwa-anchor-icon,
+html[data-theme="dark"] .fixed-pwa-anchor:hover .fixed-pwa-anchor-arrow,
+body.dark-theme .fixed-pwa-anchor:hover .fixed-pwa-anchor-arrow {
+    stroke: #052e16;
+}
+
+/* Ajuste Responsivo em Mobile */
+@media (max-width: 640px) {
+    .fixed-bottom-right-pwa-wrap {
+        bottom: 16px !important;
+        right: 16px !important;
+    }
+    .fixed-pwa-anchor {
+        height: 36px !important;
+        padding: 0 13px 0 11px !important;
+        font-size: 12.5px !important;
+    }
+}
+
+/* Modal de Instruções de Instalação (para iOS / Browsers sem prompt direto) */
+.pwa-instruction-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1050;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: pwaFadeIn 0.2s ease-out;
+}
+
+.pwa-instruction-modal-card {
+    background: #ffffff;
+    color: #0f172a;
+    width: 100%;
+    max-width: 440px;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    position: relative;
+    font-family: 'Outfit', 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+html[data-theme="dark"] .pwa-instruction-modal-card,
+body.dark-theme .pwa-instruction-modal-card {
+    background: #181a24;
+    color: #f8fafc;
+    border-color: #2a2d3d;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+.pwa-instruction-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.pwa-instruction-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pwa-instruction-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(79, 213, 128, 0.15);
+    color: #16a34a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+html[data-theme="dark"] .pwa-instruction-badge,
+body.dark-theme .pwa-instruction-badge {
+    background: rgba(79, 213, 128, 0.2);
+    color: #4FD580;
+}
+
+.pwa-instruction-title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.pwa-instruction-close {
+    background: transparent;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease;
+}
+
+.pwa-instruction-close:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+html[data-theme="dark"] .pwa-instruction-close:hover,
+body.dark-theme .pwa-instruction-close:hover {
+    background: #272a3a;
+    color: #f8fafc;
+}
+
+.pwa-instruction-body {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: #475569;
+}
+
+html[data-theme="dark"] .pwa-instruction-body,
+body.dark-theme .pwa-instruction-body {
+    color: #94a3b8;
+}
+
+.pwa-step-list {
+    margin: 16px 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.pwa-step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.pwa-step-number {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: #0f172a;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+html[data-theme="dark"] .pwa-step-number,
+body.dark-theme .pwa-step-number {
+    background: #2a2d3d;
+    color: #f8fafc;
+}
+
+.pwa-step-text strong {
+    color: #0f172a;
+}
+
+html[data-theme="dark"] .pwa-step-text strong,
+body.dark-theme .pwa-step-text strong {
+    color: #f8fafc;
+}
+
+.pwa-instruction-footer {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.pwa-btn-gotit {
+    padding: 8px 18px;
+    border-radius: 10px;
+    background: #16a34a;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 13.5px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.pwa-btn-gotit:hover {
+    background: #15803d;
+}
+
+@keyframes pwaFadeIn {
+    from { opacity: 0; transform: scale(0.97); }
+    to { opacity: 1; transform: scale(1); }
+}
+</style>
+
+<aside class="fixed-bottom-right-pwa-wrap" id="fixed-bottom-right-pwa-wrap" data-nosnippet aria-label="Instalação do Aplicativo ValidAí">
+    <button type="button" class="fixed-pwa-anchor" id="btn-pwa-install-fixed" title="Instalar aplicativo ValidAí no seu computador ou celular" aria-label="Instalar aplicativo ValidAí">
+        <svg class="fixed-pwa-anchor-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        <span class="fixed-pwa-anchor-label">Instalar App</span>
+        <svg class="fixed-pwa-anchor-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="9 18 15 12 9 6"/>
+        </svg>
+    </button>
+</aside>
+
+<!-- Modal de Instruções do PWA -->
+<div id="validai-pwa-instruction-modal" class="pwa-instruction-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="pwa-modal-title" aria-hidden="true" data-nosnippet>
+    <div class="pwa-instruction-modal-card">
+        <div class="pwa-instruction-header">
+            <div class="pwa-instruction-title-wrap">
+                <div class="pwa-instruction-badge" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                </div>
+                <h3 class="pwa-instruction-title" id="pwa-modal-title">Instalar Aplicativo ValidAí</h3>
+            </div>
+            <button type="button" class="pwa-instruction-close" id="btn-pwa-modal-close" aria-label="Fechar janela de instalação">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="pwa-instruction-body" id="pwa-instruction-body">
+            <!-- Conteúdo dinâmico injetado via JS (iOS ou Desktop/Chrome) -->
+        </div>
+
+        <div class="pwa-instruction-footer">
+            <button type="button" class="pwa-btn-gotit" id="btn-pwa-modal-gotit">Entendi</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    var pwaInstallPrompt = null;
+    var wrap = document.getElementById('fixed-bottom-right-pwa-wrap');
+    var btn = document.getElementById('btn-pwa-install-fixed');
+    var modal = document.getElementById('validai-pwa-instruction-modal');
+    var modalBody = document.getElementById('pwa-instruction-body');
+    var btnClose = document.getElementById('btn-pwa-modal-close');
+    var btnGotit = document.getElementById('btn-pwa-modal-gotit');
+
+    // 1. Se já estiver executando como PWA instalado (Standalone), oculta o botão
+    var isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                       window.navigator.standalone === true ||
+                       document.referrer.includes('android-app://');
+
+    if (isStandalone && wrap) {
+        wrap.style.display = 'none';
+        return;
+    }
+
+    // 2. Captura o evento nativo de instalação do Chrome / Edge / Android
+    window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        pwaInstallPrompt = e;
+        if (wrap) wrap.style.display = 'inline-flex';
+    });
+
+    // 3. Ao instalar com sucesso, oculta o botão
+    window.addEventListener('appinstalled', function() {
+        pwaInstallPrompt = null;
+        if (wrap) wrap.style.display = 'none';
+        closeModal();
+    });
+
+    function openModal(contentHtml) {
+        if (!modal || !modalBody) return;
+        modalBody.innerHTML = contentHtml;
+        modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeModal() {
+        if (!modal) return;
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+    }
+
+    if (btnClose) btnClose.addEventListener('click', closeModal);
+    if (btnGotit) btnGotit.addEventListener('click', closeModal);
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) closeModal();
+        });
+    }
+
+    // 4. Clique no botão "Instalar App"
+    if (btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Caso A: Disparo nativo disponível (Chrome, Edge, Samsung Internet, Android)
+            if (pwaInstallPrompt) {
+                pwaInstallPrompt.prompt();
+                pwaInstallPrompt.userChoice.then(function(choice) {
+                    if (choice && choice.outcome === 'accepted') {
+                        if (wrap) wrap.style.display = 'none';
+                    }
+                    pwaInstallPrompt = null;
+                }).catch(function() {});
+                return;
+            }
+
+            // Caso B: Usuário no iPhone / iPad (iOS Safari)
+            var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            if (isIOS) {
+                openModal(
+                    '<p>Para instalar o ValidAí na tela inicial do seu <strong>iPhone</strong> ou <strong>iPad</strong>:</p>' +
+                    '<ol class="pwa-step-list">' +
+                        '<li class="pwa-step-item">' +
+                            '<div class="pwa-step-number">1</div>' +
+                            '<div class="pwa-step-text">Toque no ícone de <strong>Compartilhar</strong> (quadrado com seta para cima) na barra inferior do Safari.</div>' +
+                        '</li>' +
+                        '<li class="pwa-step-item">' +
+                            '<div class="pwa-step-number">2</div>' +
+                            '<div class="pwa-step-text">Role as opções para cima e selecione <strong>"Adicionar à Tela de Início"</strong>.</div>' +
+                        '</li>' +
+                        '<li class="pwa-step-item">' +
+                            '<div class="pwa-step-number">3</div>' +
+                            '<div class="pwa-step-text">Toque em <strong>"Adicionar"</strong> no canto superior direito. Pronto!</div>' +
+                        '</li>' +
+                    '</ol>'
+                );
+                return;
+            }
+
+            // Caso C: Desktop Chrome / Edge ou navegador sem prompt ativo
+            openModal(
+                '<p>Você pode instalar o ValidAí como aplicativo nativo no seu computador:</p>' +
+                '<ol class="pwa-step-list">' +
+                    '<li class="pwa-step-item">' +
+                        '<div class="pwa-step-number">1</div>' +
+                        '<div class="pwa-step-text">Clique no ícone de instalação <strong>⊕</strong> (computador com seta para baixo) na barra de endereços (ao lado direito da URL).</div>' +
+                    '</li>' +
+                    '<li class="pwa-step-item">' +
+                        '<div class="pwa-step-number">2</div>' +
+                        '<div class="pwa-step-text">Ou clique no menu do navegador (<strong>⋮</strong> três pontos) e selecione <strong>"Instalar ValidAí"</strong>.</div>' +
+                    '</li>' +
+                    '<li class="pwa-step-item">' +
+                        '<div class="pwa-step-number">3</div>' +
+                        '<div class="pwa-step-text">Abra o sistema direto da sua área de trabalho com velocidade máxima e sem barras de navegação!</div>' +
+                    '</li>' +
+                '</ol>'
+            );
+        });
+    }
+})();
+</script>
+

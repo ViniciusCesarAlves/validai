@@ -601,6 +601,25 @@
                     </svg>
                 </summary>
                 <div class="mapping-content">
+                    <div class="mapping-templates-bar">
+                        <span style="font-size: 12.5px; font-weight: 600; color: var(--text-muted);">Modelos de Mapeamento Recorrentes:</span>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button type="button" class="btn-mapping-template" id="btn-save-mapping-template" title="Salvar chaves e mapeamentos de colunas no navegador">
+                                <svg class="mapping-template-btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                    <polyline points="7 3 7 8 15 8"></polyline>
+                                </svg>
+                                <span>Salvar Modelo</span>
+                            </button>
+                            <button type="button" class="btn-mapping-template" id="btn-load-mapping-template" title="Carregar um modelo de mapeamento salvo anteriormente">
+                                <svg class="mapping-template-btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                                <span>Carregar Modelo Salvo</span>
+                            </button>
+                        </div>
+                    </div>
                     <div class="mapping-toolbar">
                         <p class="mapping-hint" data-i18n="sheets_mapping_hint">O sistema associou automaticamente colunas similares. Caso alguma coluna tenha nome diferente nas duas bases, clique em <strong>"+ Adicionar Coluna"</strong> para associá-las manualmente.</p>
                         <div class="mapping-toolbar-actions">
@@ -819,10 +838,21 @@
 
             <!-- Botão de Download do Relatório Excel -->
             <div class="download-section">
-                <button type="button" class="btn btn-pill-gradient btn-lg" id="btn-download-excel">
-                    <span class="btn-text" data-i18n="btn_download_excel">Baixar Relatório Excel (.xlsx) com Células Pintadas</span>
-                    <span class="btn-circle-icon">↓</span>
-                </button>
+                <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; align-items: center;">
+                    <button type="button" class="btn btn-pill-gradient btn-lg" id="btn-download-excel">
+                        <span class="btn-text" data-i18n="btn_download_excel">Baixar Relatório Excel (.xlsx) com Células Pintadas</span>
+                        <span class="btn-circle-icon">↓</span>
+                    </button>
+                    <button type="button" class="btn-copy-whatsapp-summary" id="btn-copy-summary-dual" data-summary-mode="dual" title="Copiar resumo dos dados auditados">
+                        <svg class="btn-copy-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect>
+                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                            <line x1="9" y1="11" x2="15" y2="11"></line>
+                            <line x1="9" y1="15" x2="13" y2="15"></line>
+                        </svg>
+                        <span class="btn-copy-label">Copiar Resumo para WhatsApp / E-mail</span>
+                    </button>
+                </div>
                 <p class="download-hint" data-i18n="download_excel_hint">Gera um arquivo Excel formatado com resumo e marcação colorida nas células que divergiram.</p>
             </div>
 
@@ -1659,10 +1689,21 @@
 
                 <!-- Botão de Download do Relatório Excel -->
                 <div class="download-section">
-                    <button type="button" class="btn btn-pill-gradient btn-lg" id="btn-single-download-excel">
-                        <span class="btn-text">Baixar Relatório Excel (.xlsx) com Células Pintadas</span>
-                        <span class="btn-circle-icon">↓</span>
-                    </button>
+                    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; align-items: center;">
+                        <button type="button" class="btn btn-pill-gradient btn-lg" id="btn-single-download-excel">
+                            <span class="btn-text">Baixar Relatório Excel (.xlsx) com Células Pintadas</span>
+                            <span class="btn-circle-icon">↓</span>
+                        </button>
+                        <button type="button" class="btn-copy-whatsapp-summary" id="btn-copy-summary-single" data-summary-mode="single" title="Copiar resumo dos dados auditados">
+                            <svg class="btn-copy-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect>
+                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                                <line x1="9" y1="11" x2="15" y2="11"></line>
+                                <line x1="9" y1="15" x2="13" y2="15"></line>
+                            </svg>
+                            <span class="btn-copy-label">Copiar Resumo para WhatsApp / E-mail</span>
+                        </button>
+                    </div>
                     <p class="download-hint">Gera um arquivo Excel formatado com resumo e marcação colorida nas células que violaram as regras.</p>
                 </div>
 

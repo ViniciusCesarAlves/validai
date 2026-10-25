@@ -671,7 +671,7 @@
 
             <!-- Seção de Download dos Relatórios em Excel Padronizada -->
             <div class="download-section">
-                <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; align-items: center;">
                     <a href="#" id="btn-ofx-download-audit" class="btn btn-pill-gradient btn-lg" download>
                         <span class="btn-text" data-i18n="ofx_btn_down_audit">Baixar Relatório de Auditoria (.xlsx)</span>
                         <span class="btn-circle-icon">↓</span>
@@ -680,6 +680,15 @@
                         <span class="btn-text" data-i18n="ofx_btn_down_mirror">Baixar Espelho dos Lançamentos OFX (.xlsx)</span>
                         <span class="btn-circle-icon">↓</span>
                     </a>
+                    <button type="button" class="btn-copy-whatsapp-summary" id="btn-copy-summary-ofx" data-summary-mode="ofx" title="Copiar resumo dos dados auditados">
+                        <svg class="btn-copy-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect>
+                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                            <line x1="9" y1="11" x2="15" y2="11"></line>
+                            <line x1="9" y1="15" x2="13" y2="15"></line>
+                        </svg>
+                        <span class="btn-copy-label">Copiar Resumo para WhatsApp / E-mail</span>
+                    </button>
                 </div>
                 <p class="download-hint" style="text-align: center; margin-top: 10px;" data-i18n="ofx_dl_hint">
                     O Relatório de Auditoria destaca em cores as taxas abusivas, valores a restituir e vendas não repassadas. O Espelho OFX traz todos os créditos bancários convertidos em tabela Excel.

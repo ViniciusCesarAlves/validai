@@ -1462,6 +1462,83 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------
+    // SALVAR E CARREGAR MODELOS DE MAPEAMENTO (LOCALSTORAGE)
+    // ----------------------------------------------------
+    const btnSaveMappingTemplate = document.getElementById('btn-save-mapping-template');
+    const btnLoadMappingTemplate = document.getElementById('btn-load-mapping-template');
+    const TEMPLATES_STORAGE_KEY = 'validai_mapping_templates';
+
+    if (btnSaveMappingTemplate) {
+        btnSaveMappingTemplate.addEventListener('click', () => {
+            const tplName = prompt('Digite um nome para salvar este modelo de mapeamento (ex: Fechamento Mensal ERP):', 'Modelo Padrão ERP');
+            if (!tplName || !tplName.trim()) return;
+            try {
+                const savedRaw = localStorage.getItem(TEMPLATES_STORAGE_KEY);
+                const templates = savedRaw ? JSON.parse(savedRaw) : {};
+                const currentMap = {};
+                (state.mappingList || []).forEach(it => {
+                    if (it.colA && it.colB) currentMap[it.colA] = it.colB;
+                });
+                templates[tplName.trim()] = {
+                    name: tplName.trim(),
+                    primaryKeyA: selectPrimaryKey ? selectPrimaryKey.value : '',
+                    secondaryKeysA: [...(state.selectedSecondaryKeys || [])],
+                    mapping: currentMap,
+                    savedAt: new Date().toISOString()
+                };
+                localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(templates));
+                if (typeof showQuickToast === 'function') {
+                    showQuickToast(`Modelo "${tplName.trim()}" salvo com sucesso no navegador!`);
+                }
+            } catch (err) {
+                console.warn('Falha ao salvar modelo no localStorage:', err);
+            }
+        });
+    }
+
+    if (btnLoadMappingTemplate) {
+        btnLoadMappingTemplate.addEventListener('click', () => {
+            try {
+                const savedRaw = localStorage.getItem(TEMPLATES_STORAGE_KEY);
+                const templates = savedRaw ? JSON.parse(savedRaw) : {};
+                const names = Object.keys(templates);
+                if (names.length === 0) {
+                    alert('Nenhum modelo salvo encontrado neste navegador. Configure um mapeamento e clique em "Salvar Modelo" primeiro.');
+                    return;
+                }
+                const defaultChoice = names[names.length - 1];
+                const chosen = names.length === 1
+                    ? defaultChoice
+                    : prompt(`Modelos disponíveis:\n• ${names.join('\n• ')}\n\nDigite o nome do modelo que deseja carregar:`, defaultChoice);
+                if (!chosen || !templates[chosen.trim()]) return;
+                const tpl = templates[chosen.trim()];
+                if (tpl.primaryKeyA && selectPrimaryKey && state.columnsA.includes(tpl.primaryKeyA)) {
+                    selectPrimaryKey.value = tpl.primaryKeyA;
+                }
+                if (Array.isArray(tpl.secondaryKeysA)) {
+                    state.selectedSecondaryKeys = tpl.secondaryKeysA.filter(k => state.columnsA.includes(k));
+                    if (typeof renderSecondaryKeysChips === 'function') renderSecondaryKeysChips();
+                }
+                if (tpl.mapping && typeof tpl.mapping === 'object') {
+                    state.mappingList = Object.entries(tpl.mapping)
+                        .filter(([cA, cB]) => state.columnsA.includes(cA) && state.columnsB.includes(cB))
+                        .map(([colA, colB], idx) => ({
+                            id: 'map_tpl_' + idx + '_' + Math.random().toString(36).substring(2, 7),
+                            colA,
+                            colB
+                        }));
+                    renderMappingTable();
+                }
+                if (typeof showQuickToast === 'function') {
+                    showQuickToast(`Modelo "${tpl.name}" carregado e aplicado!`);
+                }
+            } catch (err) {
+                console.warn('Falha ao carregar modelo do localStorage:', err);
+            }
+        });
+    }
+
+    // ----------------------------------------------------
     // MODAL DE LIMPEZA E SELEÇÃO DE MAPEAMENTOS POR CHECKBOX
     // ----------------------------------------------------
     let modalSelectedCols = new Set();
@@ -2607,6 +2684,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Renderizar Gráficos Analíticos do Passo 3 (Donut e Top Colunas)
         renderChartsStep3(data);
+
+        // Aplicar Paywall de Degustação / Teaser (Blur na 4ª linha+) quando aplicável
+        if (window.ValidAiTeaser && typeof window.ValidAiTeaser.apply === 'function') {
+            window.ValidAiTeaser.apply({
+                isTeaser: Boolean(data.is_teaser),
+                teaserInfo: data.teaser_info,
+                totalHidden: data.total_hidden_divergences || 0,
+                tbodies: [diffTableBody, onlyATableBody, onlyBTableBody],
+                downloadBtns: [btnDownloadExcel]
+            });
+        }
     }
     // ----------------------------------------------------
     // GRÁFICOS ANALÍTICOS DO PASSO 3 (CHART.JS)
@@ -4013,6 +4101,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Aba padrão ativa
         switchSingleTab('issues');
+
+        if (window.ValidAiTeaser && typeof window.ValidAiTeaser.apply === 'function') {
+            window.ValidAiTeaser.apply({
+                isTeaser: Boolean(data.is_teaser),
+                teaserInfo: data.teaser_info,
+                totalHidden: data.total_hidden_divergences || 0,
+                tbodies: [singleIssuesTbody],
+                downloadBtns: [btnSingleDownloadExcel]
+            });
+        }
     }
 
     function renderSingleIssuesTable(query = '') {

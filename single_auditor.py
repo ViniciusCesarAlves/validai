@@ -338,7 +338,7 @@ def audit_single_dataset(df, rules, max_preview_rows=300):
 
 def generate_single_audit_excel(df, summary, invalid_cells_by_row, cols, output_path):
     """
-    Gera relatório Excel estilizado com a identidade SplitC:
+    Gera relatório Excel estilizado com a identidade ValidAí:
     - Aba 1: Resumo da Auditoria (KPIs, lista de regras e status)
     - Aba 2: Planilha Auditada (células divergentes destacadas em vermelho/amarelo)
     - Aba 3: Frequência de Repetições (se houver regras de contagem/duplicatas)
@@ -347,7 +347,7 @@ def generate_single_audit_excel(df, summary, invalid_cells_by_row, cols, output_
     # Remove sheet padrão
     wb.remove(wb.active)
 
-    # Cores SplitC
+    # Cores ValidAí
     COLOR_ORANGE = "4FD580"
     COLOR_LIGHT_ORANGE = "BCFFE2"
     COLOR_HEADER_FONT = "FFFFFF"
@@ -471,6 +471,15 @@ def generate_single_audit_excel(df, summary, invalid_cells_by_row, cols, output_
             if col_idx < 6:
                 cell.font = font_regular
         start_row += 1
+
+    # Crédito Institucional no Rodapé do Resumo
+    start_row += 1
+    credit_cell = ws_resumo.cell(
+        row=start_row,
+        column=1,
+        value="Relatório gerado automaticamente por ValidAí (https://validai.app.br) • Arquitetura e Inteligência de Dados por Vinícius Alves."
+    )
+    credit_cell.font = Font(name="Calibri", size=9, italic=True, color="64748B")
 
     # Ajuste de largura das colunas do resumo
     ws_resumo.column_dimensions['A'].width = 8

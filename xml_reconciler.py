@@ -1052,6 +1052,15 @@ def generate_xml_audit_excel(df_sheet, reconcile_results, output_path):
             c2.fill = PatternFill(start_color=bg_color, end_color=bg_color, fill_type="solid")
         ws_res.row_dimensions[idx].height = 22
 
+    # Crédito Institucional no Rodapé do Resumo
+    credit_row = 8 + len(kpis) + 1
+    credit_cell = ws_res.cell(
+        row=credit_row,
+        column=1,
+        value="Relatório gerado automaticamente por ValidAí (https://validai.app.br) • Arquitetura e Inteligência de Dados por Vinícius Alves."
+    )
+    credit_cell.font = Font(name="Calibri", size=9, italic=True, color="64748B")
+
     ws_res.column_dimensions['A'].width = 48
     ws_res.column_dimensions['B'].width = 30
 

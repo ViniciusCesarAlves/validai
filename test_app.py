@@ -4,7 +4,7 @@ import uuid
 import app
 
 def test_full_pipeline():
-    print("Iniciando testes integrados da aplicacao SplitC...")
+    print("Iniciando testes integrados da aplicacao ValidAí...")
     client = app.app.test_client()
 
     # Configura sessao Pro para testes de integracao com arquivos grandes (47 colunas)
@@ -144,8 +144,8 @@ def test_full_pipeline():
     
     # Valida presença da logo no Resumo
     ws_resumo = wb_test['Resumo da Validação']
-    assert len(ws_resumo._images) > 0, "Logo SplitC deve estar presente lateralmente na aba de resumo!"
-    print(f"[OK] Logo da SplitC confirmada no Excel ({len(ws_resumo._images)} imagem inserida).")
+    assert len(ws_resumo._images) > 0, "Logo ValidAí deve estar presente lateralmente na aba de resumo!"
+    print(f"[OK] Logo da ValidAí confirmada no Excel ({len(ws_resumo._images)} imagem inserida).")
 
     # Valida cabeçalhos e cores (#4FD580)
     ws_test = wb_test['Divergências Detalhadas']
@@ -1173,12 +1173,20 @@ def test_full_pipeline():
         'col_doc': 'CPF',
         'col_name': 'NOME'
     })
-    assert res_spec_block.status_code == 403, f"Deveria bloquear ferramenta especial com 403 no Standard, retornou {res_spec_block.status_code}"
-    err_spec = res_spec_block.get_json()
-    assert err_spec['error'] == 'plan_limit'
-    assert err_spec['limit_type'] == 'special_locked'
-    assert err_spec['required_plan'] == 'plus'
-    print("[OK] Bloqueio de arquivos reais em validadores avançados no plano Standard validado com HTTP 403 (special_locked)!")
+    assert res_spec_block.status_code == 200, f"Deveria retornar Teaser (HTTP 200) no Standard, retornou {res_spec_block.status_code}"
+    teaser_spec = res_spec_block.get_json()
+    assert teaser_spec['is_teaser'] is True
+    assert teaser_spec['teaser_info']['error'] == 'plan_limit'
+    assert teaser_spec['teaser_info']['limit_type'] == 'special_locked'
+    assert teaser_spec['teaser_info']['required_plan'] == 'plus'
+    assert len(teaser_spec.get('invalid_docs', [])) <= 3
+
+    # E o download do relatório gerado em modo Teaser deve ser bloqueado com HTTP 403 para usuário Standard
+    teaser_rep_id = teaser_spec['report_id']
+    res_dl_block = client.get(f'/api/cadastros/download-clean/{teaser_rep_id}')
+    assert res_dl_block.status_code == 403
+    assert res_dl_block.get_json()['error'] == 'plan_limit'
+    print("[OK] Paywall de Degustação / Teaser (is_teaser=True no processamento e HTTP 403 no download Excel) validado no plano Standard!")
 
     # Exemplo liberado e gratuito em ferramenta especial
     res_cad_ex = client.post('/api/cadastros/load-example')
@@ -1678,6 +1686,37 @@ def test_full_pipeline():
     assert 'total_icms' in fin_comp['xml']
     assert 'total_pis_cofins' in fin_comp['xml']
     print("[OK] Conciliador de XML: Painel Chart.js, confronto tributário e exportar PNG validados!")
+
+    # 27. Teste de PWA (/manifest.json, /sw.js), /llms.txt, Marca Pessoal e Retenção
+    print("\n--- Testando PWA, /llms.txt, Marca Pessoal, PIX e Retenção ---")
+    res_manifest = client.get('/manifest.json')
+    assert res_manifest.status_code == 200
+    manifest_json = res_manifest.get_json()
+    assert manifest_json['short_name'] == 'ValidAí'
+    assert manifest_json['theme_color'] == '#4FD580'
+
+    res_sw = client.get('/sw.js')
+    assert res_sw.status_code == 200
+    assert b'CACHE_NAME' in res_sw.data
+
+    res_llms = client.get('/llms.txt')
+    assert res_llms.status_code == 200
+    llms_text = res_llms.data.decode('utf-8')
+    assert 'ValidAí' in llms_text and 'Vinícius Alves' in llms_text
+
+    res_robots = client.get('/robots.txt')
+    assert 'Allow: /llms.txt' in res_robots.data.decode('utf-8')
+
+    res_sobre = client.get('/sobre')
+    assert res_sobre.status_code == 200
+    assert 'Vinícius Alves' in res_sobre.data.decode('utf-8')
+
+    assert 'Sem renovação automática surpresa' in html_planos
+    assert 'btn-copy-whatsapp-summary' in home_html
+    assert 'btn-save-mapping-template' in home_html
+    assert 'btn-pwa-install-fixed' in home_html
+    assert 'fixed-bottom-right-pwa-wrap' in home_html
+    print("[OK] PWA (/manifest.json, /sw.js, botão fixo inferior direito), /llms.txt, Marca Pessoal e recursos de retenção validados!")
 
     print("\nTODOS OS TESTES PASSARAM COM 100% DE SUCESSO!")
 

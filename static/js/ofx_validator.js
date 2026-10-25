@@ -552,6 +552,16 @@
         // Renderiza Gráficos Analíticos de Taxas e Conciliação (Chart.js)
         renderOfxCharts(data);
 
+        if (window.ValidAiTeaser && typeof window.ValidAiTeaser.apply === 'function') {
+            window.ValidAiTeaser.apply({
+                isTeaser: Boolean(data.is_teaser),
+                teaserInfo: data.teaser_info,
+                totalHidden: data.total_hidden_divergences || 0,
+                tbodies: [document.getElementById('ofx-results-tbody')],
+                downloadBtns: [btnDownloadAudit, btnDownloadMirror]
+            });
+        }
+
         window.scrollTo({ top: stepResults.offsetTop - 80, behavior: 'smooth' });
     }
 

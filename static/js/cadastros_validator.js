@@ -493,6 +493,24 @@
 
         // Renderiza Gráficos Analíticos de Cadastros (Chart.js)
         renderCadastrosCharts(data);
+
+        if (window.ValidAiTeaser && typeof window.ValidAiTeaser.apply === 'function') {
+            window.ValidAiTeaser.apply({
+                isTeaser: Boolean(data.is_teaser),
+                teaserInfo: data.teaser_info,
+                totalHidden: data.total_hidden_divergences || 0,
+                tbodies: [tbodyDocs, tbodyDups, tbodyContacts],
+                downloadBtns: [btnDownloadClean, btnDownloadAudit]
+            });
+        }
+    }
+
+    function renderCnpjLookupBtn(rawVal) {
+        const digits = String(rawVal || '').replace(/\D/g, '');
+        if (digits.length === 14) {
+            return `<button type="button" class="btn-cnpj-lookup" data-cnpj="${digits}" title="Consultar CNPJ na Receita / BrasilAPI"><svg class="splitc-icon splitc-icon-sm" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-1px;margin-right:3px;"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg><span>Consultar CNPJ</span></button>`;
+        }
+        return '';
     }
 
     const CHECK_EMPTY_SVG = '<svg class="splitc-icon splitc-icon-sm" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4FD580" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
@@ -507,10 +525,11 @@
 
         items.forEach(item => {
             const tr = document.createElement('tr');
+            const cnpjBtn = renderCnpjLookupBtn(item.cleaned || item.original);
             tr.innerHTML = `
                 <td style="text-align: center; white-space: nowrap;"><span class="badge-line">${item.row}</span></td>
                 <td><strong>${escapeHtml(item.name || '-')}</strong></td>
-                <td><span class="key-code text-danger" style="background: rgba(239, 68, 68, 0.1);">${escapeHtml(item.original || '(vazio)')}</span></td>
+                <td><span class="key-code text-danger" style="background: rgba(239, 68, 68, 0.1);">${escapeHtml(item.original || '(vazio)')}</span>${cnpjBtn}</td>
                 <td>${item.cleaned ? `<span class="key-code text-success" style="background: rgba(34, 197, 94, 0.1);">${escapeHtml(item.cleaned)}</span>` : '<span style="color:#94a3af;">-</span>'}</td>
                 <td><span class="status-badge-diff">${escapeHtml(item.reason)}</span></td>
             `;
@@ -528,9 +547,10 @@
         items.forEach(item => {
             const tr = document.createElement('tr');
             const linesStr = item.lines.join(', ');
+            const cnpjBtn = renderCnpjLookupBtn(item.value);
             tr.innerHTML = `
                 <td><strong>${escapeHtml(item.column)}</strong></td>
-                <td><span class="key-code">${escapeHtml(item.value)}</span></td>
+                <td><span class="key-code">${escapeHtml(item.value)}</span>${cnpjBtn}</td>
                 <td style="text-align: center; white-space: nowrap;"><span class="status-badge-warning">${item.count}x</span></td>
                 <td><span style="font-size: 12.5px; font-weight: 600; color: var(--text-muted);">Linhas: ${linesStr}</span></td>
                 <td>${escapeHtml(item.sample_name || '-')}</td>

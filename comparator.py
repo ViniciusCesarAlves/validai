@@ -968,9 +968,9 @@ def generate_excel_diff_report(summary: dict, diff_records: list,
     ws_summary.title = "Resumo da Validação"
     ws_summary.views.sheetView[0].showGridLines = True
 
-    # Cores e Estilos alinhados à marca SplitC
-    color_primary = "4FD580"    # Verde oficial SplitC (#4FD580)
-    color_col_header = "4FD580" # Verde oficial SplitC para títulos das colunas (#4FD580)
+    # Cores e Estilos alinhados à marca ValidAí
+    color_primary = "4FD580"    # Verde oficial ValidAí (#4FD580)
+    color_col_header = "4FD580" # Verde oficial ValidAí para títulos das colunas (#4FD580)
     color_diff_fill = "FEE2E2"  # Vermelho suave para diferenças
     color_diff_font = "991B1B"  # Vermelho escuro
     color_success_fill = "DCFCE7" # Verde suave
@@ -1008,7 +1008,7 @@ def generate_excel_diff_report(summary: dict, diff_records: list,
     ws_summary.column_dimensions['D'].width = 4
     ws_summary.column_dimensions['E'].width = 28
 
-    # Adiciona a logo SplitC lateralmente com espaçamento visual
+    # Adiciona a logo ValidAí lateralmente com espaçamento visual
     logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'images', 'logo.png')
     if os.path.exists(logo_path):
         try:
@@ -1080,6 +1080,15 @@ def generate_excel_diff_report(summary: dict, diff_records: list,
             c2.font = font_bold
             c1.border = border_thin
             c2.border = border_thin
+
+    # Crédito Institucional no Rodapé do Resumo
+    row_idx += 2
+    credit_cell = ws_summary.cell(
+        row=row_idx,
+        column=1,
+        value="Relatório gerado automaticamente por ValidAí (https://validai.app.br) • Arquitetura e Inteligência de Dados por Vinícius Alves."
+    )
+    credit_cell.font = Font(name="Calibri", size=9, italic=True, color="64748B")
 
     # Ajuste de larguras de colunas
     ws_summary.column_dimensions['A'].width = 38

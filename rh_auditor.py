@@ -738,6 +738,15 @@ def generate_rh_audit_excel(audit_data: dict, output_path: str, logo_path: str =
         for col_b in range(2, 9):
             ws_resumo.cell(row=r_idx, column=col_b).border = thin_border
 
+    # Crédito Institucional no Rodapé do Resumo
+    credit_row = 13 + len(fin_summary) + 1
+    credit_cell = ws_resumo.cell(
+        row=credit_row,
+        column=2,
+        value="Relatório gerado automaticamente por ValidAí (https://validai.app.br) • Arquitetura e Inteligência de Dados por Vinícius Alves."
+    )
+    credit_cell.font = Font(name="Calibri", size=9, italic=True, color="64748B")
+
     # ---------------------------------------------------------
     # ABA 2: Divergencias_Detalhadas
     # ---------------------------------------------------------
