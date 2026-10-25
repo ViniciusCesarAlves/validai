@@ -148,32 +148,33 @@
     // -------------------------------------------------------------------------
     function updateModeUI(mode) {
         currentMode = mode;
+        const t = (typeof window.t === 'function') ? window.t : ((k, fb) => fb);
         if (mode === 'beneficios') {
             btnModeBeneficios.classList.add('active');
             btnModeFolha.classList.remove('active');
 
-            labelRefTitle.textContent = "Base de Ativos no RH";
-            labelRefDesc.textContent = "Planilha oficial com lista de funcionários ativos (.xlsx, .xls ou .csv)";
-            labelAuditTitle.textContent = "Fatura da Operadora de Benefícios";
-            labelAuditDesc.textContent = "Relatório de cobrança (Plano de Saúde, VR/VA, Seguros) para auditar";
+            labelRefTitle.textContent = t('rh_mode_ben_ref_title', "Base de Ativos no RH");
+            labelRefDesc.textContent = t('rh_mode_ben_ref_desc', "Planilha oficial com lista de funcionários ativos (.xlsx, .xls ou .csv)");
+            labelAuditTitle.textContent = t('rh_mode_ben_audit_title', "Fatura da Operadora de Benefícios");
+            labelAuditDesc.textContent = t('rh_mode_ben_audit_desc', "Relatório de cobrança (Plano de Saúde, VR/VA, Seguros) para auditar");
 
-            if (kpiEx1Label) kpiEx1Label.textContent = "Ativos sem Fatura";
-            if (kpiEx2Label) kpiEx2Label.textContent = "Cobrança Indevida (Fantasmas)";
-            if (tabLabelEx1) tabLabelEx1.textContent = "Ativos sem Fatura no RH";
-            if (tabLabelEx2) tabLabelEx2.textContent = "Cobrança Indevida / Fantasmas";
+            if (kpiEx1Label) kpiEx1Label.textContent = t('rh_mode_ben_kpi_ex1', "Ativos sem Fatura");
+            if (kpiEx2Label) kpiEx2Label.textContent = t('rh_mode_ben_kpi_ex2', "Cobrança Indevida (Fantasmas)");
+            if (tabLabelEx1) tabLabelEx1.textContent = t('rh_mode_ben_tab_ex1', "Ativos sem Fatura no RH");
+            if (tabLabelEx2) tabLabelEx2.textContent = t('rh_mode_ben_tab_ex2', "Cobrança Indevida / Fantasmas");
         } else {
             btnModeFolha.classList.add('active');
             btnModeBeneficios.classList.remove('active');
 
-            labelRefTitle.textContent = "Base Referência (Folha Mês Anterior)";
-            labelRefDesc.textContent = "Planilha da folha de pagamento do mês anterior (.xlsx, .xls ou .csv)";
-            labelAuditTitle.textContent = "Base Auditada (Folha Mês Atual)";
-            labelAuditDesc.textContent = "Planilha da folha de pagamento do mês atual para cruzamento";
+            labelRefTitle.textContent = t('rh_mode_folha_ref_title', "Base Referência (Folha Mês Anterior)");
+            labelRefDesc.textContent = t('rh_mode_folha_ref_desc', "Planilha da folha de pagamento do mês anterior (.xlsx, .xls ou .csv)");
+            labelAuditTitle.textContent = t('rh_mode_folha_audit_title', "Base Auditada (Folha Mês Atual)");
+            labelAuditDesc.textContent = t('rh_mode_folha_audit_desc', "Planilha da folha de pagamento do mês atual para cruzamento");
 
-            if (kpiEx1Label) kpiEx1Label.textContent = "Exclusivos Base 1 (Desligados)";
-            if (kpiEx2Label) kpiEx2Label.textContent = "Exclusivos Base 2 (Admitidos)";
-            if (tabLabelEx1) tabLabelEx1.textContent = "Exclusivos Base 1 (Desligados)";
-            if (tabLabelEx2) tabLabelEx2.textContent = "Exclusivos Base 2 (Admitidos)";
+            if (kpiEx1Label) kpiEx1Label.textContent = t('rh_kpi_ex1', "Exclusivos Base 1 (Desligados)");
+            if (kpiEx2Label) kpiEx2Label.textContent = t('rh_kpi_ex2', "Exclusivos Base 2 (Admitidos)");
+            if (tabLabelEx1) tabLabelEx1.textContent = t('rh_tab_ex1', "Exclusivos Base 1 (Desligados)");
+            if (tabLabelEx2) tabLabelEx2.textContent = t('rh_tab_ex2', "Exclusivos Base 2 (Admitidos)");
         }
     }
 
@@ -183,6 +184,9 @@
     if (btnModeBeneficios) {
         btnModeBeneficios.addEventListener('click', () => updateModeUI('beneficios'));
     }
+    window.addEventListener('validaiLanguageChanged', () => {
+        updateModeUI(currentMode);
+    });
 
     // -------------------------------------------------------------------------
     // 2. GESTÃO DE DRAG & DROP E UPLOAD
@@ -805,7 +809,7 @@
     if (btnModalApply) {
         btnModalApply.addEventListener('click', () => {
             if (modalSelectedCols.size === 0) {
-                alert('Marque pelo menos uma coluna na lista para manter no mapeamento, ou clique em "Limpar Tudo" acima para esvaziar a tabela.');
+                alert(typeof window.t === 'function' ? window.t('rh_alert_min_col_keep', 'Marque pelo menos uma coluna na lista para manter no mapeamento, ou clique em "Limpar Tudo" acima para esvaziar a tabela.') : 'Marque pelo menos uma coluna na lista para manter no mapeamento, ou clique em "Limpar Tudo" acima para esvaziar a tabela.');
                 return;
             }
             mappingState.isManualMapping = false;
@@ -980,7 +984,7 @@
                 const spinner = btnProcess.querySelector('.spinner');
                 const btnText = btnProcess.querySelector('.btn-text');
                 if (spinner) spinner.style.display = 'inline-block';
-                if (btnText) btnText.textContent = "Auditando colaboradores...";
+                if (btnText) btnText.textContent = typeof window.t === 'function' ? window.t('rh_btn_processing', "Auditando colaboradores...") : "Auditando colaboradores...";
 
                 // Coletar mapeamento atualizado no padrão do Validador de Planilhas
                 const customMapping = {};
@@ -1018,13 +1022,14 @@
                 auditResults = data;
                 renderResultsStep(data);
             } catch (err) {
-                alert(`Erro na Auditoria: ${err.message}`);
+                const prefix = typeof window.t === 'function' ? window.t('rh_alert_audit_error_prefix', 'Erro na Auditoria:') : 'Erro na Auditoria:';
+                alert(`${prefix} ${err.message}`);
             } finally {
                 btnProcess.disabled = false;
                 const spinner = btnProcess.querySelector('.spinner');
                 const btnText = btnProcess.querySelector('.btn-text');
                 if (spinner) spinner.style.display = 'none';
-                if (btnText) btnText.textContent = "Executar Auditoria de RH";
+                if (btnText) btnText.textContent = typeof window.t === 'function' ? window.t('rh_btn_process', "Executar Auditoria de RH") : "Executar Auditoria de RH";
             }
         });
     }

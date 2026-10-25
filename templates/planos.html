@@ -592,9 +592,9 @@
         <div class="container institutional-container">
             <!-- Breadcrumbs -->
             <nav class="institutional-breadcrumbs" aria-label="Navegação estrutural">
-                <a href="/" class="crumb-link">Início</a>
+                <a href="/" class="crumb-link" data-i18n="plans_crumb_home">Início</a>
                 <span class="crumb-separator" aria-hidden="true">/</span>
-                <span class="crumb-current" aria-current="page">Planos e Preços</span>
+                <span class="crumb-current" aria-current="page" data-i18n="plans_crumb_pricing">Planos e Preços</span>
             </nav>
 
             <!-- Hero Header da Página -->
@@ -603,10 +603,10 @@
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                     </svg>
-                    <span>Investimento Acessível e Alta Produtividade</span>
+                    <span data-i18n="plans_hero_badge">Investimento Acessível e Alta Produtividade</span>
                 </div>
-                <h1 class="institutional-title">Escolha o Plano Ideal para Suas Auditorias</h1>
-                <p class="institutional-subtitle">
+                <h1 class="institutional-title" data-i18n="plans_hero_title">Escolha o Plano Ideal para Suas Auditorias</h1>
+                <p class="institutional-subtitle" data-i18n="plans_hero_desc">
                     Seja você um profissional autônomo conferindo planilhas ocasionais ou uma equipe contábil processando milhares de registros fiscais e de RH diariamente.
                 </p>
             </header>
@@ -616,94 +616,94 @@
                 <!-- Card 1: Standard (Gratuito) -->
                 <div class="pricing-card{{ ' current-user-plan' if user_summary.plan == 'standard' else '' }}">
                     <div class="pricing-card-header">
-                        <span class="pricing-plan-badge">Acesso Gratuito</span>
+                        <span class="pricing-plan-badge" data-i18n="plan_std_badge">Acesso Gratuito</span>
                         <h2 class="pricing-plan-name">Standard</h2>
                         <div class="pricing-plan-price">
                             <span class="currency">R$</span>
                             <span class="amount">0</span>
-                            <span class="period">/mês</span>
+                            <span class="period" data-i18n="plan_std_period">/mês</span>
                         </div>
-                        <p class="pricing-plan-desc">Perfeito para quem precisa de validações rápidas e pontuais no dia a dia.</p>
+                        <p class="pricing-plan-desc" data-i18n="plan_std_desc">Perfeito para quem precisa de validações rápidas e pontuais no dia a dia.</p>
                     </div>
 
                     <ul class="pricing-features-list">
                         <li>
                             <svg class="feature-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span><strong>3 validações básicas/dia</strong> (Planilhas e Texto)</span>
+                            <span data-i18n="plan_std_f1"><strong>3 validações básicas/dia</strong> (Planilhas e Texto)</span>
                         </li>
                         <li>
                             <svg class="feature-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span>Até <strong>500 linhas</strong> e <strong>20 colunas</strong></span>
+                            <span data-i18n="plan_std_f2">Até <strong>500 linhas</strong> e <strong>20 colunas</strong></span>
                         </li>
                         <li>
                             <svg class="feature-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span>Relatórios Excel com células pintadas</span>
+                            <span data-i18n="plan_std_f3">Relatórios Excel com células pintadas</span>
                         </li>
                         <li>
                             <svg class="feature-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span>Amostras gratuitas em todos os módulos</span>
+                            <span data-i18n="plan_std_f4">Amostras gratuitas em todos os módulos</span>
                         </li>
                         <li class="feature-muted">
                             <svg class="feature-cross" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                            <span>Contém anúncios contextuais</span>
+                            <span data-i18n="plan_std_f5">Contém anúncios contextuais</span>
                         </li>
                     </ul>
 
                     <div class="pricing-card-footer">
                         {% if user_summary.plan == 'standard' %}
-                            <span class="btn-plan-action btn-pill-outline disabled">Plano Atual</span>
+                            <span class="btn-plan-action btn-pill-outline disabled" data-i18n="plan_std_current">Plano Atual</span>
                         {% else %}
-                            <a href="/" class="btn-plan-action btn-pill-outline">Continuar Grátis</a>
+                            <a href="/" class="btn-plan-action btn-pill-outline" data-i18n="plan_std_btn">Continuar Grátis</a>
                         {% endif %}
                     </div>
                 </div>
 
                 <!-- Card 2: Plus (Destaque Econômico) -->
                 <div class="pricing-card featured-popular{{ ' current-user-plan' if user_summary.plan == 'plus' else '' }}">
-                    <div class="popular-ribbon">Mais Escolhido</div>
+                    <div class="popular-ribbon" data-i18n="plan_plus_ribbon">Mais Escolhido</div>
                     <div class="pricing-card-header">
-                        <span class="pricing-plan-badge badge-plus">Essencial para Escritórios</span>
+                        <span class="pricing-plan-badge badge-plus" data-i18n="plan_plus_badge">Essencial para Escritórios</span>
                         <h2 class="pricing-plan-name">Plus</h2>
                         <div class="pricing-plan-price">
                             <span class="currency">R$</span>
                             <span class="amount">4,99</span>
-                            <span class="period">/mês</span>
+                            <span class="period" data-i18n="plan_std_period">/mês</span>
                         </div>
-                        <p class="pricing-plan-desc">Ideal para quem valida planilhas diariamente e precisa de conciliações fiscais e cadastrais.</p>
+                        <p class="pricing-plan-desc" data-i18n="plan_plus_desc">Ideal para quem valida planilhas diariamente e precisa de conciliações fiscais e cadastrais.</p>
                     </div>
 
                     <ul class="pricing-features-list">
                         <li>
                             <svg class="feature-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span>Validações de Planilhas e Texto <strong>ILIMITADAS</strong></span>
+                            <span data-i18n="plan_plus_f1">Validações de Planilhas e Texto <strong>ILIMITADAS</strong></span>
                         </li>
                         <li>
                             <svg class="feature-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span><strong>1 validação/dia</strong> de Cadastros/XML/OFX/RH</span>
+                            <span data-i18n="plan_plus_f2"><strong>1 validação/dia</strong> de Cadastros/XML/OFX/RH</span>
                         </li>
                         <li>
                             <svg class="feature-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span>Até <strong>5.000 linhas</strong> e <strong>30 colunas</strong></span>
+                            <span data-i18n="plan_plus_f3">Até <strong>5.000 linhas</strong> e <strong>30 colunas</strong></span>
                         </li>
                         <li>
                             <svg class="feature-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span><strong>Zero anúncios</strong> publicitários</span>
+                            <span data-i18n="plan_plus_f4"><strong>Zero anúncios</strong> publicitários</span>
                         </li>
                         <li>
                             <svg class="feature-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span>Suporte prioritário por e-mail</span>
+                            <span data-i18n="plan_plus_f5">Suporte prioritário por e-mail</span>
                         </li>
                     </ul>
 
                     <div class="pricing-card-footer">
                         {% if user_summary.plan == 'plus' %}
-                            <span class="btn-plan-action btn-action-plus disabled">Plano Ativo (30 dias)</span>
+                            <span class="btn-plan-action btn-action-plus disabled" data-i18n="plan_plus_active">Plano Ativo (30 dias)</span>
                         {% else %}
                             <a href="/checkout/plus" class="btn-plan-action btn-action-plus">
-                                <span>Assinar Plus por R$ 4,99</span>
+                                <span data-i18n="plan_plus_btn">Assinar Plus por R$ 4,99</span>
                             </a>
                         {% endif %}
-                        <p class="pix-clarity-note" style="font-size: 11.5px; color: var(--text-muted, #64748b); text-align: center; margin: 10px 0 0 0; line-height: 1.4;">
+                        <p class="pix-clarity-note" style="font-size: 11.5px; color: var(--text-muted, #64748b); text-align: center; margin: 10px 0 0 0; line-height: 1.4;" data-i18n="pix_clarity_note">
                             ⚡ Pague via PIX ou Cartão • Acesso liberado imediatamente por 30 dias • Sem renovação automática surpresa.
                         </p>
                     </div>
@@ -711,50 +711,50 @@
 
                 <!-- Card 3: Pro (Profissional Ilimitado) -->
                 <div class="pricing-card featured-pro{{ ' current-user-plan' if user_summary.plan == 'pro' else '' }}">
-                    <div class="popular-ribbon ribbon-pro">Sem Travas</div>
+                    <div class="popular-ribbon ribbon-pro" data-i18n="plan_pro_ribbon">Sem Travas</div>
                     <div class="pricing-card-header">
-                        <span class="pricing-plan-badge badge-pro">Potência Máxima</span>
+                        <span class="pricing-plan-badge badge-pro" data-i18n="plan_pro_badge">Potência Máxima</span>
                         <h2 class="pricing-plan-name">Pro</h2>
                         <div class="pricing-plan-price">
                             <span class="currency">R$</span>
                             <span class="amount">9,99</span>
-                            <span class="period">/mês</span>
+                            <span class="period" data-i18n="plan_std_period">/mês</span>
                         </div>
-                        <p class="pricing-plan-desc">Para empresas, contadores e analistas que demandam alto volume sem restrições.</p>
+                        <p class="pricing-plan-desc" data-i18n="plan_pro_desc">Para empresas, contadores e analistas que demandam alto volume sem restrições.</p>
                     </div>
 
                     <ul class="pricing-features-list">
                         <li>
                             <svg class="feature-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span><strong>TODAS as ferramentas 100% ILIMITADAS</strong></span>
+                            <span data-i18n="plan_pro_f1"><strong>TODAS as ferramentas 100% ILIMITADAS</strong></span>
                         </li>
                         <li>
                             <svg class="feature-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span>Cadastros, XML, OFX e Folha de RH sem limites</span>
+                            <span data-i18n="plan_pro_f2">Cadastros, XML, OFX e Folha de RH sem limites</span>
                         </li>
                         <li>
                             <svg class="feature-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span>Grandes bases com até <strong>30.000 linhas</strong></span>
+                            <span data-i18n="plan_pro_f3">Grandes bases com até <strong>30.000 linhas</strong></span>
                         </li>
                         <li>
                             <svg class="feature-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span><strong>Zero anúncios</strong> em toda a plataforma</span>
+                            <span data-i18n="plan_pro_f4"><strong>Zero anúncios</strong> em toda a plataforma</span>
                         </li>
                         <li>
                             <svg class="feature-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span>Fila de alta prioridade de processamento</span>
+                            <span data-i18n="plan_pro_f5">Fila de alta prioridade de processamento</span>
                         </li>
                     </ul>
 
                     <div class="pricing-card-footer">
                         {% if user_summary.plan == 'pro' %}
-                            <span class="btn-plan-action btn-pill-gradient disabled">Plano Ativo (30 dias)</span>
+                            <span class="btn-plan-action btn-pill-gradient disabled" data-i18n="plan_pro_active">Plano Ativo (30 dias)</span>
                         {% else %}
                             <a href="/checkout/pro" class="btn-plan-action btn-pill-gradient">
-                                <span>Assinar Pro por R$ 9,99</span>
+                                <span data-i18n="plan_pro_btn">Assinar Pro por R$ 9,99</span>
                             </a>
                         {% endif %}
-                        <p class="pix-clarity-note" style="font-size: 11.5px; color: var(--text-muted, #64748b); text-align: center; margin: 10px 0 0 0; line-height: 1.4;">
+                        <p class="pix-clarity-note" style="font-size: 11.5px; color: var(--text-muted, #64748b); text-align: center; margin: 10px 0 0 0; line-height: 1.4;" data-i18n="pix_clarity_note">
                             ⚡ Pague via PIX ou Cartão • Acesso liberado imediatamente por 30 dias • Sem renovação automática surpresa.
                         </p>
                     </div>
@@ -768,8 +768,8 @@
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4FD580" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                     </div>
                     <div class="trust-content">
-                        <h3>Pagamento Seguro Mercado Pago</h3>
-                        <p>PIX instantâneo ou Cartão de Crédito com criptografia bancária de ponta a ponta.</p>
+                        <h3 data-i18n="plans_trust_mp_title">Pagamento Seguro Mercado Pago</h3>
+                        <p data-i18n="plans_trust_mp_desc">PIX instantâneo ou Cartão de Crédito com criptografia bancária de ponta a ponta.</p>
                     </div>
                 </div>
 
@@ -778,8 +778,8 @@
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4FD580" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                     </div>
                     <div class="trust-content">
-                        <h3>Privacidade Estrita (LGPD)</h3>
-                        <p>Seus arquivos são processados estritamente em memória volátil e nunca são salvos em disco.</p>
+                        <h3 data-i18n="plans_trust_lgpd_title">Privacidade Estrita (LGPD)</h3>
+                        <p data-i18n="plans_trust_lgpd_desc">Seus arquivos são processados estritamente em memória volátil e nunca são salvos em disco.</p>
                     </div>
                 </div>
 
@@ -788,8 +788,8 @@
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4FD580" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     </div>
                     <div class="trust-content">
-                        <h3>Sem Fidelidade ou Multas</h3>
-                        <p>A assinatura é válida por 30 dias. Você decide quando renovar, com liberdade total.</p>
+                        <h3 data-i18n="plans_trust_nofee_title">Sem Fidelidade ou Multas</h3>
+                        <p data-i18n="plans_trust_nofee_desc">A assinatura é válida por 30 dias. Você decide quando renovar, com liberdade total.</p>
                     </div>
                 </div>
             </section>
@@ -805,10 +805,10 @@
                             <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
                             <line x1="12" y1="17" x2="12.01" y2="17"/>
                         </svg>
-                        <span>Dúvidas Frequentes</span>
+                        <span data-i18n="plans_faq_badge">Dúvidas Frequentes</span>
                     </span>
-                    <h2 class="seo-faq-title" id="faq-planos-heading">Perguntas Frequentes sobre Planos e Pagamentos</h2>
-                    <p class="seo-faq-subtitle">Tire suas dúvidas sobre assinaturas, formas de pagamento via Mercado Pago (PIX e Cartão), limites de uso e segurança.</p>
+                    <h2 class="seo-faq-title" id="faq-planos-heading" data-i18n="plans_faq_title">Perguntas Frequentes sobre Planos e Pagamentos</h2>
+                    <p class="seo-faq-subtitle" data-i18n="plans_faq_sub">Tire suas dúvidas sobre assinaturas, formas de pagamento via Mercado Pago (PIX e Cartão), limites de uso e segurança.</p>
                 </div>
 
                 <div class="seo-faq-list">

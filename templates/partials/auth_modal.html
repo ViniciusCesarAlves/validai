@@ -156,8 +156,8 @@
         <button type="button" class="validai-modal-close" id="btn-close-auth" aria-label="Fechar modal">✕</button>
 
         <div class="auth-tabs-nav">
-            <button type="button" class="auth-tab-btn active" id="auth-tab-login" data-target="form-login">Entrar</button>
-            <button type="button" class="auth-tab-btn" id="auth-tab-signup" data-target="form-signup">Criar Conta</button>
+            <button type="button" class="auth-tab-btn active" id="auth-tab-login" data-target="form-login" data-i18n="auth_tab_login">Entrar</button>
+            <button type="button" class="auth-tab-btn" id="auth-tab-signup" data-target="form-signup" data-i18n="auth_tab_signup">Criar Conta</button>
         </div>
 
         <!-- Alerta de Status / Erro de Autenticação -->
@@ -167,8 +167,8 @@
 
         <!-- Formulário de Login -->
         <form id="form-login" class="auth-form-panel active" autocomplete="on">
-            <div id="auth-modal-title" class="auth-form-title" role="heading" aria-level="2">Acesse sua conta ValidAí</div>
-            <p class="auth-form-sub">Sincronize suas validações e aproveite seu plano.</p>
+            <div id="auth-modal-title" class="auth-form-title" role="heading" aria-level="2" data-i18n="auth_login_title">Acesse sua conta ValidAí</div>
+            <p class="auth-form-sub" data-i18n="auth_login_sub">Sincronize suas validações e aproveite seu plano.</p>
 
             <!-- 1. Botão Google no Topo -->
             <button type="button" class="btn-google-auth" onclick="if(window.ValidAiAuth) window.ValidAiAuth.googleLogin();" aria-label="Continuar com o Google">
@@ -178,36 +178,36 @@
                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                 </svg>
-                <span>Continuar com o Google</span>
+                <span data-i18n="auth_btn_google">Continuar com o Google</span>
             </button>
 
             <!-- Linha Divisória Elegante -->
             <div class="auth-divider">
-                <span>ou continue com e-mail</span>
+                <span data-i18n="auth_divider_email">ou continue com e-mail</span>
             </div>
 
             <div class="auth-input-group">
-                <label for="login-email">E-mail corporativo ou pessoal</label>
-                <input type="email" id="login-email" name="email" required placeholder="seu@email.com" autocomplete="email">
+                <label for="login-email" data-i18n="auth_email_label">E-mail corporativo ou pessoal</label>
+                <input type="email" id="login-email" name="email" required placeholder="seu@email.com" data-i18n-placeholder="auth_email_placeholder" autocomplete="email">
             </div>
 
             <div class="auth-input-group">
-                <label for="login-password">Senha de acesso</label>
-                <input type="password" id="login-password" name="password" required placeholder="••••••••" autocomplete="current-password">
+                <label for="login-password" data-i18n="auth_password_label">Senha de acesso</label>
+                <input type="password" id="login-password" name="password" required placeholder="••••••••" data-i18n-placeholder="auth_password_placeholder" autocomplete="current-password">
                 <div class="auth-forgot-row">
-                    <button type="button" class="auth-forgot-link" onclick="if(window.ValidAiAuth) window.ValidAiAuth.forgotPassword();">Esqueci minha senha</button>
+                    <button type="button" class="auth-forgot-link" onclick="if(window.ValidAiAuth) window.ValidAiAuth.forgotPassword();" data-i18n="auth_forgot_password">Esqueci minha senha</button>
                 </div>
             </div>
 
             <button type="submit" class="btn btn-pill-gradient auth-btn-submit" id="btn-submit-login">
-                <span>Entrar na Plataforma</span>
+                <span data-i18n="auth_btn_login">Entrar na Plataforma</span>
             </button>
         </form>
 
         <!-- Formulário de Cadastro -->
         <form id="form-signup" class="auth-form-panel" style="display: none;" autocomplete="on">
-            <div class="auth-form-title" role="heading" aria-level="2">Crie sua conta gratuita</div>
-            <p class="auth-form-sub">Comece agora no plano Standard gratuito ou assine o Plus/Pro.</p>
+            <div class="auth-form-title" role="heading" aria-level="2" data-i18n="auth_signup_title">Crie sua conta gratuita</div>
+            <p class="auth-form-sub" data-i18n="auth_signup_sub">Comece agora no plano Standard gratuito ou assine o Plus/Pro.</p>
 
             <!-- 1. Botão Google no Topo -->
             <button type="button" class="btn-google-auth" onclick="if(window.ValidAiAuth) window.ValidAiAuth.googleLogin();" aria-label="Continuar com o Google">
@@ -217,40 +217,40 @@
                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                 </svg>
-                <span>Continuar com o Google</span>
+                <span data-i18n="auth_btn_google">Continuar com o Google</span>
             </button>
 
             <!-- Linha Divisória Elegante -->
             <div class="auth-divider">
-                <span>ou continue com e-mail</span>
+                <span data-i18n="auth_divider_email">ou continue com e-mail</span>
             </div>
 
             <div class="auth-input-group">
-                <label for="signup-email">Seu e-mail</label>
-                <input type="email" id="signup-email" name="email" required placeholder="seu@email.com" autocomplete="email">
+                <label for="signup-email" data-i18n="auth_signup_email_label">Seu e-mail</label>
+                <input type="email" id="signup-email" name="email" required placeholder="seu@email.com" data-i18n-placeholder="auth_email_placeholder" autocomplete="email">
             </div>
 
             <div class="auth-input-group">
-                <label for="signup-password">Crie uma senha (mínimo 6 caracteres)</label>
-                <input type="password" id="signup-password" name="password" required minlength="6" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+                <label for="signup-password" data-i18n="auth_signup_password_label">Crie uma senha (mínimo 6 caracteres)</label>
+                <input type="password" id="signup-password" name="password" required minlength="6" placeholder="Mínimo 6 caracteres" data-i18n-placeholder="auth_signup_password_placeholder" autocomplete="new-password">
             </div>
 
             <!-- Campo Confirme sua senha -->
             <div class="auth-input-group">
-                <label for="signup-password-confirm">Confirme sua senha</label>
-                <input type="password" id="signup-password-confirm" name="password_confirm" required minlength="6" placeholder="Repita a senha criada" autocomplete="new-password">
+                <label for="signup-password-confirm" data-i18n="auth_signup_confirm_label">Confirme sua senha</label>
+                <input type="password" id="signup-password-confirm" name="password_confirm" required minlength="6" placeholder="Repita a senha criada" data-i18n-placeholder="auth_signup_confirm_placeholder" autocomplete="new-password">
             </div>
 
             <!-- Checkbox Obrigatório: Termos de Uso e Política de Privacidade -->
             <div class="auth-checkbox-group">
                 <label class="auth-checkbox-label" for="signup-terms">
                     <input type="checkbox" id="signup-terms" name="terms" required>
-                    <span>Li e aceito os <a href="/termos" target="_blank" rel="noopener">Termos de Uso</a> e a <a href="/privacidade" target="_blank" rel="noopener">Política de Privacidade</a>.</span>
+                    <span data-i18n="auth_terms_label">Li e aceito os <a href="/termos" target="_blank" rel="noopener">Termos de Uso</a> e a <a href="/privacidade" target="_blank" rel="noopener">Política de Privacidade</a>.</span>
                 </label>
             </div>
 
             <button type="submit" class="btn btn-pill-gradient auth-btn-submit" id="btn-submit-signup">
-                <span>Criar Conta Gratuita</span>
+                <span data-i18n="auth_btn_signup">Criar Conta Gratuita</span>
             </button>
         </form>
     </div>

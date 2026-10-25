@@ -181,9 +181,10 @@
                 var kpiCards = stepSection.querySelectorAll('.kpi-card');
                 var pageH1 = document.querySelector('h1');
                 var toolName = pageH1 ? pageH1.textContent.trim() : 'Auditoria de Dados';
+                var t = (typeof window.t === 'function') ? window.t : function(k, fb) { return fb; };
                 var lines = [
-                    '📊 *Resumo Executivo de Auditoria — ValidAí*',
-                    '🛠️ *Módulo:* ' + toolName,
+                    '📊 *' + t('summary_exec_title', 'Resumo Executivo de Auditoria — ValidAí') + '*',
+                    '🛠️ *' + t('summary_exec_module', 'Módulo') + ':* ' + toolName,
                     ''
                 ];
                 kpiCards.forEach(function(card) {
@@ -200,7 +201,7 @@
                     }
                 });
                 lines.push('');
-                lines.push('✅ _Auditoria realizada em https://validai.app.br_');
+                lines.push('✅ _' + t('summary_exec_footer', 'Auditoria realizada em https://validai.app.br') + '_');
                 return lines.join('\n');
             }
 
@@ -215,7 +216,8 @@
                     spanEl.setAttribute('data-orig-text', origText);
 
                     function onCopied() {
-                        spanEl.textContent = 'Resumo Copiado!';
+                        var t = (typeof window.t === 'function') ? window.t : function(k, fb) { return fb; };
+                        spanEl.textContent = t('summary_copied_btn', 'Resumo Copiado!');
                         copyBtn.classList.add('copied');
                         if (iconEl) {
                             iconEl.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';

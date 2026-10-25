@@ -10,8 +10,8 @@
                 </svg>
             </div>
             <span class="paywall-kicker" data-i18n="paywall_kicker">Desbloqueie o Máximo Potencial</span>
-            <h3 id="paywall-title" class="paywall-title">Limite de Uso do Plano Atingido</h3>
-            <p id="paywall-desc" class="paywall-desc">
+            <h3 id="paywall-title" class="paywall-title" data-i18n="paywall_title_default">Limite de Uso do Plano Atingido</h3>
+            <p id="paywall-desc" class="paywall-desc" data-i18n="paywall_desc_default">
                 Esta ferramenta ou o volume do seu arquivo ultrapassa os limites do plano gratuito. Faça upgrade para continuar validando com máxima velocidade e sem anúncios.
             </p>
         </div>
@@ -19,51 +19,51 @@
         <div class="paywall-plans-grid">
             <!-- Opção 1: Plano Plus -->
             <div class="paywall-plan-option" id="paywall-option-plus">
-                <div class="paywall-option-badge">Mais Econômico</div>
-                <div class="paywall-option-title">Plano Plus</div>
-                <div class="paywall-option-price">R$ 4,99 <span>/mês</span></div>
+                <div class="paywall-option-badge" data-i18n="plan_plus_ribbon">Mais Econômico</div>
+                <div class="paywall-option-title" data-i18n="plan_plus_badge">Plano Plus</div>
+                <div class="paywall-option-price">R$ 4,99 <span data-i18n="plan_std_period">/mês</span></div>
                 <ul class="paywall-option-perks">
-                    <li>✔ Planilhas e Textos <strong>100% Ilimitados</strong></li>
-                    <li>✔ <strong>1 validação/dia</strong> de Cadastros e XMLs</li>
-                    <li>✔ Arquivos de até <strong>5.000 linhas</strong></li>
-                    <li>✔ <strong>Zero anúncios</strong> publicitários</li>
+                    <li>✔ <span data-i18n="plan_plus_f1">Planilhas e Textos <strong>100% Ilimitados</strong></span></li>
+                    <li>✔ <span data-i18n="plan_plus_f2"><strong>1 validação/dia</strong> de Cadastros e XMLs</span></li>
+                    <li>✔ <span data-i18n="plan_plus_f3">Arquivos de até <strong>5.000 linhas</strong></span></li>
+                    <li>✔ <span data-i18n="plan_plus_f4"><strong>Zero anúncios</strong> publicitários</span></li>
                 </ul>
                 <a href="/checkout/plus" class="btn btn-pill-outline paywall-btn-cta" id="paywall-cta-plus">
-                    <span>Assinar Plus por R$ 4,99</span>
+                    <span data-i18n="plan_plus_btn">Assinar Plus por R$ 4,99</span>
                 </a>
-                <p class="pix-clarity-note" style="font-size: 11px; color: var(--text-muted, #64748b); text-align: center; margin: 8px 0 0 0; line-height: 1.35;">
+                <p class="pix-clarity-note" style="font-size: 11px; color: var(--text-muted, #64748b); text-align: center; margin: 8px 0 0 0; line-height: 1.35;" data-i18n="pix_clarity_note">
                     ⚡ Pague via PIX ou Cartão • Acesso liberado imediatamente por 30 dias • Sem renovação automática surpresa.
                 </p>
             </div>
 
             <!-- Opção 2: Plano Pro (Destaque) -->
             <div class="paywall-plan-option featured" id="paywall-option-pro">
-                <div class="paywall-option-badge featured-badge">Recomendado • Ilimitado</div>
-                <div class="paywall-option-title">Plano Pro</div>
-                <div class="paywall-option-price">R$ 9,99 <span>/mês</span></div>
+                <div class="paywall-option-badge featured-badge" data-i18n="plan_pro_badge">Recomendado • Ilimitado</div>
+                <div class="paywall-option-title" data-i18n="plan_pro_name">Plano Pro</div>
+                <div class="paywall-option-price">R$ 9,99 <span data-i18n="plan_std_period">/mês</span></div>
                 <ul class="paywall-option-perks">
-                    <li>✔ <strong>Todas as ferramentas 100% ILIMITADAS</strong></li>
-                    <li>✔ Cadastros, XMLs, OFX e RH sem travas</li>
-                    <li>✔ Grandes bases até <strong>30.000 linhas</strong></li>
-                    <li>✔ <strong>Zero anúncios</strong> + Suporte VIP</li>
+                    <li>✔ <span data-i18n="plan_pro_f1"><strong>Todas as ferramentas 100% ILIMITADAS</strong></span></li>
+                    <li>✔ <span data-i18n="plan_pro_f2">Cadastros, XMLs, OFX e RH sem travas</span></li>
+                    <li>✔ <span data-i18n="plan_pro_f3">Grandes bases até <strong>30.000 linhas</strong></span></li>
+                    <li>✔ <span data-i18n="plan_pro_f4"><strong>Zero anúncios</strong> + Suporte VIP</span></li>
                 </ul>
                 <a href="/checkout/pro" class="btn btn-pill-gradient paywall-btn-cta" id="paywall-cta-pro">
-                    <span>Assinar Pro por R$ 9,99</span>
+                    <span data-i18n="plan_pro_btn">Assinar Pro por R$ 9,99</span>
                 </a>
-                <p class="pix-clarity-note" style="font-size: 11px; color: var(--text-muted, #64748b); text-align: center; margin: 8px 0 0 0; line-height: 1.35;">
+                <p class="pix-clarity-note" style="font-size: 11px; color: var(--text-muted, #64748b); text-align: center; margin: 8px 0 0 0; line-height: 1.35;" data-i18n="pix_clarity_note">
                     ⚡ Pague via PIX ou Cartão • Acesso liberado imediatamente por 30 dias • Sem renovação automática surpresa.
                 </p>
             </div>
         </div>
 
         <div class="paywall-modal-footer">
-            <a href="/planos" class="paywall-footer-link">Ver tabela comparativa completa de planos →</a>
+            <a href="/planos" class="paywall-footer-link" data-i18n="paywall_footer_link">Ver tabela comparativa completa de planos →</a>
             <div class="paywall-security-note">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                     <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                 </svg>
-                <span>Pagamento 100% seguro via Mercado Pago (PIX ou Cartão). Cancele quando quiser.</span>
+                <span data-i18n="paywall_security_note">Pagamento 100% seguro via Mercado Pago (PIX ou Cartão). Cancele quando quiser.</span>
             </div>
         </div>
     </div>

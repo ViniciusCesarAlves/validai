@@ -209,12 +209,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const BTN_STEPPER_STAGES = [
-        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 7px; flex-shrink: 0;" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Lendo e normalizando células...',
-        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 7px; flex-shrink: 0;" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>Cruzando chaves e identificadores...',
-        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 7px; flex-shrink: 0;" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>Consolidando divergências e KPIs...',
-        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 7px; flex-shrink: 0;" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>Finalizando relatório...'
-    ];
+    function getBtnStepperStages() {
+        const t = (typeof window.t === 'function') ? window.t : ((k, fb) => fb);
+        return [
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 7px; flex-shrink: 0;" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>' + t('sheets_proc_step1', 'Lendo e normalizando células...'),
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 7px; flex-shrink: 0;" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>' + t('sheets_proc_step2', 'Cruzando chaves e identificadores...'),
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 7px; flex-shrink: 0;" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>' + t('sheets_proc_step2_5', 'Consolidando divergências e KPIs...'),
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 7px; flex-shrink: 0;" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>' + t('sheets_proc_step3', 'Finalizando relatório...')
+        ];
+    }
 
     function startBtnStepperLoading(button, fallbackDefaultText = '') {
         try {
@@ -234,21 +237,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (spinner) spinner.style.display = 'inline-block';
             if (icon) icon.style.display = 'none';
 
+            const stages = getBtnStepperStages();
             let stepIndex = 0;
             if (textSpan) {
                 textSpan.style.transition = 'opacity 0.18s ease';
-                textSpan.innerHTML = BTN_STEPPER_STAGES[0];
+                textSpan.innerHTML = stages[0];
             }
 
             button._stepperIntervalId = setInterval(() => {
                 try {
                     if (!textSpan || !button.disabled) return;
-                    stepIndex = Math.min(stepIndex + 1, BTN_STEPPER_STAGES.length - 1);
+                    stepIndex = Math.min(stepIndex + 1, stages.length - 1);
                     textSpan.style.opacity = '0.65';
                     setTimeout(() => {
                         try {
                             if (button.disabled && textSpan) {
-                                textSpan.innerHTML = BTN_STEPPER_STAGES[stepIndex];
+                                textSpan.innerHTML = stages[stepIndex];
                                 textSpan.style.opacity = '1';
                             }
                         } catch (_) {}
