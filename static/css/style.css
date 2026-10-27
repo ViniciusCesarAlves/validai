@@ -8260,7 +8260,8 @@ body.dark-theme .seo-faq-badge {
     border-color: rgba(79, 213, 128, 0.35);
 }
 
-/* Seção de Perguntas Frequentes (FAQ Semântico) */
+/* Seção de Funcionalidades e Perguntas Frequentes (SEO Semântico) */
+.seo-features-section,
 .seo-faq-section {
     margin-top: 36px;
     padding: 28px 30px;
@@ -8421,6 +8422,9 @@ body.dark-theme .seo-faq-badge {
     box-shadow: 0 4px 12px rgba(79, 213, 128, 0.35);
 }
 
+html[data-theme="dark"] .seo-features-section,
+html.dark-theme .seo-features-section,
+body.dark-theme .seo-features-section,
 html[data-theme="dark"] .seo-faq-section,
 html.dark-theme .seo-faq-section,
 body.dark-theme .seo-faq-section {
@@ -8510,6 +8514,7 @@ body.dark-theme .seo-faq-help-text svg {
     .seo-page-header h1 {
         font-size: 18px;
     }
+    .seo-features-section,
     .seo-faq-section {
         padding: 20px 18px;
     }

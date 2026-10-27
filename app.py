@@ -797,10 +797,14 @@ def llms_txt():
 
 @app.route('/ads.txt')
 def ads_txt():
-    content = "google.com, pub-3178662755020611, DIRECT, f08c47fec0942fa0\n"
-    response = Response(content, mimetype='text/plain; charset=utf-8')
+    response = send_from_directory(
+        BASE_DIR,
+        'ads.txt',
+        mimetype='text/plain'
+    )
     response.headers['Content-Type'] = 'text/plain; charset=utf-8'
     response.headers['Cache-Control'] = 'public, max-age=86400'
+    response.headers['X-Robots-Tag'] = 'all'
     return response
 
 
@@ -1069,8 +1073,9 @@ def change_sheet():
 
 @app.route('/favicon.ico')
 def favicon():
+    fav_dir = BASE_DIR if os.path.exists(os.path.join(BASE_DIR, 'favicon.ico')) else os.path.join(BASE_DIR, 'static')
     response = send_from_directory(
-        os.path.join(BASE_DIR, 'static'),
+        fav_dir,
         'favicon.ico',
         mimetype='image/vnd.microsoft.icon'
     )
