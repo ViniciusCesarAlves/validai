@@ -974,6 +974,104 @@
             </div>
         </section>
 
+        <!-- ======================================================== -->
+        <!-- GUIA EDITORIAL: AUDITORIA DE FOLHA E BENEFÍCIOS DE RH     -->
+        <!-- ======================================================== -->
+        <section class="editorial-guide-section" aria-labelledby="editorial-rh-heading">
+            <header class="editorial-guide-header">
+                <span class="editorial-guide-badge">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    <span>Gestão de Pessoas &amp; Compliance Trabalhista</span>
+                </span>
+                <h2 id="editorial-rh-heading">Procedimentos de Auditoria de Folha e Conciliação de Benefícios de RH</h2>
+                <p class="editorial-guide-subtitle">Guia avançado para analistas de Departamento Pessoal: como eliminar fraudes em faturas de operadoras e identificar desvios salariais antes da remessa bancária.</p>
+            </header>
+
+            <div class="editorial-guide-body">
+                <article class="editorial-guide-block">
+                    <h3>Metodologia de confronto mês anterior vs. mês atual para travar variações salariais atípicas</h3>
+                    <p>
+                        O fechamento mensal da folha de pagamento (proventos, descontos, horas extras, adicionais de periculosidade/insalubridade e comissões) envolve centenas de eventos contratuais dinâmicos. Em empresas médias e grandes, erros de digitação de ponto manual ou fórmulas incorretas em softwares de folha (como Senior, ADP, RM Totvs, FPw) podem passar despercebidos, resultando em pagamentos duplicados ou reclamatórias trabalhistas.
+                    </p>
+                    <p>
+                        A auditoria preventiva consiste em confrontar a planilha analítica de folha do mês anterior (Referência) contra o espelho de folha do mês corrente (Auditada), aplicando três níveis de validação:
+                    </p>
+                    <ol>
+                        <li><strong>Identificação de Movimentação de Headcount:</strong> Isolar imediatamente colaboradores demitidos (presentes na base anterior, ausentes na atual) e novos admitidos (ausentes na base anterior, presentes na atual). Isso garante que rescisões (TRCT) e novos contratos foram devidamente processados.</li>
+                        <li><strong>Cálculo do Delta Percentual por Evento:</strong> Fixar uma margem de tolerância (como 5% ou 10%). Qualquer alteração de salário bruto ou líquido que ultrapasse esse limiar é sinalizada para checagem da justificativa (ex: promoção homologada, dissídio coletivo ou hora extra sazonal autorizada).</li>
+                        <li><strong>Batimento de Descontos Legais (INSS e IRRF):</strong> Conferir se as tabelas progressivas federais foram respeitadas e se o teto previdenciário foi aplicado adequadamente em colaboradores com múltiplos vínculos empregatícios.</li>
+                    </ol>
+                </article>
+
+                <article class="editorial-guide-block">
+                    <h3>Auditoria de faturas de plano de saúde corporativo: detecção de colaboradores demitidos mantidos na cobrança</h3>
+                    <p>
+                        A fatura das operadoras de saúde (Unimed, Bradesco Saúde, Amil, SulAmérica, NotreDame Intermédica, Hapvida) é frequentemente uma das maiores despesas operacionais das organizações. Devido ao descasamento entre a data de desligamento no DP e o protocolo de cancelamento na operadora (que costuma exigir aviso prévio de até 30 dias), é comum que empresas paguem mensalidades de <strong>colaboradores fantasmas</strong> por meses seguidos.
+                    </p>
+                    <p>
+                        A conciliação inteligente do ValidAí cruza a lista oficial de colaboradores ativos no RH contra o relatório analítico de vidas faturadas pela seguradora, apontando inconsistências conforme a matriz abaixo:
+                    </p>
+
+                    <div class="editorial-table-wrapper">
+                        <table class="editorial-table">
+                            <thead>
+                                <tr>
+                                    <th>Colaborador / CPF</th>
+                                    <th>Cargo / Departamento</th>
+                                    <th>Status no RH (Base 1)</th>
+                                    <th>Cobrança na Operadora (Base 2)</th>
+                                    <th>Diagnóstico da Auditoria</th>
+                                    <th>Ação Corretiva Imediata</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>***.849.201-**</code></td>
+                                    <td>Analista Contábil</td>
+                                    <td>Ativo (Admitido)</td>
+                                    <td>Faturado (R$ 680,00)</td>
+                                    <td><span class="editorial-badge-pill status-ok">Conforme (100% Regular)</span></td>
+                                    <td>Manter desconto regular em folha.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>***.512.908-**</code></td>
+                                    <td>Coordenador de TI</td>
+                                    <td>Demitido há 45 dias</td>
+                                    <td>Faturado (R$ 1.150,00)</td>
+                                    <td><span class="editorial-badge-pill status-err">Cobrança Indevida (Fantasma)</span></td>
+                                    <td>Solicitar exclusão imediata e glosa/estorno na próxima fatura.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>***.104.332-**</code></td>
+                                    <td>Executivo Comercial</td>
+                                    <td>Ativo (Admissão recente)</td>
+                                    <td>Não Consta na Fatura</td>
+                                    <td><span class="editorial-badge-pill status-warn">Ativo sem Cobertura</span></td>
+                                    <td>Verificar pendência de inclusão para evitar desassistência médica.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>***.773.015-**</code></td>
+                                    <td>Gerente de Operações</td>
+                                    <td>Ativo (Plano Básico)</td>
+                                    <td>Faturado Plano Executivo (+R$ 480,00)</td>
+                                    <td><span class="editorial-badge-pill status-err">Upgrade Não Autorizado</span></td>
+                                    <td>Contestar reenquadramento de categoria junto à corretora.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p>
+                        Ao auditar as bases antes da autorização de pagamento ao setor financeiro, a equipe de Recursos Humanos estanca pagamentos indevidos e gera relatórios com valor financeiro recuperado mensurável para a diretoria.
+                    </p>
+                </article>
+            </div>
+        </section>
+
     </main>
 
     <!-- Modal de Limpeza e Seleção de Mapeamento -->

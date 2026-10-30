@@ -12078,3 +12078,231 @@ body.dark-theme .btn-mapping-template .mapping-template-btn-icon {
     color: #991b1b;
     border: 1px solid #fca5a5;
 }
+
+/* ========================================================
+   SEÇÕES EDITORIAIS ANTI-THIN CONTENT (GUIAS TÉCNICOS ADM/FIN/FISCAL)
+   ======================================================== */
+.editorial-guide-section {
+    margin-top: 36px;
+    margin-bottom: 24px;
+    padding: 36px 38px;
+    border-radius: var(--radius-lg);
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
+}
+
+.editorial-guide-header {
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 18px;
+}
+
+.editorial-guide-header h2 {
+    font-family: 'Outfit', 'Montserrat', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1.35;
+    margin: 8px 0 6px 0;
+}
+
+.editorial-guide-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: rgba(79, 213, 128, 0.12);
+    color: #1a7a40;
+}
+
+.editorial-guide-subtitle {
+    font-size: 14.5px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.editorial-guide-body {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    color: var(--text-main);
+}
+
+.editorial-guide-block h3 {
+    font-family: 'Outfit', 'Montserrat', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.editorial-guide-block p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-muted);
+    margin: 0 0 14px 0;
+}
+
+.editorial-guide-block p strong {
+    color: var(--text-main);
+}
+
+.editorial-guide-block code {
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: #0f172a;
+}
+
+.editorial-guide-block ul,
+.editorial-guide-block ol {
+    margin: 0 0 16px 20px;
+    padding: 0;
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.editorial-guide-block li {
+    margin-bottom: 8px;
+}
+
+.editorial-guide-block li strong {
+    color: var(--text-main);
+}
+
+/* Tabelas explicativas nas seções editoriais */
+.editorial-table-wrapper {
+    overflow-x: auto;
+    margin: 18px 0;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: #ffffff;
+}
+
+.editorial-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+}
+
+.editorial-table th {
+    background: #f8fafc;
+    padding: 11px 14px;
+    font-weight: 700;
+    color: var(--text-main);
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+}
+
+.editorial-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-muted);
+    vertical-align: middle;
+}
+
+.editorial-table tr:last-child td {
+    border-bottom: none;
+}
+
+.editorial-table tr:hover td {
+    background: rgba(79, 213, 128, 0.04);
+}
+
+.editorial-badge-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.editorial-badge-pill.status-err {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+.editorial-badge-pill.status-ok {
+    background: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+.editorial-badge-pill.status-warn {
+    background: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+
+/* Suporte a Tema Escuro */
+html[data-theme="dark"] .editorial-guide-section,
+html.dark-theme .editorial-guide-section,
+body.dark-theme .editorial-guide-section {
+    background: #14151b;
+    border-color: #242632;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="dark"] .editorial-guide-header h2,
+html.dark-theme .editorial-guide-header h2,
+body.dark-theme .editorial-guide-header h2,
+html[data-theme="dark"] .editorial-guide-block h3,
+html.dark-theme .editorial-guide-block h3,
+body.dark-theme .editorial-guide-block h3 {
+    color: #f1f5f9;
+}
+
+html[data-theme="dark"] .editorial-guide-badge {
+    background: rgba(79, 213, 128, 0.18);
+    color: #4FD580;
+}
+
+html[data-theme="dark"] .editorial-guide-block code {
+    background: #1e2230;
+    color: #e2e8f0;
+}
+
+html[data-theme="dark"] .editorial-table-wrapper {
+    background: #14151b;
+    border-color: #242632;
+}
+
+html[data-theme="dark"] .editorial-table th {
+    background: #1a1c24;
+    color: #f1f5f9;
+    border-color: #242632;
+}
+
+html[data-theme="dark"] .editorial-table td {
+    border-color: #242632;
+    color: #94a3b8;
+}
+
+html[data-theme="dark"] .editorial-table tr:hover td {
+    background: rgba(79, 213, 128, 0.08);
+}
+
+@media (max-width: 768px) {
+    .editorial-guide-section {
+        padding: 22px 18px;
+    }
+    .editorial-guide-header h2 {
+        font-size: 18px;
+    }
+}

@@ -917,6 +917,105 @@
             </div>
         </section>
 
+        <!-- ======================================================== -->
+        <!-- GUIA EDITORIAL: CONCILIAÇÃO FISCAL DE XMLS                -->
+        <!-- ======================================================== -->
+        <section class="editorial-guide-section" aria-labelledby="editorial-xml-heading">
+            <header class="editorial-guide-header">
+                <span class="editorial-guide-badge">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <path d="M10 12l-2 2 2 2"/>
+                        <path d="M14 12l2 2-2 2"/>
+                    </svg>
+                    <span>Auditoria Tributária &amp; SPED</span>
+                </span>
+                <h2 id="editorial-xml-heading">Guia Fiscal: Conciliação de Lotes de XML (NF-e/NFS-e) contra o Contas a Pagar</h2>
+                <p class="editorial-guide-subtitle">Aprenda a estruturar a auditoria de notas fiscais eletrônicas, prevenir autuações do Fisco e detectar divergências de escrituração financeira.</p>
+            </header>
+
+            <div class="editorial-guide-body">
+                <article class="editorial-guide-block">
+                    <h3>As principais tags do layout NF-e 4.00 (&lt;nNF&gt;, &lt;vNF&gt;, &lt;emit&gt;, &lt;ICMSTot&gt;) e como são cruzadas com o ERP</h3>
+                    <p>
+                        O modelo nacional da Nota Fiscal Eletrônica (NF-e modelo 55) é regido pelo Manual de Orientação do Contribuinte (MOC 7.0 / Layout 4.00) da SEFAZ. Cada documento XML possui uma hierarquia bem definida de nós sintáticos que sintetizam a operação mercantil entre fornecedor e adquirente.
+                    </p>
+                    <p>
+                        Para conciliar lotes de dezenas ou centenas de arquivos XML contra a listagem de títulos a pagar do sistema de gestão da empresa (ERP), é necessário mapear com exatidão as seguintes tags fundamentais:
+                    </p>
+                    <ul>
+                        <li><code>&lt;chNFe&gt;</code> ou atributo <code>Id</code> na tag raiz <code>&lt;infNFe&gt;</code>: Chave de acesso de 44 dígitos numéricos que identifica univocamente a nota fiscal em todo o território nacional.</li>
+                        <li><code>&lt;ide&gt;&lt;nNF&gt;</code> e <code>&lt;serie&gt;</code>: Número sequencial da nota e série de emissão, comumente utilizados como identificador comercial nos relatórios financeiros.</li>
+                        <li><code>&lt;emit&gt;&lt;CNPJ&gt;</code> e <code>&lt;xNome&gt;</code>: Identificação do fornecedor credor da obrigação.</li>
+                        <li><code>&lt;total&gt;&lt;ICMSTot&gt;&lt;vNF&gt;</code>: Valor total bruto da nota fiscal, incluindo valor dos produtos (<code>&lt;vProd&gt;</code>), frete (<code>&lt;vFrete&gt;</code>), seguro, outras despesas acessórias e subtraindo descontos incondicionais (<code>&lt;vDesc&gt;</code>).</li>
+                    </ul>
+
+                    <div class="editorial-table-wrapper">
+                        <table class="editorial-table">
+                            <thead>
+                                <tr>
+                                    <th>Tag do Layout NF-e 4.00</th>
+                                    <th>Significado Fiscal</th>
+                                    <th>Coluna Correspondente no ERP</th>
+                                    <th>Impacto em Caso de Divergência</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>&lt;chNFe&gt;</code> (44 dígitos)</td>
+                                    <td>Chave de Acesso Oficial SEFAZ</td>
+                                    <td>Chave de NF-e / Código de Barras</td>
+                                    <td><span class="editorial-badge-pill status-err">Risco de Glosa no SPED</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>&lt;ide&gt;&lt;nNF&gt;</code></td>
+                                    <td>Número do Documento Fiscal</td>
+                                    <td>Nº do Título / Nº Fatura</td>
+                                    <td><span class="editorial-badge-pill status-warn">Divergência de Identificador</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>&lt;emit&gt;&lt;CNPJ&gt;</code></td>
+                                    <td>CNPJ do Fornecedor / Prestador</td>
+                                    <td>CNPJ do Favorecido</td>
+                                    <td><span class="editorial-badge-pill status-err">Pagamento a Favorecido Incorreto</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>&lt;ICMSTot&gt;&lt;vNF&gt;</code></td>
+                                    <td>Valor Total Líquido da Nota</td>
+                                    <td>Valor Bruto do Contas a Pagar</td>
+                                    <td><span class="editorial-badge-pill status-err">Prejuízo Financeiro ou Desembolso Indevido</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+
+                <article class="editorial-guide-block">
+                    <h3>Riscos fiscais de notas emitidas contra o CNPJ da empresa não escrituradas no financeiro</h3>
+                    <p>
+                        A chamada "nota fria" ou o faturamento indevido contra o CNPJ da empresa representa uma das maiores ameaças à conformidade contábil. Com a obrigatoriedade da <strong>Manifestação do Destinatário</strong> junto aos WebServices da Receita e SEFAZ, se um fornecedor emitir uma NF-e contra sua empresa e ela não for devidamente escriturada no Livro de Registro de Entradas (EFD ICMS IPI / EFD Contribuições):
+                    </p>
+                    <ul>
+                        <li>O Fisco presume aquisição de mercadorias sem lastro financeiro, configurando passivo a descoberto ou omissão de receitas.</li>
+                        <li>A empresa perde o prazo legal de 180 dias para registrar o evento de <em>"Desconhecimento da Operação"</em> ou <em>"Operação não Realizada"</em>, assumindo responsabilidade tributária solidária.</li>
+                        <li>Perda irreparável de créditos legítimos de PIS, COFINS e ICMS que deixam de ser apropriados no período competente.</li>
+                    </ul>
+                </article>
+
+                <article class="editorial-guide-block">
+                    <h3>Tolerâncias de centavos e tratamento de retenções tributárias na fonte</h3>
+                    <p>
+                        No confronto entre o valor contábil do ERP e a tag <code>&lt;vNF&gt;</code> do XML, profissionais da controladoria frequentemente encontram pequenas diferenças causadas por dois fenômenos operacionais distintos:
+                    </p>
+                    <ol>
+                        <li><strong>Dízimas e Arredondamento de Itens:</strong> O layout da NF-e permite que valores unitários de produtos tenham até 4 casas decimais (<code>&lt;vUnCom&gt;</code>), mas a multiplicação pela quantidade (<code>&lt;qCom&gt;</code>) e posterior soma dos itens pode acumular variações de R$ 0,01 a R$ 0,03 em relação aos critérios de truncamento do ERP.</li>
+                        <li><strong>Retenções Federais e Municipais (IRRF, CSRF, INSS e ISS):</strong> Especialmente em Notas Fiscais de Serviços (NFS-e), o valor líquido a pagar pelo setor financeiro desconta os impostos retidos na fonte (comprovados no grupo <code>&lt;retTrib&gt;</code>). A conciliação inteligente do ValidAí prevê esses cenários, alertando se a diferença monetária decorre rigorosamente da soma dos tributos retidos ou se houve cobrança indevida de itens adicionais.</li>
+                    </ol>
+                </article>
+            </div>
+        </section>
+
     </main>
 
     {% include 'partials/footer.html' %}

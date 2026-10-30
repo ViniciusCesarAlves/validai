@@ -2051,6 +2051,105 @@
             </div>
         </section>
 
+        <!-- ======================================================== -->
+        <!-- GUIA EDITORIAL: AUDITORIA AVANÇADA DE PLANILHAS           -->
+        <!-- ======================================================== -->
+        <section class="editorial-guide-section" aria-labelledby="editorial-guide-heading">
+            <header class="editorial-guide-header">
+                <span class="editorial-guide-badge">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                    <span>Manual Técnico &amp; Boas Práticas</span>
+                </span>
+                <h2 id="editorial-guide-heading">Manual de Auditoria de Planilhas: Superando as Limitações do PROCV e PROCX</h2>
+                <p class="editorial-guide-subtitle">Aprenda a blindar suas conciliações financeiras contra erros silenciosos de digitação, incompatibilidade de tipos de dados e gargalos de processamento.</p>
+            </header>
+
+            <div class="editorial-guide-body">
+                <article class="editorial-guide-block">
+                    <h3>Por que PROCV e PROCX geram falsos positivos em fechamentos financeiros</h3>
+                    <p>
+                        Durante décadas, analistas financeiros, contadores e auditores recorreram às funções <code>PROCV (VLOOKUP)</code> e <code>PROCX (XLOOKUP)</code> do Microsoft Excel para realizar o batimento entre relatórios de vendas, controles auxiliares e lançamentos contábeis. Contudo, em bases que ultrapassam alguns milhares de linhas ou que se originam de sistemas heterogêneos (como SAP, TOTVS, Sankhya, Omie e plataformas de e-commerce), essas fórmulas tornam-se fontes crônicas de <strong>falsos positivos e falsos negativos</strong>.
+                    </p>
+                    <p>
+                        O primeiro vilão da conferência tradicional é a presença de <strong>espaços invisíveis</strong> e caracteres não imprimíveis. Ao exportar relatórios via web ou copiar dados de páginas HTML, é comum que células recebam o espaço rígido <em>non-breaking space</em> (<code>\u00A0</code> ou código ASCII 160). Para o olho humano na planilha, <code>"PED-1084"</code> e <code>"PED-1084 "</code> parecem idênticos; para o <code>PROCV</code>, são sequências de bytes totalmente distintas, resultando no famigerado erro <code>#N/D</code>.
+                    </p>
+                    <p>
+                        O segundo problema reside na <strong>incompatibilidade estrita de tipos primitivos</strong>. Se o ERP exportou um código de produto como texto (<code>"10495"</code>) e a planilha de estoque armazenou o mesmo valor como inteiro (<code>10495</code>), o Excel não correlaciona as entradas. Além disso, fórmulas de busca exigem que o usuário traga colunas uma a uma: para comparar 30 atributos de uma base, é necessário replicar dezenas de fórmulas pesadas, degradando a memória RAM da estação de trabalho e aumentando o risco de referências circulares ou descontinuidade de fórmulas.
+                    </p>
+                </article>
+
+                <article class="editorial-guide-block">
+                    <h3>Diagnóstico Prático: Discrepâncias Comuns em Cruzamentos Tradicionais</h3>
+                    <p>
+                        A tabela abaixo ilustra cenários reais em que métodos manuais e funções nativas falham, demonstrando como a normalização algorítmica do ValidAí resolve cada discrepância de forma determinística:
+                    </p>
+
+                    <div class="editorial-table-wrapper">
+                        <table class="editorial-table">
+                            <thead>
+                                <tr>
+                                    <th>Código do Item</th>
+                                    <th>Valor na Base A (Referência)</th>
+                                    <th>Valor na Base B (Comparação)</th>
+                                    <th>Divergência Detectada</th>
+                                    <th>Causa Raiz &amp; Tratamento Recomendado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>SKU-4091</code></td>
+                                    <td><code>"Ativo "</code> (com espaço final)</td>
+                                    <td><code>"Ativo"</code> (texto limpo)</td>
+                                    <td><span class="editorial-badge-pill status-err">Falso Positivo (#N/D)</span></td>
+                                    <td>Espaço invisível ao final da célula no ERP. <strong>Solução:</strong> Aplicação de rotina automática de <em>strip/trim</em> em ambas as extremidades.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>FAT-8820</code></td>
+                                    <td><code>"15650.00"</code> (String/Texto)</td>
+                                    <td><code>R$ 15.650,00</code> (Float formatado)</td>
+                                    <td><span class="editorial-badge-pill status-err">Tipo Incompatível</span></td>
+                                    <td>Exportação CSV sem tipagem vs Excel formatado. <strong>Solução:</strong> Sanitização por regex convertendo moedas para ponto flutuante unificado.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>CLI-0012</code></td>
+                                    <td><code>2026-08-01 00:00:00</code> (ISO)</td>
+                                    <td><code>01/08/2026</code> (Padrão BR)</td>
+                                    <td><span class="editorial-badge-pill status-warn">Divergência Sintática</span></td>
+                                    <td>Formatos de data ISO 8601 vs dia/mês/ano brasileiro. <strong>Solução:</strong> Conversão temporal universal com descarte de timestamp zerado.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>NF-99432</code></td>
+                                    <td><code>R$ 4.500,00</code></td>
+                                    <td><code>R$ 4.950,00</code></td>
+                                    <td><span class="editorial-badge-pill status-ok">Divergência Real (+10%)</span></td>
+                                    <td>Reajuste contratual ou erro de digitação de alíquota. <strong>Solução:</strong> Apontamento no relatório com destaque colorido e cálculo do delta monetário (+R$ 450,00).</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+
+                <article class="editorial-guide-block">
+                    <h3>Como estruturar um checklist de conciliação mensal entre sistemas ERP e planilhas</h3>
+                    <p>
+                        Para garantir fechamentos contábeis auditáveis e eliminar retrabalho em períodos de auditoria externa (como auditorias Big Four ou fiscalizações da Receita), recomenda-se adotar um fluxo padronizado de validação em 5 etapas:
+                    </p>
+                    <ol>
+                        <li><strong>Identificação de Chave Primária Única e Imutável:</strong> Nunca utilize nomes de pessoas ou descrições livres como identificadores. Priorize números de documento fiscal (Chave de NF-e), CPF, CNPJ, código SKU ou ID interno do banco de dados relacional.</li>
+                        <li><strong>Higienização Prévia e Expurgo de Zeros Truncados:</strong> Antes de confrontar bases, garanta que campos numéricos como códigos de agência, contas bancárias e documentos federais tenham seus zeros à esquerda devidamente preservados (ex: 11 dígitos para CPF e 14 para CNPJ).</li>
+                        <li><strong>Normalização de Regras de Negócio:</strong> Isole regras de tolerância. Em operações com múltiplos itens e rateio de frete, pequenas discrepâncias de R$ 0,01 a R$ 0,05 devem ser tratadas como tolerância técnica de arredondamento, enquanto valores superiores exigem intervenção manual.</li>
+                        <li><strong>Segregação de Registros Exclusivos:</strong> Analise primeiro as linhas que existem apenas na Base A (potenciais cancelamentos ou exclusões indevidas) e apenas na Base B (lançamentos não escriturados), antes de auditar discrepâncias célula a célula dos registros em comum.</li>
+                        <li><strong>Armazenamento de Trilha de Evidência Auditável:</strong> Mantenha a versão original dos arquivos recebidos e arquive a planilha de resultado com células pintadas e data/hora do processamento, garantindo rastreabilidade perante os órgãos de controle interno.</li>
+                    </ol>
+                </article>
+            </div>
+        </section>
+
     </main>
 
     {% include 'partials/footer.html' %}

@@ -375,10 +375,10 @@ def test_full_pipeline():
         assert '/validador-xml' in html_p, f"Item Conciliador XML ausente em {label}"
         assert '/conciliador-taxas' in html_p, f"Item Conciliação Taxas OFX ausente em {label}"
         assert '/auditoria-rh' in html_p, f"Item Auditoria RH ausente em {label}"
-        assert '/validador-json' in html_p, f"Item Comparador JSON ausente em {label}"
-        assert 'badge_coming_soon' in html_p, f"Badge 'Em breve' ausente em {label}"
-        assert 'Em breve' in html_p, f"Texto da badge 'Em breve' ausente em {label}"
-    print("[OK] Menu Dropdown 'Mais Validadores' validado com os 5 novos módulos em todas as páginas!")
+        # Conformidade AdSense: itens "Em breve" removidos do menu visível para evitar recusa por links em construção
+        assert '/validador-json' not in html_p, f"Item 'Em breve' /validador-json não deve constar no menu em {label}"
+        assert 'badge_coming_soon' not in html_p, f"Badge 'Em breve' não deve constar no menu em {label}"
+    print("[OK] Menu Dropdown 'Mais Validadores' validado com os 4 módulos 100% ativos e sem links 'Em breve'!")
 
     # 14. Teste completo do Higienizador de Cadastros (/validador-cadastros)
     # A. Renderização da página e seus elementos de UI

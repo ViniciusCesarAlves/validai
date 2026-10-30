@@ -882,6 +882,117 @@
             </div>
         </section>
 
+        <!-- ======================================================== -->
+        <!-- GUIA EDITORIAL: CONCILIAÇÃO BANCÁRIA E TAXAS OFX          -->
+        <!-- ======================================================== -->
+        <section class="editorial-guide-section" aria-labelledby="editorial-ofx-heading">
+            <header class="editorial-guide-header">
+                <span class="editorial-guide-badge">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="12" y1="1" x2="12" y2="23"/>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                    <span>Controladoria &amp; Conciliação de Cartões</span>
+                </span>
+                <h2 id="editorial-ofx-heading">Auditoria Financeira de Vendas em Cartão e Extratos Bancários OFX</h2>
+                <p class="editorial-guide-subtitle">Metodologia prática para confrontar relatórios de vendas contra créditos em conta corrente e estancar perdas invisíveis com taxas de adquirência.</p>
+            </header>
+
+            <div class="editorial-guide-body">
+                <article class="editorial-guide-block">
+                    <h3>A estrutura do arquivo bancário .OFX e a importância da conciliação diária</h3>
+                    <p>
+                        O padrão <strong>Open Financial Exchange (.OFX)</strong> é o formato aberto global utilizado por todas as instituições financeiras atuantes no Brasil (Itaú, Bradesco, Santander, Banco do Brasil, Caixa, bancos digitais e cooperativas) para disponibilizar o extrato eletrônico de contas correntes e contas de pagamento.
+                    </p>
+                    <p>
+                        Diferente de um arquivo PDF ou planilha livre de Excel, o arquivo OFX possui marcação padronizada em blocos SGML/XML. No bloco <code>&lt;BANKTRANLIST&gt;</code>, cada lançamento a crédito ou débito é encapsulado pela tag <code>&lt;STMTTRN&gt;</code>, contendo:
+                    </p>
+                    <ul>
+                        <li><code>&lt;TRNTYPE&gt;</code>: O tipo da transação (ex: <code>CREDIT</code> para entradas e <code>DEBIT</code> para saídas ou tarifas).</li>
+                        <li><code>&lt;DTPOSTED&gt;</code>: Data e hora do crédito na compensação bancária (formato <code>AAAAMMDDHHMMSS</code>).</li>
+                        <li><code>&lt;TRNAMT&gt;</code>: O valor monetário líquido exato que impactou o saldo disponível.</li>
+                        <li><code>&lt;FITID&gt;</code>: O identificador financeiro exclusivo gerado pela instituição bancária.</li>
+                        <li><code>&lt;MEMO&gt;</code>: Descrição do histórico (ex: <em>"LIQ. CIELO VENDAS"</em>, <em>"REPASSE REDE"</em>, <em>"RECEB. STONE"</em>).</li>
+                    </ul>
+                    <p>
+                        Sem a conciliação automatizada desses registros, empresas do varejo e serviços acumulam vazamentos de caixa decorrentes de vendas não repassadas, cancelamentos não computados e prazos de liquidação extrapolados.
+                    </p>
+                </article>
+
+                <article class="editorial-guide-block">
+                    <h3>Como auditar taxas MDR contratuais de adquirentes e identificar descontos indevidos</h3>
+                    <p>
+                        A taxa de desconto cobrada pelas adquirentes de cartão e subadquirentes é chamada de <strong>MDR (Merchant Discount Rate)</strong>. Ela incide percentualmente sobre cada venda de acordo com a modalidade contratada: Débito (ex: 1,20%), Crédito à Vista (ex: 2,50%) ou Crédito Parcelado (ex: 3,80% + acréscimo por parcela).
+                    </p>
+                    <p>
+                        A auditoria financeira consiste em cruzar cada transação registrada no ponto de venda (PDV ou gateway) com o valor creditado no extrato bancário, calculando a <strong>Taxa Efetiva Real</strong> praticada:
+                    </p>
+
+                    <div class="editorial-table-wrapper">
+                        <table class="editorial-table">
+                            <thead>
+                                <tr>
+                                    <th>Identificador / NSU</th>
+                                    <th>Adquirente</th>
+                                    <th>Valor Bruto da Venda</th>
+                                    <th>Taxa Contratual</th>
+                                    <th>Líquido Esperado</th>
+                                    <th>Creditado no OFX</th>
+                                    <th>Taxa Efetiva Praticada</th>
+                                    <th>Auditoria / Prejuízo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>NSU-782109</code></td>
+                                    <td>Rede Cartões</td>
+                                    <td>R$ 1.000,00</td>
+                                    <td>2,50%</td>
+                                    <td>R$ 975,00</td>
+                                    <td>R$ 975,00</td>
+                                    <td>2,50%</td>
+                                    <td><span class="editorial-badge-pill status-ok">Taxa Correta</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>NSU-782110</code></td>
+                                    <td>Cielo</td>
+                                    <td>R$ 850,00</td>
+                                    <td>2,00%</td>
+                                    <td>R$ 833,00</td>
+                                    <td>R$ 816,00</td>
+                                    <td>4,00%</td>
+                                    <td><span class="editorial-badge-pill status-err">Cobrança a Maior (-R$ 17,00)</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>NSU-782111</code></td>
+                                    <td>Stone</td>
+                                    <td>R$ 2.400,00</td>
+                                    <td>3,20%</td>
+                                    <td>R$ 2.323,20</td>
+                                    <td>R$ 0,00</td>
+                                    <td>—</td>
+                                    <td><span class="editorial-badge-pill status-err">Não Repassado (Pendente)</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>OFX-LANC-99</code></td>
+                                    <td>Banco Itaú</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>R$ 150,00</td>
+                                    <td>—</td>
+                                    <td><span class="editorial-badge-pill status-warn">Crédito Avulso sem Venda</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p>
+                        Ao auditar milhares de operações no fechamento de mês, pequenas discrepâncias de 0,5% a 2% na aplicação do MDR resultam em perdas invisíveis que drenam a margem operacional do negócio. O relatório com células pintadas do ValidAí gera a evidência documental necessária para contestação formal e estorno junto à credenciadora.
+                    </p>
+                </article>
+            </div>
+        </section>
+
     </main>
 
     {% include 'partials/footer.html' %}

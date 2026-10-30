@@ -882,6 +882,96 @@
             </div>
         </section>
 
+        <!-- ======================================================== -->
+        <!-- GUIA EDITORIAL: HIGIENIZAÇÃO CADASTRAL & MÓDULO 11       -->
+        <!-- ======================================================== -->
+        <section class="editorial-guide-section" aria-labelledby="editorial-cadastros-heading">
+            <header class="editorial-guide-header">
+                <span class="editorial-guide-badge">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="10" cy="7" r="4"/>
+                        <polyline points="16 11 18 13 22 9"/>
+                    </svg>
+                    <span>Engenharia de Dados Cadastrais</span>
+                </span>
+                <h2 id="editorial-cadastros-heading">Guia Técnico de Higienização Cadastral e Validação Matemática pelo Módulo 11</h2>
+                <p class="editorial-guide-subtitle">Compreenda a formulação criptográfica dos documentos oficiais brasileiros, o impacto de bases corrompidas no CRM e a higienização algorítmica em lote.</p>
+            </header>
+
+            <div class="editorial-guide-body">
+                <article class="editorial-guide-block">
+                    <h3>Como funciona a fórmula matemática dos dois dígitos verificadores de CPF e CNPJ</h3>
+                    <p>
+                        No Brasil, o Cadastro de Pessoas Físicas (CPF) e o Cadastro Nacional da Pessoa Jurídica (CNPJ) não são números gerados aleatoriamente. Ambos são regulamentados pela Receita Federal e adotam o algoritmo de integridade conhecido como <strong>Módulo 11 com pesos decrescentes</strong>. Os dois últimos algarismos atuam como dígitos verificadores (DV1 e DV2) para blindar sistemas contra erros de digitação e fraudes sintéticas.
+                    </p>
+                    <p>
+                        Para o <strong>CPF (11 dígitos no formato ABC.DEF.GHI-JK)</strong>, o cálculo ocorre em dois estágios:
+                    </p>
+                    <ul>
+                        <li><strong>Cálculo do Primeiro Dígito (J):</strong> Multiplica-se cada um dos 9 primeiros números por uma sequência de pesos decrescentes de <code>10 até 2</code>. Soma-se o produto de cada elemento. Em seguida, divide-se a soma total por 11. Se o resto da divisão for menor que 2, o primeiro dígito verificador é obrigatoriamente <code>0</code>; caso contrário, é o resultado de <code>11 - resto</code>.</li>
+                        <li><strong>Cálculo do Segundo Dígito (K):</strong> Consideram-se agora os 9 primeiros algarismos acrescidos do primeiro dígito recém-calculado (10 números no total), multiplicando-os pelos pesos decrescentes de <code>11 até 2</code>. Aplica-se a mesma regra da divisão por 11.</li>
+                        <li><strong>Bloqueio de Falsos Válidos:</strong> Sequências com todos os dígitos idênticos (como <code>111.111.111-11</code> ou <code>000.000.000-00</code>) geram restos matemáticos teoricamente válidos, mas são expressamente rejeitadas pela regra de negócio federal.</li>
+                    </ul>
+
+                    <div class="editorial-table-wrapper">
+                        <table class="editorial-table">
+                            <thead>
+                                <tr>
+                                    <th>Tipo de Documento</th>
+                                    <th>Estrutura Canônica</th>
+                                    <th>Pesos do 1º Dígito</th>
+                                    <th>Pesos do 2º Dígito</th>
+                                    <th>Critério de Validação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>CPF</strong></td>
+                                    <td>11 dígitos (9 base + 2 DVs)</td>
+                                    <td><code>[10, 9, 8, 7, 6, 5, 4, 3, 2]</code></td>
+                                    <td><code>[11, 10, 9, 8, 7, 6, 5, 4, 3, 2]</code></td>
+                                    <td><span class="editorial-badge-pill status-ok">Módulo 11 Oficial (RFB)</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>CNPJ</strong></td>
+                                    <td>14 dígitos (12 base + 2 DVs)</td>
+                                    <td><code>[5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]</code></td>
+                                    <td><code>[6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]</code></td>
+                                    <td><span class="editorial-badge-pill status-ok">Módulo 11 Cíclico (RFB)</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+
+                <article class="editorial-guide-block">
+                    <h3>O fenômeno da supressão de zeros à esquerda no Microsoft Excel e a solução de recomposição via .zfill()</h3>
+                    <p>
+                        Um dos gargalos mais frequentes no dia a dia de setores administrativos ocorre ao abrir planilhas em formato <code>.CSV</code> no Excel. Por padrão, o Excel tenta interpretar qualquer sequência puramente numérica como tipo <em>Integer</em> ou <em>Float</em>. Como números inteiros não possuem valor posicional no zero à esquerda, o software descarta silenciosamente os zeros iniciais.
+                    </p>
+                    <p>
+                        Por exemplo, um CPF de São Paulo ou Rio de Janeiro que começa com zero (como <code>019.876.543-21</code>) é transformado pelo Excel em <code>1987654321</code> (apenas 10 dígitos). Da mesma forma, empresas antigas com CNPJ matriz do tipo <code>00.123.456/0001-78</code> acabam armazenadas com apenas 12 ou 13 dígitos.
+                    </p>
+                    <p>
+                        Ao tentar validar esses registros sem tratamento prévio, os algoritmos convencionais apontam documento inválido por falta de dígitos. O motor de dados do ValidAí resolve essa inconsistência antes da validação matemática: isola apenas caracteres numéricos via expressão regular e aplica o método vetorial de preenchimento <code>.zfill(11)</code> para CPFs e <code>.zfill(14)</code> para CNPJs, recompondo a cadeia original e testando a validade no algoritmo oficial.
+                    </p>
+                </article>
+
+                <article class="editorial-guide-block">
+                    <h3>Boas práticas para padronização de contatos (DDD, WhatsApp com 55 e sintaxe de e-mails corporativos)</h3>
+                    <p>
+                        Bases de clientes e colaboradores que alimentam CRMs (Salesforce, HubSpot, RD Station, Piperun) e ferramentas de disparo ativo de mensagens (WhatsApp Business API) exigem formatação estrita para não gerar bloqueios de conta ou taxas elevadas de <em>bounce</em>:
+                    </p>
+                    <ul>
+                        <li><strong>Telefonia e WhatsApp (Padrão E.164):</strong> A higienização remove parênteses, traços e espaços, prefixa o código de país do Brasil (<code>+55</code>), valida se o DDD regional possui 2 dígitos válidos (11 a 99) e certifica a presença do 9º dígito em celulares (formato de 13 dígitos: <code>5511999998888</code>).</li>
+                        <li><strong>Sintaxe e Typos em E-mails:</strong> Além de aplicar regex em conformidade com o padrão internacional RFC 5322, o motor identifica e corrige automaticamente erros comuns de digitação em provedores públicos populares, como substituir <code>@gmai.com</code> por <code>@gmail.com</code>, <code>@hotmaill.com</code> por <code>@hotmail.com</code> e <code>@outlok.com</code> por <code>@outlook.com</code>.</li>
+                        <li><strong>Padronização de Nomes Próprios (Title Case Inteligente):</strong> Converte nomes cadastrados inteiramente em caixa alta (<code>MARIA DA SILVA SOUZA</code>) ou em caixa baixa para o formato elegante de capitalização, preservando preposições da língua portuguesa em minúsculas (<code>de</code>, <code>da</code>, <code>do</code>, <code>dos</code>, <code>das</code>, <code>e</code>).</li>
+                    </ul>
+                </article>
+            </div>
+        </section>
+
     </main>
 
     {% include 'partials/footer.html' %}
